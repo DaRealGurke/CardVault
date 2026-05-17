@@ -1,0 +1,5631 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Vault – Meine Kartensammlung</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #111;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(245,245,247,0.84);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .nav {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand { display: flex; gap: 12px; align-items: center; }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 16px;
+      background: #111; color: white; display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 750; font-size: 15px; }
+    .brand-subtitle { color: #6e6e73; font-size: 12px; margin-top: 2px; }
+
+    .nav-links { display: flex; gap: 24px; align-items: center; color: #6e6e73; font-size: 14px; }
+    .nav-link {
+      border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer;
+      padding: 8px 0; position: relative;
+    }
+    .nav-link.active { color: #111; font-weight: 650; }
+    .nav-link.active::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+      background: #111; border-radius: 99px;
+    }
+
+    .top-button, .primary-button, .secondary-button, .danger-button {
+      border: 0; border-radius: 999px; padding: 12px 17px; font-size: 14px;
+      cursor: pointer; font-family: inherit; transition: 0.18s ease;
+    }
+
+    .top-button, .primary-button { background: #111; color: white; }
+    .top-button:hover, .primary-button:hover { background: #2d2d2f; transform: translateY(-1px); }
+    .secondary-button { background: #f1f1f3; color: #515154; }
+    .secondary-button:hover { background: #e5e5ea; }
+    .danger-button { background: #fff1f1; color: #b42318; }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 22px 80px;
+    }
+
+    .page { display: none; animation: fadeIn .2s ease; }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero { text-align: center; padding: 86px 0 54px; }
+    .pill {
+      display: inline-flex; gap: 8px; align-items: center;
+      padding: 9px 16px; border-radius: 99px; background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0,0,0,0.08); color: #6e6e73; font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 24px;
+    }
+    h1 {
+      max-width: 870px; margin: 0 auto; font-size: clamp(44px, 7vw, 82px);
+      line-height: .95; letter-spacing: -.06em; font-weight: 780;
+    }
+    .hero-text {
+      max-width: 680px; margin: 24px auto 0; color: #6e6e73; font-size: 20px; line-height: 1.45;
+    }
+
+    .quick-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 20px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.035);
+    }
+
+    .quick-filter-chip {
+      border: 0;
+      border-radius: 999px;
+      background: #f1f1f3;
+      color: #515154;
+      padding: 10px 13px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: .18s ease;
+    }
+
+    .quick-filter-chip:hover {
+      background: #e5e5ea;
+      transform: translateY(-1px);
+    }
+
+    .quick-filter-chip.active {
+      background: #111;
+      color: white;
+    }
+
+    .analysis-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .analysis-card {
+      border-radius: 22px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 15px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.035);
+    }
+
+    .analysis-label {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .analysis-value {
+      font-size: 24px;
+      color: #111;
+      font-weight: 780;
+      letter-spacing: -0.035em;
+    }
+
+    .analysis-sub {
+      margin-top: 6px;
+      color: #6e6e73;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 860px) {
+      .analysis-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .doc-score {
+      margin-top: 10px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .doc-score-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      color: #6e6e73;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .doc-score-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e5ea;
+      overflow: hidden;
+    }
+
+    .doc-score-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: #111;
+      transition: width .22s ease;
+    }
+
+    .doc-score-good .doc-score-fill {
+      background: #1f8f45;
+    }
+
+    .doc-score-mid .doc-score-fill {
+      background: #c47a00;
+    }
+
+    .doc-score-low .doc-score-fill {
+      background: #b42318;
+    }
+
+    .duplicate-button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      background: #f1f1f3;
+      color: #515154;
+    }
+
+    .missing-pill {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #fff7e6;
+      color: #8a5a00;
+      font-size: 11px;
+      font-weight: 750;
+      margin-top: 7px;
+    }
+
+    .completion-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .completion-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 9px 11px;
+      font-size: 13px;
+    }
+
+    .completion-item span:first-child {
+      color: #2d2d2f;
+      font-weight: 650;
+    }
+
+    .completion-ok {
+      color: #18723a;
+      font-weight: 750;
+    }
+
+    .completion-missing {
+      color: #b42318;
+      font-weight: 750;
+    }
+
+    .pro-dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 26px;
+    }
+
+    .pro-card {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: 0 12px 34px rgba(0,0,0,0.04);
+      min-height: 132px;
+    }
+
+    .pro-label {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .pro-value {
+      color: #111;
+      font-size: 24px;
+      font-weight: 780;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+
+    .pro-sub {
+      color: #6e6e73;
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 8px;
+    }
+
+    .pro-warning {
+      background: #fff7e6;
+      color: #8a5a00;
+      border-color: rgba(138,90,0,0.12);
+    }
+
+    .pro-danger {
+      background: #fff1f1;
+      color: #b42318;
+      border-color: rgba(180,35,24,0.12);
+    }
+
+    .pro-success {
+      background: #eaf8ef;
+      color: #18723a;
+      border-color: rgba(24,114,58,0.12);
+    }
+
+    .pro-blue {
+      background: #eef4ff;
+      color: #175cd3;
+      border-color: rgba(23,92,211,0.12);
+    }
+
+    @media (max-width: 980px) {
+      .pro-dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .pro-dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 34px;
+    }
+
+    .glass, .stat-card, .card-row {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 30px;
+      box-shadow: 0 14px 45px rgba(0,0,0,0.045);
+      backdrop-filter: blur(18px);
+    }
+
+    .stat-card { padding: 26px; }
+    .stat-label { color: #6e6e73; font-size: 14px; }
+    .stat-value { margin-top: 5px; font-size: 34px; font-weight: 760; letter-spacing: -.04em; }
+    .stat-sub { margin-top: 8px; color: #6e6e73; font-size: 14px; }
+
+    section { margin-bottom: 52px; }
+    .section-head {
+      padding-top: 54px; display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 22px;
+    }
+    .section-kicker { color: #6e6e73; font-size: 14px; font-weight: 650; margin-bottom: 6px; }
+    h2 { font-size: 42px; letter-spacing: -.045em; line-height: 1; }
+
+    .dashboard-grid {
+      display: grid; grid-template-columns: 1.2fr .8fr; gap: 16px;
+    }
+    .dashboard-card { padding: 28px; min-height: 240px; }
+    .dashboard-title { font-size: 28px; font-weight: 760; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 12px; }
+    .dashboard-text { color: #6e6e73; font-size: 15px; line-height: 1.55; }
+    .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+    .form-panel { padding: 24px; }
+    .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.wide { grid-column: span 2; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: #6e6e73; font-size: 13px; font-weight: 650; }
+    input, select, textarea {
+      border: 0; outline: none; background: #f5f5f7; border-radius: 18px; padding: 14px 15px;
+      font-size: 15px; color: #111; width: 100%; font-family: inherit;
+    }
+    textarea { min-height: 92px; resize: vertical; line-height: 1.45; }
+
+    .hint { color: #86868b; font-size: 12px; line-height: 1.4; }
+
+    .upload-grid {
+      grid-column: 1 / -1;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    }
+
+    .upload-box {
+      background: #f5f5f7; border: 1px dashed rgba(0,0,0,0.2); border-radius: 22px; padding: 14px;
+    }
+
+    .upload-box input[type="file"] {
+      background: #fff; padding: 10px; border-radius: 14px; cursor: pointer;
+    }
+
+    .preview {
+      margin-top: 12px; width: 100%; aspect-ratio: 63/88; border-radius: 18px;
+      background: linear-gradient(145deg, #ececf0, #fff);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      color: #86868b; font-weight: 700; font-size: 12px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+
+    .preview img { width: 100%; height: 100%; object-fit: fill; display: block; background: white; }
+
+    .form-actions {
+      margin-top: 18px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;
+    }
+
+    .tool-message {
+      display: none; margin-top: 14px; padding: 14px 16px; border-radius: 20px; font-size: 14px; line-height: 1.4;
+    }
+    .tool-message.success { display: block; background: #eaf8ef; color: #18723a; }
+    .tool-message.error { display: block; background: #fff1f1; color: #b42318; }
+
+    .marker-panel {
+      grid-column: 1 / -1;
+      background: #f5f5f7; border: 1px solid rgba(0,0,0,0.06); border-radius: 24px; padding: 16px;
+    }
+    .marker-toolbar {
+      display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px;
+    }
+    .side-switch { display: flex; gap: 8px; flex-wrap: wrap; }
+    .side-button, .fine-button {
+      border: 0; border-radius: 99px; padding: 10px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+      background: #e9e9ee; color: #515154;
+    }
+    .side-button.active, .fine-button.active { background: #111; color: white; }
+
+    .marker-layout { display: grid; grid-template-columns: 330px 1fr; gap: 18px; align-items: start; }
+    .marker-card {
+      width: 100%; aspect-ratio: 63/88; border-radius: 24px; overflow: hidden; position: relative;
+      background: linear-gradient(145deg,#ececf0,#fff);
+      display: flex; align-items: center; justify-content: center; color: #86868b; font-weight: 700;
+      cursor: crosshair; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .marker-card img { width: 100%; height: 100%; object-fit: fill; display: block; pointer-events: none; background: white; }
+    .marker-dot {
+      position: absolute; transform: translate(-50%,-50%); width: 24px; height: 24px; border-radius: 99px;
+      background: #0a84ff; color: white; border: 2px solid white; font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(10,132,255,0.28);
+      pointer-events: none;
+    }
+
+    .rough-dot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 2px solid white;
+      background: rgba(10,132,255,0.88);
+      box-shadow: 0 0 0 2px rgba(10,132,255,0.55), 0 8px 22px rgba(10,132,255,0.30);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .fine-area { display: none; margin-top: 14px; background: white; border-radius: 22px; padding: 14px; border: 1px solid rgba(0,0,0,0.08); }
+    .fine-area.active { display: block; }
+    .fine-stage {
+      width: min(360px, 100%);
+      aspect-ratio: 63 / 88;
+      border-radius: 18px;
+      background: #f5f5f7;
+      cursor: crosshair;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fine-stage canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: white;
+    }
+
+    .fine-stage::before {
+      content: "echter Feinausschnitt";
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      transform: translateX(-50%);
+      z-index: 2;
+      border-radius: 999px;
+      background: rgba(17,17,17,0.72);
+      color: white;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .fine-stage::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%,-50%);
+      border-radius: 99px;
+      border: 2px solid rgba(255,255,255,0.95);
+      box-shadow: 0 0 0 2px rgba(10,132,255,0.95);
+      pointer-events: none;
+    }
+
+    .marker-list { display: grid; gap: 8px; }
+    .marker-item {
+      display: flex; justify-content: space-between; gap: 12px; align-items: center;
+      border-radius: 16px; background: white; padding: 11px 12px; border: 1px solid rgba(0,0,0,0.06);
+      font-size: 14px; line-height: 1.35;
+    }
+
+    .collection-controls, .toolbar-extra, .summary-strip {
+      display: grid; gap: 12px; margin-bottom: 20px;
+    }
+    .collection-controls { grid-template-columns: 1fr 220px 220px; }
+    .toolbar-extra { grid-template-columns: 220px 220px 1fr; }
+    .summary-strip { grid-template-columns: repeat(4,1fr); }
+
+    .control-panel, .summary-chip {
+      background: rgba(255,255,255,0.72); border: 1px solid rgba(0,0,0,0.08); border-radius: 24px;
+      padding: 15px; box-shadow: 0 12px 36px rgba(0,0,0,0.04);
+    }
+    .summary-label { color: #86868b; font-size: 12px; font-weight: 650; margin-bottom: 5px; }
+    .summary-value { color: #111; font-size: 22px; font-weight: 760; letter-spacing: -.03em; }
+
+    .view-toggle { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .view-button {
+      border: 0; background: #f1f1f3; color: #515154; border-radius: 99px; padding: 12px 14px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .view-button.active { background: #111; color: white; }
+
+    .cards { display: grid; gap: 16px; }
+    .cards.grid-view { grid-template-columns: repeat(3,minmax(0,1fr)); }
+
+    .card-row {
+      padding: 22px; display: grid; grid-template-columns: 90px 1fr auto; gap: 22px; align-items: center;
+      cursor: pointer; transition: .22s ease;
+    }
+    .card-row:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 30px 85px rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.14);
+      background: rgba(255,255,255,0.92);
+    }
+    .card-image {
+      height: 108px; border-radius: 22px; background: linear-gradient(145deg,#ececf0,#fff);
+      display: flex; align-items: center; justify-content: center; color: #86868b; font-size: 12px; font-weight: 750;
+      overflow: hidden; transition: .22s ease;
+    }
+    .card-row:hover .card-image { transform: scale(1.025); }
+    .card-image img { width: 100%; height: 100%; object-fit: fill; background: white; display: block; }
+
+    .cards.grid-view .card-row { grid-template-columns: 1fr; align-items: stretch; }
+    .cards.grid-view .card-image { height: auto; aspect-ratio: 63 / 88; width: min(220px, 100%); justify-self: center; }
+    .cards.grid-view .details { grid-template-columns: repeat(2,1fr); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .tag { border-radius: 99px; padding: 6px 11px; background: #f1f1f3; color: #515154; font-size: 12px; font-weight: 650; }
+    .tag.green { background: #eaf8ef; color: #18723a; }
+    .tag.gold { background: #fff7e6; color: #8a5a00; }
+
+    .card-title { font-size: 25px; font-weight: 760; letter-spacing: -.035em; }
+    .note-pill { display: inline-flex; margin-left: 8px; background: #111; color: white; border-radius: 99px; padding: 7px 11px; font-size: 12px; font-weight: 750; vertical-align: middle; }
+    .card-meta { color: #6e6e73; font-size: 14px; margin-top: 5px; line-height: 1.4; }
+    .details { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 18px; }
+    .detail-label { color: #9a9aa0; font-size: 12px; margin-bottom: 4px; }
+    .detail-value { color: #2d2d2f; font-size: 14px; font-weight: 650; }
+
+    .card-tools { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .favorite-button, .edit-button, .delete-button {
+      border: 0; border-radius: 99px; padding: 9px 13px; font-size: 13px; cursor: pointer; white-space: nowrap;
+    }
+    .favorite-button { background: #fff7e6; color: #8a5a00; }
+    .favorite-button.active { background: #111; color: white; }
+    .edit-button { background: #eef4ff; color: #175cd3; }
+    .delete-button { background: #fff1f1; color: #b42318; }
+
+    .empty { display: none; text-align: center; padding: 50px; color: #6e6e73; background: white; border-radius: 28px; border: 1px solid rgba(0,0,0,0.08); }
+
+    .modal-backdrop, .zoom-backdrop {
+      position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center;
+      padding: 22px; background: rgba(0,0,0,0.35); backdrop-filter: blur(18px);
+    }
+    .zoom-backdrop { z-index: 120; background: rgba(0,0,0,0.45); }
+
+    .modal, .zoom-modal {
+      width: min(1080px,100%); max-height: 90vh; overflow: auto; border-radius: 34px;
+      background: rgba(255,255,255,0.94); border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.28);
+    }
+    .zoom-modal { width: min(760px,100%); }
+
+    .modal-header, .zoom-header {
+      display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; padding: 26px 28px 0;
+    }
+    .modal-kicker { color: #6e6e73; font-size: 14px; font-weight: 650; margin-bottom: 8px; }
+    .modal-title, .zoom-title { font-size: 38px; line-height: 1; letter-spacing: -.05em; font-weight: 780; }
+    .zoom-title { font-size: 28px; }
+    .close-button {
+      width: 42px; height: 42px; border: 0; border-radius: 99px; background: #f1f1f3; color: #515154;
+      font-size: 24px; cursor: pointer;
+    }
+
+    .modal-body { display: grid; grid-template-columns: 310px 1fr; gap: 26px; padding: 28px; }
+    .main-card-image {
+      height: 430px; border-radius: 30px; background: linear-gradient(145deg,#ececf0,#fff);
+      display: flex; align-items: center; justify-content: center; color: #86868b; font-weight: 750;
+      overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .main-card-image img { width: 100%; height: 100%; object-fit: fill; background: white; display: block; }
+    .thumbs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .thumb {
+      width: 70px; height: 92px; border-radius: 16px; overflow: hidden; border: 2px solid transparent; background: #f5f5f7;
+      cursor: pointer; padding: 0;
+    }
+    .thumb.active { border-color: #111; }
+    .thumb img { width: 100%; height: 100%; object-fit: fill; background: white; display: block; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    .info-box { border-radius: 22px; background: #f5f5f7; padding: 16px; border: 1px solid rgba(0,0,0,0.06); }
+    .info-label { color: #86868b; font-size: 12px; margin-bottom: 6px; }
+    .info-value { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+
+    .note-box, .verification-box, .damage-section {
+      margin-top: 16px; border-radius: 26px; padding: 18px; border: 1px solid rgba(0,0,0,0.06);
+    }
+    .verification-box { background: #eaf8ef; color: #18723a; border-color: rgba(24,114,58,0.12); }
+    .note-box, .damage-section { background: #f5f5f7; color: #2d2d2f; }
+    .box-title { font-size: 16px; font-weight: 750; margin-bottom: 6px; }
+    .box-text { font-size: 14px; line-height: 1.45; color: inherit; white-space: pre-wrap; }
+
+    .damage-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .damage-layout { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+    .damage-card {
+      width: 100%; aspect-ratio: 63/88; border-radius: 22px; overflow: hidden; position: relative;
+      background: linear-gradient(145deg,#ececf0,#fff); display: flex; align-items: center; justify-content: center;
+      color: #86868b; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+    .damage-card img { width: 100%; height: 100%; object-fit: fill; background: white; display: block; pointer-events: none; }
+    .damage-dot {
+      position: absolute; transform: translate(-50%,-50%); width: 25px; height: 25px; border-radius: 99px;
+      background: #ff3b30; color: white; border: 2px solid white; font-size: 12px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 8px 18px rgba(255,59,48,0.35);
+    }
+    .damage-list { display: grid; gap: 8px; }
+    .damage-item { border-radius: 16px; background: white; padding: 11px 12px; font-size: 14px; border: 1px solid rgba(0,0,0,0.06); cursor: pointer; }
+
+    .zoom-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .zoom-stage {
+      width: min(420px, 100%);
+      aspect-ratio: 63 / 88;
+      border-radius: 24px;
+      background: #f5f5f7;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), 0 16px 45px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-stage canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: white;
+    }
+
+    .zoom-stage::before {
+      content: "echter Ausschnitt";
+      position: absolute;
+      left: 50%;
+      top: 12px;
+      transform: translateX(-50%);
+      z-index: 2;
+      border-radius: 999px;
+      background: rgba(17,17,17,0.78);
+      color: white;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .zoom-stage::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%,-50%);
+      border: 2px solid rgba(255,255,255,0.96);
+      border-radius: 999px;
+      box-shadow: 0 0 0 2px rgba(255,59,48,0.96), 0 8px 24px rgba(255,59,48,0.28);
+      pointer-events: none;
+    }
+    .zoom-controls { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .zoom-button { border: 0; background: #f1f1f3; color: #515154; border-radius: 99px; padding: 10px 13px; font-size: 13px; cursor: pointer; }
+    .zoom-button.active { background: #111; color: white; }
+
+    @media (max-width: 980px) {
+      .form-grid { grid-template-columns: repeat(2,1fr); }
+      .modal-body, .damage-layout, .marker-layout, .dashboard-grid { grid-template-columns: 1fr; }
+      .upload-grid, .summary-strip, .collection-controls, .toolbar-extra { grid-template-columns: 1fr 1fr; }
+      .cards.grid-view { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+
+    @media (max-width: 680px) {
+      .nav-links { display: none; }
+      .stats, .form-grid, .upload-grid, .summary-strip, .collection-controls, .toolbar-extra, .cards.grid-view { grid-template-columns: 1fr; }
+      .field.wide { grid-column: span 1; }
+      .card-row { grid-template-columns: 1fr; }
+      .card-image { height: 170px; }
+      .details { grid-template-columns: repeat(2,1fr); }
+      h2 { font-size: 34px; }
+    }
+  
+    .image-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .image-tool-button {
+      border: 0;
+      background: #f1f1f3;
+      color: #515154;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .image-tool-button:hover {
+      background: #e5e5ea;
+    }
+
+
+    .finance-panel {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      border-radius: 24px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 16px;
+    }
+
+    .finance-title {
+      grid-column: 1 / -1;
+      color: #111;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .profit-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-top: 7px;
+      background: #f1f1f3;
+      color: #515154;
+    }
+
+    .profit-positive {
+      background: #eaf8ef;
+      color: #18723a;
+    }
+
+    .profit-negative {
+      background: #fff1f1;
+      color: #b42318;
+    }
+
+    .profit-neutral {
+      background: #f1f1f3;
+      color: #515154;
+    }
+
+    .finance-summary-box {
+      margin-top: 16px;
+      border-radius: 26px;
+      background: #f5f5f7;
+      padding: 18px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .finance-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .finance-summary-item {
+      border-radius: 18px;
+      background: white;
+      padding: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .finance-summary-label {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .finance-summary-value {
+      color: #111;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    @media (max-width: 980px) {
+      .finance-panel,
+      .finance-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .finance-panel,
+      .finance-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .image-tool-button.danger-mini {
+      background: #fff1f1;
+      color: #b42318;
+    }
+
+
+    .tag-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tag-input-row input {
+      flex: 1;
+    }
+
+    .tag-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: #175cd3;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 750;
+      border: 1px solid rgba(23,92,211,0.12);
+    }
+
+    .custom-tag-chip button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.035);
+    }
+
+    .tag-cloud-chip {
+      border: 0;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: #175cd3;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .tag-cloud-chip.active {
+      background: #111;
+      color: white;
+    }
+
+
+    .brand-home {
+      border: 0;
+      background: transparent;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      cursor: pointer;
+      font-family: inherit;
+      color: inherit;
+      text-align: left;
+      border-radius: 18px;
+      padding: 6px 8px;
+      transition: .18s ease;
+    }
+
+    .brand-home:hover {
+      background: rgba(255,255,255,0.72);
+      transform: translateY(-1px);
+    }
+
+    .brand-home:hover .brand-icon {
+      transform: scale(1.05);
+    }
+
+    .brand-icon {
+      transition: .18s ease;
+    }
+
+
+    /* Galerieansicht: Karte nicht verzerren, sondern im Kartenformat anzeigen */
+    .cards.grid-view .card-image {
+      height: auto;
+      aspect-ratio: 63 / 88;
+      width: min(220px, 100%);
+      justify-self: center;
+      align-self: center;
+      padding: 0;
+      background: linear-gradient(145deg,#ececf0,#fff);
+    }
+
+    .cards.grid-view .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: white;
+    }
+
+    .cards.grid-view .card-row {
+      justify-items: stretch;
+    }
+
+    .cards.grid-view .card-tools {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+
+    .floating-add {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 80;
+      border: 0;
+      border-radius: 999px;
+      background: #111;
+      color: white;
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 750;
+      cursor: pointer;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      transition: .18s ease;
+      font-family: inherit;
+    }
+
+    .floating-add:hover {
+      transform: translateY(-3px);
+      background: #2d2d2f;
+    }
+
+    .collection-header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .soft-button {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      color: #2d2d2f;
+      padding: 12px 15px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.035);
+    }
+
+    .soft-button:hover {
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    .filter-panel {
+      overflow: hidden;
+      transition: max-height .25s ease, opacity .2s ease, margin .2s ease;
+      max-height: 900px;
+      opacity: 1;
+    }
+
+    .filter-panel.collapsed {
+      max-height: 0;
+      opacity: 0;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    .empty {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .empty::before {
+      content: "⌕";
+      display: block;
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 16px;
+      border-radius: 20px;
+      background: #f5f5f7;
+      color: #86868b;
+      font-size: 30px;
+      line-height: 58px;
+    }
+
+    .empty-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-row {
+      position: relative;
+    }
+
+    .card-row::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 30px;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 0 rgba(10,132,255,0);
+      transition: .2s ease;
+    }
+
+    .card-row:hover::after {
+      box-shadow: inset 0 0 0 1px rgba(10,132,255,0.16);
+    }
+
+    .card-title-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .mini-score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      border-radius: 999px;
+      background: #111;
+      color: white;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 6px;
+      background: #86868b;
+    }
+
+    .status-dot.ok {
+      background: #1f8f45;
+    }
+
+    .status-dot.warn {
+      background: #c47a00;
+    }
+
+    .status-dot.bad {
+      background: #b42318;
+    }
+
+    .keyboard-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #86868b;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .kbd {
+      border-radius: 7px;
+      background: #f1f1f3;
+      color: #515154;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 680px) {
+      .floating-add {
+        right: 16px;
+        bottom: 16px;
+        padding: 13px 15px;
+      }
+
+      .floating-add span:last-child {
+        display: none;
+      }
+
+      .collection-header-actions {
+        justify-content: flex-start;
+      }
+    }
+
+
+    .image-action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      justify-content: center;
+    }
+
+    .image-action-button {
+      border: 0;
+      border-radius: 999px;
+      background: #f1f1f3;
+      color: #515154;
+      padding: 9px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .image-action-button.active,
+    .image-action-button:hover {
+      background: #111;
+      color: white;
+    }
+
+    .fullscreen-image-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 180;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(18px);
+      padding: 24px;
+    }
+
+    .fullscreen-image-backdrop.active {
+      display: flex;
+    }
+
+    .fullscreen-image-box {
+      width: min(520px, 100%);
+      max-height: 92vh;
+      border-radius: 28px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.45);
+      position: relative;
+    }
+
+    .fullscreen-image-box img {
+      width: 100%;
+      height: auto;
+      max-height: 92vh;
+      object-fit: contain;
+      display: block;
+      background: white;
+    }
+
+    .fullscreen-close {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(17,17,17,0.72);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .thumb-label {
+      text-align: center;
+      color: #86868b;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .thumb-wrap {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+    }
+
+
+    .theme-toggle {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      color: #2d2d2f;
+      padding: 11px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.035);
+      white-space: nowrap;
+    }
+
+    .theme-toggle:hover {
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    body.dark {
+      background: #050507;
+      color: #f5f5f7;
+    }
+
+    body.dark header {
+      background: rgba(5,5,7,0.78);
+      border-bottom-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .brand-home:hover,
+    body.dark .glass,
+    body.dark .stat-card,
+    body.dark .card-row,
+    body.dark .control-panel,
+    body.dark .summary-chip,
+    body.dark .analysis-card,
+    body.dark .tag-cloud,
+    body.dark .quick-filter-bar,
+    body.dark .pro-card {
+      background: rgba(28,28,32,0.78);
+      border-color: rgba(255,255,255,0.10);
+      box-shadow: 0 14px 45px rgba(0,0,0,0.28);
+    }
+
+    body.dark .brand-title,
+    body.dark h1,
+    body.dark h2,
+    body.dark .card-title,
+    body.dark .summary-value,
+    body.dark .analysis-value,
+    body.dark .pro-value,
+    body.dark .detail-value,
+    body.dark .info-value,
+    body.dark .finance-summary-value,
+    body.dark .dashboard-title {
+      color: #f5f5f7;
+    }
+
+    body.dark .brand-subtitle,
+    body.dark .hero-text,
+    body.dark .stat-label,
+    body.dark .stat-sub,
+    body.dark .section-kicker,
+    body.dark .hint,
+    body.dark .card-meta,
+    body.dark .detail-label,
+    body.dark .summary-label,
+    body.dark .analysis-label,
+    body.dark .analysis-sub,
+    body.dark .pro-label,
+    body.dark .pro-sub,
+    body.dark .dashboard-text {
+      color: #a1a1a6;
+    }
+
+    body.dark input,
+    body.dark select,
+    body.dark textarea,
+    body.dark .upload-box,
+    body.dark .marker-panel,
+    body.dark .quality-panel,
+    body.dark .finance-panel,
+    body.dark .report-box,
+    body.dark .review-box,
+    body.dark .note-box,
+    body.dark .damage-section,
+    body.dark .finance-summary-box,
+    body.dark .info-box,
+    body.dark .completion-item,
+    body.dark .marker-item,
+    body.dark .damage-item,
+    body.dark .finance-summary-item,
+    body.dark .dashboard-list-item,
+    body.dark .empty,
+    body.dark .preview,
+    body.dark .upload-preview,
+    body.dark .marker-card,
+    body.dark .damage-card,
+    body.dark .main-card-image,
+    body.dark .fine-stage,
+    body.dark .zoom-stage {
+      background: #1c1c20;
+      color: #f5f5f7;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark input::placeholder,
+    body.dark textarea::placeholder {
+      color: #73737a;
+    }
+
+    body.dark .secondary-button,
+    body.dark .soft-button,
+    body.dark .theme-toggle,
+    body.dark .tiny-button,
+    body.dark .image-tool-button,
+    body.dark .view-button,
+    body.dark .side-button,
+    body.dark .fine-button,
+    body.dark .quick-filter-chip,
+    body.dark .tag,
+    body.dark .damage-badge,
+    body.dark .duplicate-button {
+      background: #2c2c31;
+      color: #f5f5f7;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .secondary-button:hover,
+    body.dark .soft-button:hover,
+    body.dark .theme-toggle:hover,
+    body.dark .tiny-button:hover,
+    body.dark .image-tool-button:hover {
+      background: #3a3a40;
+    }
+
+    body.dark .modal,
+    body.dark .zoom-modal,
+    body.dark .damage-edit-modal {
+      background: rgba(28,28,32,0.96);
+      color: #f5f5f7;
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    body.dark .close-button {
+      background: #2c2c31;
+      color: #f5f5f7;
+    }
+
+    body.dark .card-image,
+    body.dark .thumb,
+    body.dark .closeup-thumb,
+    body.dark .fullscreen-image-box,
+    body.dark .fullscreen-image-box img,
+    body.dark .main-card-image img,
+    body.dark .card-image img,
+    body.dark .thumb img,
+    body.dark .preview img {
+      background: #111114;
+    }
+
+    body.dark .doc-score-bar,
+    body.dark .report-bar {
+      background: #3a3a40;
+    }
+
+    body.dark .storage-note,
+    body.dark .accuracy-note,
+    body.dark .drag-hint,
+    body.dark .smart-grade-box,
+    body.dark .pro-blue {
+      background: rgba(23,92,211,0.22);
+      color: #8db7ff;
+      border-color: rgba(141,183,255,0.18);
+    }
+
+    body.dark .pro-success,
+    body.dark .verification-box {
+      background: rgba(24,114,58,0.22);
+      color: #8ee0aa;
+      border-color: rgba(142,224,170,0.18);
+    }
+
+    body.dark .pro-warning,
+    body.dark .warning-note,
+    body.dark .grade-explain {
+      background: rgba(138,90,0,0.24);
+      color: #ffd285;
+      border-color: rgba(255,210,133,0.18);
+    }
+
+    body.dark .pro-danger,
+    body.dark .danger-button,
+    body.dark .coordinate-debug {
+      background: rgba(180,35,24,0.24);
+      color: #ffaaa4;
+      border-color: rgba(255,170,164,0.18);
+    }
+
+
+    body.dark .nav-link {
+      color: #a1a1a6;
+    }
+
+    body.dark .nav-link.active {
+      color: #ffffff;
+      font-weight: 750;
+    }
+
+    body.dark .nav-link.active::after {
+      background: #ffffff;
+    }
+
+    body.dark .nav-link:hover {
+      color: #f5f5f7;
+    }
+
+    body.dark .top-button {
+      background: #f5f5f7;
+      color: #111114;
+    }
+
+    body.dark .top-button:hover {
+      background: #ffffff;
+    }
+
+
+    .backup-reminder {
+      display: none;
+      max-width: 1180px;
+      margin: 16px auto 0;
+      padding: 14px 18px;
+      border-radius: 22px;
+      background: #fff7e6;
+      color: #8a5a00;
+      border: 1px solid rgba(138,90,0,0.14);
+      box-shadow: 0 12px 34px rgba(0,0,0,0.045);
+      font-size: 14px;
+      line-height: 1.45;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .backup-reminder.active {
+      display: flex;
+    }
+
+    .backup-reminder-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .backup-reminder button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .backup-reminder .backup-main {
+      background: #111;
+      color: white;
+    }
+
+    .backup-reminder .backup-secondary {
+      background: rgba(255,255,255,0.7);
+      color: #8a5a00;
+    }
+
+    body.dark .backup-reminder {
+      background: rgba(138,90,0,0.24);
+      color: #ffd285;
+      border-color: rgba(255,210,133,0.18);
+    }
+
+    body.dark .backup-reminder .backup-secondary {
+      background: rgba(255,255,255,0.10);
+      color: #ffd285;
+    }
+
+
+    .recent-section {
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .recent-panel {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 30px;
+      padding: 22px;
+      box-shadow: 0 14px 45px rgba(0,0,0,0.045);
+      backdrop-filter: blur(18px);
+    }
+
+    .recent-title {
+      font-size: 22px;
+      font-weight: 780;
+      letter-spacing: -0.035em;
+      margin-bottom: 12px;
+      color: #111;
+    }
+
+    .recent-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .recent-item {
+      border: 0;
+      width: 100%;
+      text-align: left;
+      border-radius: 18px;
+      background: #f5f5f7;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: .18s ease;
+      display: grid;
+      gap: 4px;
+    }
+
+    .recent-item:hover {
+      background: #ededf2;
+      transform: translateY(-1px);
+    }
+
+    .recent-item-title {
+      color: #111;
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .recent-item-sub {
+      color: #6e6e73;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .recent-empty {
+      color: #86868b;
+      font-size: 14px;
+      line-height: 1.45;
+      background: #f5f5f7;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .todo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 750;
+      background: #fff7e6;
+      color: #8a5a00;
+      width: fit-content;
+    }
+
+    body.dark .recent-panel {
+      background: rgba(28,28,32,0.78);
+      border-color: rgba(255,255,255,0.10);
+      box-shadow: 0 14px 45px rgba(0,0,0,0.28);
+    }
+
+    body.dark .recent-title,
+    body.dark .recent-item-title {
+      color: #f5f5f7;
+    }
+
+    body.dark .recent-item,
+    body.dark .recent-empty {
+      background: #1c1c20;
+      color: #f5f5f7;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .recent-item:hover {
+      background: #2c2c31;
+    }
+
+    body.dark .recent-item-sub {
+      color: #a1a1a6;
+    }
+
+    @media (max-width: 860px) {
+      .recent-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .bulk-toolbar {
+      display: none;
+      position: sticky;
+      top: 76px;
+      z-index: 40;
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(17,17,17,0.90);
+      color: white;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+      backdrop-filter: blur(18px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bulk-toolbar.active {
+      display: flex;
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bulk-button {
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      color: white;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .bulk-button:hover {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .bulk-button.danger {
+      background: rgba(255,90,82,0.22);
+      color: #ffd7d4;
+    }
+
+    .select-card-check {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      z-index: 3;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 2px solid white;
+      background: rgba(17,17,17,0.58);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.20);
+    }
+
+    .selection-mode .select-card-check {
+      display: flex;
+    }
+
+    .card-row.selected-card {
+      outline: 2px solid #0a84ff;
+      outline-offset: 2px;
+    }
+
+    .card-row.selected-card .select-card-check {
+      background: #0a84ff;
+    }
+
+    body.dark .bulk-toolbar {
+      background: rgba(245,245,247,0.92);
+      color: #111;
+    }
+
+    body.dark .bulk-button {
+      background: rgba(0,0,0,0.08);
+      color: #111;
+    }
+
+    body.dark .bulk-button:hover {
+      background: rgba(0,0,0,0.14);
+    }
+
+    body.dark .bulk-button.danger {
+      background: rgba(180,35,24,0.16);
+      color: #b42318;
+    }
+
+
+    .compact-view .card-row {
+      padding: 16px;
+      grid-template-columns: 64px 1fr auto;
+      gap: 16px;
+      border-radius: 24px;
+    }
+
+    .compact-view .card-image {
+      height: 78px;
+      border-radius: 16px;
+    }
+
+    .compact-view .card-meta,
+    .compact-view .tags,
+    .compact-view .doc-score,
+    .compact-view .missing-pill {
+      display: none;
+    }
+
+    .compact-view .details {
+      margin-top: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .compact-view .detail-label {
+      font-size: 11px;
+    }
+
+    .compact-view .detail-value {
+      font-size: 13px;
+    }
+
+    .compact-view .card-title {
+      font-size: 19px;
+    }
+
+    .compact-view .mini-score {
+      min-width: 42px;
+      padding: 6px 9px;
+    }
+
+    .view-density-toggle {
+      border: 0;
+      background: #f1f1f3;
+      color: #515154;
+      border-radius: 999px;
+      padding: 12px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .view-density-toggle.active {
+      background: #111;
+      color: white;
+    }
+
+    body.dark .view-density-toggle {
+      background: #2c2c31;
+      color: #f5f5f7;
+    }
+
+    body.dark .view-density-toggle.active {
+      background: #f5f5f7;
+      color: #111;
+    }
+
+
+    .import-choice-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 190;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(0,0,0,0.38);
+      backdrop-filter: blur(18px);
+    }
+
+    .import-choice-backdrop.active {
+      display: flex;
+    }
+
+    .import-choice-modal {
+      width: min(560px, 100%);
+      border-radius: 30px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+      padding: 24px;
+    }
+
+    .import-choice-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .import-choice-text {
+      color: #6e6e73;
+      font-size: 14px;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .import-choice-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .import-choice-stat {
+      border-radius: 18px;
+      background: #f5f5f7;
+      padding: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .import-choice-label {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .import-choice-value {
+      color: #111;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .import-choice-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .import-action-button {
+      border: 0;
+      border-radius: 18px;
+      padding: 13px 15px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      background: #f5f5f7;
+      color: #111;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .import-action-button strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .import-action-button span {
+      display: block;
+      color: #6e6e73;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .import-action-button:hover {
+      background: #ededf2;
+    }
+
+    .import-action-button.danger {
+      background: #fff1f1;
+      color: #b42318;
+      border-color: rgba(180,35,24,0.14);
+    }
+
+    .import-action-button.primary-choice {
+      background: #111;
+      color: white;
+    }
+
+    .import-action-button.primary-choice span {
+      color: rgba(255,255,255,0.72);
+    }
+
+    body.dark .import-choice-modal {
+      background: rgba(28,28,32,0.96);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    body.dark .import-choice-title,
+    body.dark .import-choice-value,
+    body.dark .import-action-button {
+      color: #f5f5f7;
+    }
+
+    body.dark .import-choice-text,
+    body.dark .import-action-button span {
+      color: #a1a1a6;
+    }
+
+    body.dark .import-choice-stat,
+    body.dark .import-action-button {
+      background: #1c1c20;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .import-action-button:hover {
+      background: #2c2c31;
+    }
+
+    body.dark .import-action-button.primary-choice {
+      background: #f5f5f7;
+      color: #111;
+    }
+
+    body.dark .import-action-button.primary-choice span {
+      color: #515154;
+    }
+
+
+    .trash-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 195;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(0,0,0,0.38);
+      backdrop-filter: blur(18px);
+    }
+
+    .trash-backdrop.active {
+      display: flex;
+    }
+
+    .trash-modal {
+      width: min(760px, 100%);
+      max-height: 84vh;
+      overflow: auto;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+      padding: 24px;
+    }
+
+    .trash-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .trash-title {
+      font-size: 28px;
+      font-weight: 820;
+      letter-spacing: -0.045em;
+      color: #111;
+    }
+
+    .trash-text {
+      color: #6e6e73;
+      font-size: 14px;
+      line-height: 1.45;
+      margin-top: 6px;
+    }
+
+    .trash-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trash-item {
+      border-radius: 20px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 13px;
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .trash-thumb {
+      width: 52px;
+      aspect-ratio: 63 / 88;
+      border-radius: 10px;
+      background: white;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #86868b;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .trash-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: white;
+    }
+
+    .trash-name {
+      color: #111;
+      font-weight: 780;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .trash-meta {
+      color: #6e6e73;
+      font-size: 12px;
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .trash-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .trash-empty {
+      border-radius: 20px;
+      background: #f5f5f7;
+      padding: 24px;
+      color: #86868b;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    body.dark .trash-modal {
+      background: rgba(28,28,32,0.96);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    body.dark .trash-title,
+    body.dark .trash-name {
+      color: #f5f5f7;
+    }
+
+    body.dark .trash-text,
+    body.dark .trash-meta {
+      color: #a1a1a6;
+    }
+
+    body.dark .trash-item,
+    body.dark .trash-empty {
+      background: #1c1c20;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .trash-thumb,
+    body.dark .trash-thumb img {
+      background: #111114;
+    }
+
+
+    .report-page-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 210;
+      display: none;
+      background: rgba(0,0,0,0.42);
+      backdrop-filter: blur(18px);
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .report-page-backdrop.active {
+      display: block;
+    }
+
+    .report-page {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      background: white;
+      color: #111;
+      border-radius: 34px;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.34);
+      overflow: hidden;
+    }
+
+    .report-page-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 28px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      background: linear-gradient(145deg,#f5f5f7,#fff);
+    }
+
+    .report-page-title {
+      font-size: 34px;
+      font-weight: 850;
+      letter-spacing: -0.055em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .report-page-sub {
+      color: #6e6e73;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .report-page-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .report-page-body {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+
+    .report-image-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .report-image {
+      aspect-ratio: 63 / 88;
+      border-radius: 22px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #86868b;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .report-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: white;
+      display: block;
+    }
+
+    .report-section {
+      border-radius: 24px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .report-section-title {
+      font-size: 16px;
+      font-weight: 820;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .report-kv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .report-kv {
+      border-radius: 16px;
+      background: white;
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: 11px;
+    }
+
+    .report-k {
+      color: #86868b;
+      font-size: 11px;
+      font-weight: 750;
+      margin-bottom: 4px;
+    }
+
+    .report-v {
+      color: #111;
+      font-size: 14px;
+      font-weight: 760;
+      line-height: 1.3;
+    }
+
+    .report-damage-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .report-damage-item {
+      border-radius: 16px;
+      background: white;
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 11px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .report-damage-meta {
+      color: #6e6e73;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .report-note {
+      color: #2d2d2f;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    body.dark .report-page {
+      background: #1c1c20;
+      color: #f5f5f7;
+    }
+
+    body.dark .report-page-header,
+    body.dark .report-section {
+      background: #111114;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark .report-page-title,
+    body.dark .report-v,
+    body.dark .report-section-title,
+    body.dark .report-note {
+      color: #f5f5f7;
+    }
+
+    body.dark .report-page-sub,
+    body.dark .report-k,
+    body.dark .report-damage-meta {
+      color: #a1a1a6;
+    }
+
+    body.dark .report-kv,
+    body.dark .report-damage-item,
+    body.dark .report-image {
+      background: #1c1c20;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    @media (max-width: 780px) {
+      .report-page-body {
+        grid-template-columns: 1fr;
+      }
+
+      .report-image-stack {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media print {
+      body > header,
+      body > main,
+      .backup-reminder,
+      .floating-add,
+      .fullscreen-image-backdrop,
+      .trash-backdrop,
+      .import-choice-backdrop,
+      .zoom-backdrop,
+      #detailBackdrop {
+        display: none !important;
+      }
+
+      .report-page-backdrop {
+        display: block !important;
+        position: static !important;
+        inset: auto !important;
+        background: white !important;
+        backdrop-filter: none !important;
+        padding: 0 !important;
+      }
+
+      .report-page {
+        width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .report-page-actions {
+        display: none !important;
+      }
+    }
+
+</style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <button class="brand-home" data-page="overviewPage" type="button" title="Zur Startseite">
+        <div class="brand-icon">C</div>
+        <div>
+          <div class="brand-title">Card Vault</div>
+          <div class="brand-subtitle">Meine Kartensammlung</div>
+        </div>
+      </button>
+
+      <nav class="nav-links">
+        <button class="nav-link active" data-page="overviewPage" type="button">Übersicht</button>
+        <button class="nav-link" data-page="collectionPage" type="button">Sammlung</button>
+        <button class="nav-link" data-page="addPage" type="button">Eintragen</button>
+        <button class="nav-link" data-page="checkPage" type="button">ID prüfen</button>
+      </nav>
+
+      <button class="theme-toggle" id="themeToggleBtn" type="button">🌙 Dunkel</button>
+      <button class="top-button" data-page="addPage" type="button">Eintragen</button>
+    </div>
+  </header>
+
+  <div id="appErrorBox" style="display:none;max-width:1180px;margin:16px auto 0;padding:12px 16px;border-radius:16px;background:#fff1f1;color:#b42318;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;"></div>
+
+  <div class="backup-reminder" id="backupReminder">
+    <div id="backupReminderText">Backup empfohlen.</div>
+    <div class="backup-reminder-actions">
+      <button class="backup-main" id="backupNowBtn" type="button">Backup erstellen</button>
+      <button class="backup-secondary" id="backupDismissBtn" type="button">Später</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="page active" id="overviewPage">
+      <section class="hero">
+        <div class="pill">✦ Apple-inspirierte Sammlung für eigene Kartenbewertungen</div>
+        <h1>Jede Karte. Jeder Zustand. Sauber dokumentiert.</h1>
+        <p class="hero-text">
+          Verwalte deine Karten mit Vorderseite, Rückseite, eigener Note, Zustand,
+          Schadensmarkierungen, Zoom und Sammlungswert.
+        </p>
+      </section>
+
+      <section class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Karten in Sammlung</div>
+          <div class="stat-value" id="totalCardsStat">0</div>
+          <div class="stat-sub">lokal gespeichert</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bewertete Karten</div>
+          <div class="stat-value" id="ratedCardsStat">0</div>
+          <div class="stat-sub">mit eigener Zustandsnote</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sammlungswert</div>
+          <div class="stat-value" id="totalValueStat">0 €</div>
+          <div class="stat-sub">basierend auf eingetragenen Werten</div>
+        </div>
+      </section>
+
+      <section class="pro-dashboard" id="proDashboard">
+        <div class="pro-card pro-blue">
+          <div class="pro-label">Teuerste Karte</div>
+          <div class="pro-value" id="topValueCard">-</div>
+          <div class="pro-sub" id="topValueCardSub">Noch keine Werte eingetragen.</div>
+        </div>
+        <div class="pro-card pro-success">
+          <div class="pro-label">Beste Note</div>
+          <div class="pro-value" id="bestGradeCard">-</div>
+          <div class="pro-sub" id="bestGradeCardSub">Noch keine Bewertung vorhanden.</div>
+        </div>
+        <div class="pro-card pro-warning">
+          <div class="pro-label">Ohne Rückseite</div>
+          <div class="pro-value" id="missingBackCount">0</div>
+          <div class="pro-sub">Karten ohne vollständige Bilddokumentation.</div>
+        </div>
+        <div class="pro-card pro-danger">
+          <div class="pro-label">Starke Schäden</div>
+          <div class="pro-value" id="highDamageCount">0</div>
+          <div class="pro-sub">Karten mit mindestens einer starken Markierung.</div>
+        </div>
+        <div class="pro-card">
+          <div class="pro-label">Pot. Gewinn/Verlust</div>
+          <div class="pro-value" id="profitDashboardValue">-</div>
+          <div class="pro-sub">Aus Einkaufspreis und aktuellem Wert/Verkaufspreis.</div>
+        </div>
+      </section>
+
+      <section class="recent-section">
+        <div class="recent-panel">
+          <div class="recent-title">Zuletzt bearbeitet</div>
+          <div class="recent-list" id="recentCardsList"></div>
+        </div>
+
+        <div class="recent-panel">
+          <div class="recent-title">To-dos</div>
+          <div class="recent-list" id="todoCardsList"></div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="glass dashboard-card">
+          <div class="section-kicker">Dashboard</div>
+          <div class="dashboard-title">Deine Sammlung auf einen Blick.</div>
+          <p class="dashboard-text">
+            Trage Karten ein, lade Vorder- und Rückseite hoch und markiere Schäden direkt im Bild.
+            In der Detailansicht kannst du Schäden stark vergrößert prüfen.
+          </p>
+          <div class="action-row">
+            <button class="primary-button" data-page="addPage" type="button">Neue Karte eintragen</button>
+            <button class="secondary-button" data-page="collectionPage" type="button">Sammlung öffnen</button>
+            <button class="secondary-button" data-page="checkPage" type="button">ID prüfen</button>
+          </div>
+        </div>
+
+        <div class="glass dashboard-card">
+          <div class="section-kicker">Hinweis</div>
+          <div class="dashboard-title">Upload funktioniert lokal.</div>
+          <p class="dashboard-text">
+            Die Bilder werden als lokale Daten im Browser gespeichert. Für den Prototyp ist das praktisch,
+            bei vielen großen Fotos solltest du regelmäßig exportieren.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div class="page" id="addPage">
+      <section id="addSection">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Eintragen</div>
+            <h2 id="formHeadline">Karte zur Sammlung hinzufügen</h2>
+          </div>
+        </div>
+
+        <div class="glass form-panel">
+          <div class="form-grid">
+            <div class="field">
+              <label for="cardId">Sammlungs-ID</label>
+              <input id="cardId" type="text" placeholder="z. B. COL-2026-0001" />
+            </div>
+            <div class="field">
+              <label for="cardName">Kartenname</label>
+              <input id="cardName" type="text" placeholder="z. B. Monkey D. Luffy" />
+            </div>
+            <div class="field">
+              <label for="cardNumber">Kartennummer</label>
+              <input id="cardNumber" type="text" placeholder="z. B. OP05-060" />
+            </div>
+            <div class="field">
+              <label for="cardSet">Set</label>
+              <input id="cardSet" type="text" placeholder="z. B. OP05 – Awakening" />
+            </div>
+
+            <div class="field">
+              <label for="cardRarity">Seltenheit</label>
+              <input id="cardRarity" type="text" placeholder="z. B. SEC / AA / SP" />
+            </div>
+            <div class="field">
+              <label for="cardLanguage">Sprache</label>
+              <select id="cardLanguage">
+                <option>English</option>
+                <option>Japanese</option>
+                <option>German</option>
+                <option>French</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cardStatus">Status</label>
+              <select id="cardStatus">
+                <option>Behalten</option>
+                <option>Verkaufen</option>
+                <option>Tauschen</option>
+                <option>Prüfen</option>
+                <option>Wishlist</option>
+                <option>Sonstige</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cardGrade">Eigene Note</label>
+              <input id="cardGrade" type="text" placeholder="z. B. 8.5" />
+            </div>
+
+            <div class="field">
+              <label for="cardCondition">Zustand</label>
+              <input id="cardCondition" type="text" placeholder="z. B. Near Mint" />
+            </div>
+            <div class="field">
+              <label for="cardStorage">Lagerort</label>
+              <input id="cardStorage" type="text" placeholder="z. B. Binder 1 / Seite 4" />
+            </div>
+            <div class="field">
+              <label for="cardValue">Marktwert</label>
+              <input id="cardValue" type="text" placeholder="z. B. 250 €" />
+            </div>
+
+            <div class="finance-panel">
+              <div class="finance-title">Wert / Verkauf</div>
+              <div class="field">
+                <label for="purchasePrice">Einkaufspreis</label>
+                <input id="purchasePrice" type="text" placeholder="z. B. 180 €" />
+              </div>
+              <div class="field">
+                <label for="purchaseDate">Gekauft am</label>
+                <input id="purchaseDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="salePrice">Verkaufspreis</label>
+                <input id="salePrice" type="text" placeholder="z. B. 275 €" />
+              </div>
+              <div class="field">
+                <label for="saleDate">Verkauft am</label>
+                <input id="saleDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="platform">Plattform / Quelle</label>
+                <input id="platform" type="text" placeholder="z. B. Cardmarket, eBay, Privat" />
+              </div>
+              <div class="field">
+                <label for="buyer">Käufer / Verkäufer</label>
+                <input id="buyer" type="text" placeholder="optional" />
+              </div>
+              <div class="field">
+                <label>Gewinn / Verlust</label>
+                <div class="profit-pill profit-neutral" id="profitPreview">-</div>
+              </div>
+            </div>
+
+            <div class="upload-grid">
+              <div class="upload-box">
+                <label for="frontFile">Vorderseite hochladen</label>
+                <input id="frontFile" type="file" accept="image/*" />
+                <div class="preview" id="frontPreview">Vorderseite</div>
+                <div class="image-tools">
+                  <button class="image-tool-button" id="rotateFrontLeftBtn" type="button">↶ Links</button>
+                  <button class="image-tool-button" id="rotateFrontRightBtn" type="button">↷ Rechts</button>
+                  <button class="image-tool-button danger-mini" id="removeFrontBtn" type="button">Entfernen</button>
+                </div>
+                <div class="hint" id="frontStatus">Kein Bild geladen.</div>
+              </div>
+              <div class="upload-box">
+                <label for="backFile">Rückseite hochladen</label>
+                <input id="backFile" type="file" accept="image/*" />
+                <div class="preview" id="backPreview">Rückseite</div>
+                <div class="image-tools">
+                  <button class="image-tool-button" id="rotateBackLeftBtn" type="button">↶ Links</button>
+                  <button class="image-tool-button" id="rotateBackRightBtn" type="button">↷ Rechts</button>
+                  <button class="image-tool-button danger-mini" id="removeBackBtn" type="button">Entfernen</button>
+                </div>
+                <div class="hint" id="backStatus">Kein Bild geladen.</div>
+              </div>
+              <div class="upload-box">
+                <label for="extraFiles">Detailbilder hochladen</label>
+                <input id="extraFiles" type="file" accept="image/*" multiple />
+                <div class="preview" id="extraPreview">Detailbilder</div>
+                <div class="hint" id="extraStatus">Keine Detailbilder geladen.</div>
+              </div>
+            </div>
+
+            <div class="field wide">
+              <label for="tagInput">Tags / Kategorien</label>
+              <div class="tag-input-row">
+                <input id="tagInput" type="text" placeholder="z. B. Manga, Alt Art, PSA-Kandidat" />
+                <button class="tiny-button" id="addTagBtn" type="button">Tag hinzufügen</button>
+              </div>
+              <div class="hint">Enter oder Button nutzen. Tags helfen beim Filtern und Export.</div>
+              <div class="tag-chip-list" id="formTagList"></div>
+            </div>
+
+            <div class="field wide">
+              <label for="cardNotes">Notizen</label>
+              <textarea id="cardNotes" placeholder="z. B. kleine Stelle unten rechts, sonst sehr sauber."></textarea>
+            </div>
+
+            <div class="marker-panel">
+              <div class="marker-toolbar">
+                <div class="side-switch">
+                  <button class="side-button active" id="markFrontBtn" type="button">Vorderseite markieren</button>
+                  <button class="side-button" id="markBackBtn" type="button">Rückseite markieren</button>
+                </div>
+                <div class="side-switch">
+                  <button class="fine-button" id="fineModeBtn" type="button">Feinmarkierung / Zoom</button>
+                  <button class="secondary-button" id="clearMarkersBtn" type="button">Aktuelle Seite leeren</button>
+                </div>
+              </div>
+
+              <div class="marker-layout">
+                <div>
+                  <div class="marker-card" id="markerCard">Bild hochladen</div>
+                  <div class="fine-area" id="fineArea">
+                    <div class="hint" style="margin-bottom: 10px;">1. Grob im normalen Kartenbild auf den Schaden klicken. 2. Danach im vergrößerten Ausschnitt exakt markieren.</div>
+                    <div class="fine-stage" id="fineStage"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="hint" style="margin-bottom: 12px;">
+                    Ohne Feinmarkierung: direkt auf die Karte klicken. Mit Feinmarkierung: erst grob im normalen Bild anklicken, dann im vergrößerten Ausschnitt exakt markieren.
+                  </div>
+                  <div class="marker-list" id="markerList"></div>
+                  <div class="hint" id="markerEmpty">Noch keine Schäden markiert.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <div class="hint" id="editHint">Bilder werden beim Upload in ein einheitliches Kartenformat gebracht. Drehst du ein Bild nachträglich, werden die Markierungen dieser Seite zurückgesetzt. Die Bildgröße bleibt dabei erhalten.</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="secondary-button" id="cancelEditBtn" type="button" style="display:none;">Bearbeiten abbrechen</button>
+              <button class="primary-button" id="saveCardBtn" type="button">Karte speichern</button>
+            </div>
+          </div>
+          <div class="tool-message" id="toolMessage"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="page" id="collectionPage">
+      <section>
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Sammlung</div>
+            <h2>Meine Karten</h2>
+            <div class="keyboard-hint"><span class="kbd">/</span> Suche <span class="kbd">N</span> Neue Karte <span class="kbd">A</span> Auswahl</div>
+          </div>
+          <div class="collection-header-actions">
+            <button class="soft-button" id="openTrashBtn" type="button">Papierkorb</button>
+            <button class="soft-button" id="toggleSelectModeBtn" type="button">Auswahlmodus</button>
+            <button class="soft-button" id="toggleFiltersBtn" type="button">Filter ausblenden</button>
+            <button class="soft-button" id="resetFiltersBtn" type="button">Filter zurücksetzen</button>
+            <div class="hint"><span id="resultCount">0</span> Ergebnisse</div>
+          </div>
+        </div>
+
+        <div class="quick-filter-bar" id="quickFilterBar">
+          <button class="quick-filter-chip" type="button" data-quick-filter="all">Alle</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="favorites">Favoriten</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="missing-back">Ohne Rückseite</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="damaged">Mit Schäden</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="high-damage">Starke Schäden</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="grade9">Note 9+</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="for-sale">Verkaufen</button>
+          <button class="quick-filter-chip" type="button" data-quick-filter="incomplete">Unvollständig</button>
+        </div>
+
+        <div class="tag-cloud" id="tagCloud"></div>
+
+        <div class="analysis-strip">
+          <div class="analysis-card">
+            <div class="analysis-label">Durchschnittliche Note</div>
+            <div class="analysis-value" id="averageGradeStat">-</div>
+            <div class="analysis-sub">Basierend auf gefilterten Karten.</div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-label">Ø Dokumentation</div>
+            <div class="analysis-value" id="averageDocStat">-</div>
+            <div class="analysis-sub">Vollständigkeit der gefilterten Karten.</div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-label">Karten mit Wert</div>
+            <div class="analysis-value" id="valuedCardsStat">0</div>
+            <div class="analysis-sub">Anzahl Karten mit eingetragenem Marktwert.</div>
+          </div>
+        </div>
+
+        <div class="summary-strip">
+          <div class="summary-chip">
+            <div class="summary-label">Gefilterte Karten</div>
+            <div class="summary-value" id="filteredCount">0</div>
+          </div>
+          <div class="summary-chip">
+            <div class="summary-label">Gefilterter Wert</div>
+            <div class="summary-value" id="filteredValue">0 €</div>
+          </div>
+          <div class="summary-chip">
+            <div class="summary-label">Favoriten</div>
+            <div class="summary-value" id="favoriteCount">0</div>
+          </div>
+          <div class="summary-chip">
+            <div class="summary-label">Mit Markierungen</div>
+            <div class="summary-value" id="markedCount">0</div>
+          </div>
+        </div>
+
+        <div class="collection-controls">
+          <div class="control-panel">
+            <label for="searchInput">Schnellsuche</label>
+            <input id="searchInput" type="text" placeholder="Name, Set, ID, Notiz ..." />
+          </div>
+          <div class="control-panel">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="">Alle Status</option>
+              <option value="Behalten">Behalten</option>
+              <option value="Verkaufen">Verkaufen</option>
+              <option value="Tauschen">Tauschen</option>
+              <option value="Prüfen">Prüfen</option>
+              <option value="Wishlist">Wishlist</option>
+              <option value="Sonstige">Sonstige</option>
+            </select>
+          </div>
+          <div class="control-panel">
+            <label for="conditionFilter">Zustand</label>
+            <select id="conditionFilter">
+              <option value="">Alle Zustände</option>
+              <option>Gem Mint</option>
+              <option>Mint</option>
+              <option>Near Mint</option>
+              <option>Excellent</option>
+              <option>Light Played</option>
+              <option>Played</option>
+              <option>Damaged</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toolbar-extra">
+          <div class="control-panel">
+            <label for="sortSelect">Sortieren</label>
+            <select id="sortSelect">
+              <option value="newest">Neueste zuerst</option>
+              <option value="name">Name A–Z</option>
+              <option value="value-desc">Wert absteigend</option>
+              <option value="value-asc">Wert aufsteigend</option>
+              <option value="grade-desc">Note absteigend</option>
+              <option value="grade-asc">Note aufsteigend</option>
+              <option value="doc-desc">Dokumentation absteigend</option>
+              <option value="doc-asc">Dokumentation aufsteigend</option>
+              <option value="profit-desc">Gewinn absteigend</option>
+              <option value="profit-asc">Gewinn aufsteigend</option>
+              <option value="updated-desc">Zuletzt aktualisiert</option>
+            </select>
+          </div>
+          <div class="control-panel">
+            <label for="favoriteFilter">Favoriten</label>
+            <select id="favoriteFilter">
+              <option value="">Alle Karten</option>
+              <option value="favorites">Nur Favoriten</option>
+            </select>
+          </div>
+          <div class="view-toggle">
+            <button class="view-button active" id="listViewBtn" type="button">Listenansicht</button>
+            <button class="view-button" id="gridViewBtn" type="button">Galerieansicht</button>
+            <button class="view-density-toggle" id="compactViewBtn" type="button">Kompakt</button>
+            <button class="secondary-button" id="exportBtn" type="button">Backup</button>
+            <button class="secondary-button" id="csvExportBtn" type="button">CSV für Excel</button>
+            <button class="secondary-button" id="importBtn" type="button">Import</button>
+            <input id="importFile" type="file" accept="application/json,.json" style="display:none;" />
+          </div>
+        </div>
+
+        <div class="bulk-toolbar" id="bulkToolbar">
+          <div><strong id="bulkSelectedCount">0 ausgewählt</strong></div>
+          <div class="bulk-actions">
+            <button class="bulk-button" id="bulkSelectAllBtn" type="button">Alle sichtbaren wählen</button>
+            <button class="bulk-button" id="bulkClearSelectionBtn" type="button">Auswahl aufheben</button>
+            <button class="bulk-button" id="bulkFavoriteBtn" type="button">Favorisieren</button>
+            <button class="bulk-button" id="bulkSellBtn" type="button">Status: Verkaufen</button>
+            <button class="bulk-button" id="bulkKeepBtn" type="button">Status: Behalten</button>
+            <button class="bulk-button danger" id="bulkDeleteBtn" type="button">Löschen</button>
+          </div>
+        </div>
+
+        <div class="cards" id="cardsList"></div>
+        <div class="empty" id="emptyState">
+          <strong>Keine Karte gefunden.</strong><br>
+          Passe die Filter an oder lege eine neue Karte an.
+          <div class="empty-actions">
+            <button class="primary-button" data-page="addPage" type="button">Neue Karte eintragen</button>
+            <button class="secondary-button" id="emptyResetFiltersBtn" type="button">Filter zurücksetzen</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="page" id="checkPage">
+      <section>
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">ID prüfen</div>
+            <h2>Sammlungs-ID prüfen</h2>
+          </div>
+        </div>
+
+        <div class="glass form-panel">
+          <div class="form-actions">
+            <input id="checkInput" type="text" placeholder="z. B. COL-2026-0001" />
+            <button class="primary-button" id="checkBtn" type="button">Prüfen</button>
+          </div>
+          <div class="tool-message" id="checkResult"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="detailBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-kicker" id="detailKicker">Sammlungs-ID</div>
+          <div class="modal-title" id="detailTitle">Kartendetails</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="secondary-button" id="detailEditBtn" type="button">Bearbeiten</button>
+          <button class="close-button" id="closeDetailBtn" type="button">×</button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <div class="main-card-image" id="detailMainImage">CARD</div>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="image-action-row">
+            <button class="image-action-button" id="showFrontImageBtn" type="button">Vorderseite</button>
+            <button class="image-action-button" id="showBackImageBtn" type="button">Rückseite</button>
+            <button class="image-action-button" id="fullscreenImageBtn" type="button">Bild groß anzeigen</button>
+          </div>
+        </div>
+        <div>
+          <div class="info-grid" id="detailInfo"></div>
+          <div class="note-box" id="detailTagsBox" style="display:none;">
+            <div class="box-title">Tags</div>
+            <div class="tag-chip-list" id="detailTagsList"></div>
+          </div>
+
+          <div class="finance-summary-box" id="detailFinanceBox">
+            <div class="box-title">Wert / Trading</div>
+            <div class="finance-summary-grid" id="detailFinanceGrid"></div>
+          </div>
+          <div class="verification-box">
+            <div class="box-title">✓ Karte in deiner Sammlung</div>
+            <div class="box-text" id="detailVerification"></div>
+          </div>
+
+          <div class="note-box" id="detailCompletionBox">
+            <div class="box-title">Dokumentations-Check</div>
+            <div class="box-text" id="detailCompletionScore"></div>
+            <div class="completion-list" id="detailCompletionList"></div>
+          </div>
+          <div class="note-box" id="detailNoteBox" style="display:none;">
+            <div class="box-title">Notizen / eigene Einschätzung</div>
+            <div class="box-text" id="detailNotes"></div>
+          </div>
+          <div class="damage-section">
+            <div class="damage-head">
+              <div>
+                <div class="box-title">Schadensgrafik</div>
+                <div class="hint">Klicke auf einen Schadenspunkt für die Zoomansicht.</div>
+              </div>
+              <div class="side-switch">
+                <button class="side-button active" id="damageFrontBtn" type="button">Vorderseite</button>
+                <button class="side-button" id="damageBackBtn" type="button">Rückseite</button>
+              </div>
+            </div>
+            <div class="damage-layout">
+              <div class="damage-card" id="damageCard">CARD</div>
+              <div>
+                <div class="damage-list" id="damageList"></div>
+                <div class="hint" id="damageEmpty">Keine Schäden auf dieser Seite eingetragen.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="zoom-backdrop" id="damageEditBackdrop">
+    <div class="damage-edit-modal">
+      <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;">
+        <div>
+          <div class="modal-kicker" id="damageEditKicker">Schaden bearbeiten</div>
+          <div class="zoom-title">Markierung</div>
+          <div class="hint" style="margin-top:8px;">Beschreibung, Kategorie und Schweregrad anpassen.</div>
+        </div>
+        <button class="close-button" id="closeDamageEditBtn" type="button">×</button>
+      </div>
+      <div class="damage-edit-grid">
+        <div class="field"><label for="damageEditLabel">Beschreibung</label><input id="damageEditLabel" type="text" /></div>
+        <div class="field"><label for="damageEditCategory">Kategorie</label><select id="damageEditCategory"><option>Whitening</option><option>Kratzer</option><option>Druckstelle</option><option>Ecke</option><option>Kante</option><option>Oberfläche</option><option>Sonstiges</option></select></div>
+        <div class="field"><label for="damageEditSeverity">Schweregrad</label><select id="damageEditSeverity"><option value="low">leicht</option><option value="medium">mittel</option><option value="high">stark</option></select></div>
+        <div class="field">
+          <label for="damageEditCloseupFile">Close-up Foto zum Schaden</label>
+          <input id="damageEditCloseupFile" type="file" accept="image/*" />
+          <div class="damage-closeup-preview" id="damageEditCloseupPreview">Kein Close-up hinterlegt</div>
+          <div class="hint">Optional: Nahaufnahme des markierten Schadens hochladen.</div>
+        </div>
+      </div>
+      <div class="damage-edit-actions">
+        <button class="danger-button" id="deleteDamageEditBtn" type="button">Markierung löschen</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button class="secondary-button" id="cancelDamageEditBtn" type="button">Abbrechen</button><button class="primary-button" id="saveDamageEditBtn" type="button">Speichern</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="zoom-backdrop" id="zoomBackdrop">
+    <div class="zoom-modal">
+      <div class="zoom-header">
+        <div>
+          <div class="modal-kicker" id="zoomKicker">Schaden</div>
+          <div class="zoom-title" id="zoomTitle">Zoom</div>
+          <div class="hint" id="zoomDesc" style="margin-top:8px;">Vergrößerter Ausschnitt.</div>
+        </div>
+        <button class="close-button" id="closeZoomBtn" type="button">×</button>
+      </div>
+      <div class="zoom-body">
+        <div class="zoom-stage" id="zoomStage"></div>
+        <div class="hint" id="zoomCropInfo" style="margin-top:10px;">Der Ausschnitt wird aus dem Originalbild berechnet.</div>
+        <div class="hint" style="margin-top:12px;">Fester Ausschnitt-Zoom auf die markierte Stelle.</div>
+      </div>
+    </div>
+  </div>
+  <div class="trash-backdrop" id="trashBackdrop">
+    <div class="trash-modal">
+      <div class="trash-header">
+        <div>
+          <div class="trash-title">Papierkorb</div>
+          <div class="trash-text">Gelöschte Karten können wiederhergestellt oder endgültig entfernt werden.</div>
+        </div>
+        <button class="close-button" id="closeTrashBtn" type="button">×</button>
+      </div>
+      <div class="trash-list" id="trashList"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px; flex-wrap:wrap;">
+        <button class="secondary-button" id="restoreAllTrashBtn" type="button">Alle wiederherstellen</button>
+        <button class="danger-button" id="emptyTrashBtn" type="button">Papierkorb leeren</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="import-choice-backdrop" id="importChoiceBackdrop">
+    <div class="import-choice-modal">
+      <div class="import-choice-title">Import prüfen</div>
+      <div class="import-choice-text" id="importChoiceText">Wie sollen die importierten Karten übernommen werden?</div>
+      <div class="import-choice-stats">
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Import</div>
+          <div class="import-choice-value" id="importCountStat">0</div>
+        </div>
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Neue IDs</div>
+          <div class="import-choice-value" id="importNewStat">0</div>
+        </div>
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Duplikate</div>
+          <div class="import-choice-value" id="importDuplicateStat">0</div>
+        </div>
+      </div>
+      <div class="import-choice-actions">
+        <button class="import-action-button primary-choice" id="importMergeBtn" type="button">
+          <strong>Zusammenführen</strong>
+          <span>Neue Karten hinzufügen, vorhandene IDs aktualisieren.</span>
+        </button>
+        <button class="import-action-button" id="importOnlyNewBtn" type="button">
+          <strong>Nur neue Karten hinzufügen</strong>
+          <span>Karten mit bereits vorhandener ID werden übersprungen.</span>
+        </button>
+        <button class="import-action-button danger" id="importReplaceBtn" type="button">
+          <strong>Sammlung ersetzen</strong>
+          <span>Aktuelle Sammlung vollständig durch Import ersetzen.</span>
+        </button>
+        <button class="import-action-button" id="importCancelBtn" type="button">
+          <strong>Abbrechen</strong>
+          <span>Import nicht durchführen.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page-backdrop" id="cardReportBackdrop">
+    <div class="report-page" id="cardReportPage">
+      <div class="report-page-header">
+        <div>
+          <div class="report-page-title" id="cardReportTitle">Kartenreport</div>
+          <div class="report-page-sub" id="cardReportSub">Sammlungs- und Bewertungsreport</div>
+        </div>
+        <div class="report-page-actions">
+          <button class="secondary-button" id="printCardReportBtn" type="button">Drucken</button>
+          <button class="close-button" id="closeCardReportBtn" type="button">×</button>
+        </div>
+      </div>
+      <div class="report-page-body" id="cardReportBody"></div>
+    </div>
+  </div>
+
+  <div class="fullscreen-image-backdrop" id="fullscreenImageBackdrop">
+    <div class="fullscreen-image-box">
+      <button class="fullscreen-close" id="fullscreenCloseBtn" type="button">×</button>
+      <img id="fullscreenImage" src="" alt="Karte groß" />
+    </div>
+  </div>
+
+  <button class="floating-add" id="floatingAddBtn" type="button"><span>＋</span><span>Neue Karte</span></button>
+
+  <script>
+    const TRASH_KEY = "cardVaultTrash";
+    window.addEventListener("error", function(event) {
+      const box = document.getElementById("appErrorBox");
+      if (box) {
+        box.style.display = "block";
+        box.textContent = "Fehler: " + event.message;
+      }
+    });
+
+    const STORAGE_KEY = "cardVaultStableV1";
+
+    let cards = loadCards();
+    let trashCards = loadTrash();
+    let editingId = null;
+    let currentMarkerSide = "front";
+    let fineMode = false;
+    let fineCenter = { x: 50, y: 50 };
+    let fineCropReady = false;
+    let fineCrop = null;
+    let frontImage = "";
+    let backImage = "";
+    let extraImages = [];
+    let currentDetailCard = null;
+    let currentDamageSide = "front";
+    let currentZoom = { card: null, side: "front", point: null, level: 800 };
+    let activeQuickFilter = "all";
+    let formTags = [];
+    let activeTagFilter = "";
+    let currentDetailImageIndex = 0;
+    let selectionMode = false;
+    let selectedCardIds = new Set();
+    let lastRenderedCardIds = [];
+    let compactView = localStorage.getItem("cardVaultCompactView") === "true";
+    let pendingImportCards = [];
+    let editingDamage = null;
+    let damageEditCloseupData = "";
+    let draggingMarker = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    function demoCards() {
+      return [
+        {
+          id: "COL-2026-0001",
+          name: "Monkey D. Luffy",
+          number: "OP05-060",
+          set: "OP05 – Awakening of the New Era",
+          rarity: "SEC",
+          language: "Japanese",
+          status: "Behalten",
+          grade: "8.5",
+          condition: "Near Mint",
+          storage: "Binder 1 / Seite 4",
+          value: "320 €",
+          notes: "Demo-Karte. Lade eigene Bilder hoch, um die Schadensfunktion zu testen.",
+          images: [],
+          damageFront: [{ x: 14, y: 10, label: "Whitening oben links" }],
+          damageBack: [],
+          favorite: true,
+          createdAt: "2026-01-10T10:00:00.000Z"
+        }
+      ];
+    }
+
+    function loadCards() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : demoCards();
+      } catch {
+        return demoCards();
+      }
+    }
+
+    function loadTrash() {
+      try {
+        return JSON.parse(localStorage.getItem("cardVaultTrash") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTrash() {
+      localStorage.setItem("cardVaultTrash", JSON.stringify(trashCards));
+      updateTrashButton();
+    }
+
+    function updateTrashButton() {
+      const btn = $("openTrashBtn");
+      if (!btn) return;
+      btn.textContent = trashCards.length ? "Papierkorb (" + trashCards.length + ")" : "Papierkorb";
+    }
+
+    function moveCardToTrash(card, reason = "gelöscht") {
+      const deleted = JSON.parse(JSON.stringify(card));
+      deleted.deletedAt = new Date().toISOString();
+      deleted.deleteReason = reason;
+      trashCards.unshift(deleted);
+      saveTrash();
+    }
+
+    function restoreTrashCard(id) {
+      const index = trashCards.findIndex(card => card.id === id);
+      if (index < 0) return;
+
+      const restored = trashCards.splice(index, 1)[0];
+      delete restored.deletedAt;
+      delete restored.deleteReason;
+
+      if (cards.some(card => card.id === restored.id)) {
+        restored.id = nextDuplicateId(restored.id);
+      }
+
+      restored.updatedAt = new Date().toISOString();
+      cards.unshift(restored);
+      saveCards();
+      saveTrash();
+      renderStats();
+      renderCards();
+      renderTrash();
+    }
+
+    function deleteTrashCardForever(id) {
+      if (!confirm("Diese Karte endgültig löschen?")) return;
+      trashCards = trashCards.filter(card => card.id !== id);
+      saveTrash();
+      renderTrash();
+    }
+
+    function restoreAllTrash() {
+      if (!trashCards.length) return;
+
+      const restored = trashCards.map(card => {
+        const copy = JSON.parse(JSON.stringify(card));
+        delete copy.deletedAt;
+        delete copy.deleteReason;
+        if (cards.some(existing => existing.id === copy.id)) {
+          copy.id = nextDuplicateId(copy.id);
+        }
+        copy.updatedAt = new Date().toISOString();
+        return copy;
+      });
+
+      cards = restored.concat(cards);
+      trashCards = [];
+      saveCards();
+      saveTrash();
+      renderStats();
+      renderCards();
+      renderTrash();
+    }
+
+    function emptyTrash() {
+      if (!trashCards.length) return;
+      if (!confirm("Papierkorb endgültig leeren?")) return;
+      trashCards = [];
+      saveTrash();
+      renderTrash();
+    }
+
+    function renderTrash() {
+      const list = $("trashList");
+      if (!list) return;
+
+      if (!trashCards.length) {
+        list.innerHTML = '<div class="trash-empty">Der Papierkorb ist leer.</div>';
+        return;
+      }
+
+      list.innerHTML = "";
+      trashCards.forEach(card => {
+        const item = document.createElement("div");
+        item.className = "trash-item";
+        const image = (card.images || [])[0];
+
+        item.innerHTML = `
+          <div class="trash-thumb">${image ? `<img src="${image}" alt="${escapeHtml(card.name || "Karte")}">` : "CARD"}</div>
+          <div>
+            <div class="trash-name">${escapeHtml(card.name || card.id)}</div>
+            <div class="trash-meta">${escapeHtml(card.id)} · gelöscht: ${card.deletedAt ? shortDate(card.deletedAt) : "-"}</div>
+          </div>
+          <div class="trash-actions">
+            <button class="secondary-button" type="button" data-restore-trash="${escapeHtml(card.id)}">Wiederherstellen</button>
+            <button class="danger-button" type="button" data-delete-trash="${escapeHtml(card.id)}">Endgültig löschen</button>
+          </div>
+        `;
+
+        list.appendChild(item);
+      });
+
+      list.querySelectorAll("[data-restore-trash]").forEach(button => {
+        button.addEventListener("click", () => restoreTrashCard(button.dataset.restoreTrash));
+      });
+
+      list.querySelectorAll("[data-delete-trash]").forEach(button => {
+        button.addEventListener("click", () => deleteTrashCardForever(button.dataset.deleteTrash));
+      });
+    }
+
+    function openTrash() {
+      renderTrash();
+      $("trashBackdrop").classList.add("active");
+    }
+
+    function closeTrash() {
+      $("trashBackdrop").classList.remove("active");
+    }
+
+    function saveCards() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      localStorage.setItem("cardVaultLastChange", new Date().toISOString());
+      updateTrashButton();
+      updateBackupReminder();
+    }
+
+    function daysBetween(dateA, dateB) {
+      const a = new Date(dateA).getTime();
+      const b = new Date(dateB).getTime();
+      if (Number.isNaN(a) || Number.isNaN(b)) return 999;
+      return Math.floor(Math.abs(b - a) / (1000 * 60 * 60 * 24));
+    }
+
+    function updateBackupReminder() {
+      const box = $("backupReminder");
+      const text = $("backupReminderText");
+      if (!box || !text) return;
+
+      const lastExport = localStorage.getItem("cardVaultLastExport");
+      const lastDismiss = localStorage.getItem("cardVaultBackupDismissed");
+      const lastChange = localStorage.getItem("cardVaultLastChange");
+      const now = new Date().toISOString();
+
+      const changedCards = cards.length > 0;
+      const daysSinceExport = lastExport ? daysBetween(lastExport, now) : 999;
+      const dismissedRecently = lastDismiss && daysBetween(lastDismiss, now) < 1;
+
+      if (!changedCards || dismissedRecently || daysSinceExport < 7) {
+        box.classList.remove("active");
+        return;
+      }
+
+      box.classList.add("active");
+      text.textContent = lastExport
+        ? "Backup empfohlen: Dein letzter Export ist ca. " + daysSinceExport + " Tage her."
+        : "Backup empfohlen: Du hast noch keinen Export dieser Sammlung erstellt.";
+    }
+
+    function markBackupExported() {
+      localStorage.setItem("cardVaultLastExport", new Date().toISOString());
+      localStorage.removeItem("cardVaultBackupDismissed");
+      updateBackupReminder();
+    }
+
+    function dismissBackupReminder() {
+      localStorage.setItem("cardVaultBackupDismissed", new Date().toISOString());
+      updateBackupReminder();
+    }
+
+    function applyTheme(theme) {
+      const dark = theme === "dark";
+      document.body.classList.toggle("dark", dark);
+      localStorage.setItem("cardVaultTheme", theme);
+
+      const btn = $("themeToggleBtn");
+      if (btn) btn.textContent = dark ? "☀️ Hell" : "🌙 Dunkel";
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.classList.contains("dark");
+      applyTheme(isDark ? "light" : "dark");
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem("cardVaultTheme") || "light";
+      applyTheme(saved);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll(".page").forEach(page => page.classList.toggle("active", page.id === pageId));
+      document.querySelectorAll(".nav-link").forEach(link => link.classList.toggle("active", link.dataset.page === pageId));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (pageId === "collectionPage") renderCards();
+      if (pageId === "overviewPage") renderStats();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function parseMoney(value) {
+      const n = parseFloat(String(value || "0").replace(",", ".").replace(/[^\d.]/g, ""));
+      return Number.isNaN(n) ? 0 : n;
+    }
+
+    function parseGrade(value) {
+      const n = parseFloat(String(value || "0").replace(",", ".").replace(/[^\d.]/g, ""));
+      return Number.isNaN(n) ? 0 : n;
+    }
+
+    function formatEuro(value) {
+      return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
+    }
+
+    function showMessage(text, type = "success") {
+      const box = $("toolMessage");
+      if (!box) return;
+      box.className = "tool-message " + type;
+      box.textContent = text;
+    }
+
+    function showToast(message) {
+      // Fallback für kurze Hinweise, damit Buttons nicht abbrechen.
+      const box = $("toolMessage");
+      if (box) {
+        box.className = "tool-message success";
+        box.textContent = message;
+      }
+    }
+
+
+    function updateSmartGradePreview() {
+      // Diese Datei enthält keine aktive Smart-Grade-Box.
+      // Die Funktion bleibt als sichere Brücke erhalten, damit Bearbeiten/Speichern nicht abbrechen.
+    }
+
+    function renderSmartGradeBox() {
+      // Sichere Brücke für ältere Detailansicht-Aufrufe.
+    }
+
+    function calculateSmartGradeForCard() {
+      return { grade: "", breakdown: [] };
+    }
+
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const original = String(reader.result || "");
+          const img = new Image();
+
+          img.onload = () => {
+            // WICHTIG:
+            // Alle Bilder werden auf exakt dasselbe Kartenformat gebracht.
+            // Dadurch sind Markierung, Detailansicht und Zoom immer deckungsgleich.
+            const canvas = document.createElement("canvas");
+            canvas.width = 630;
+            canvas.height = 880;
+
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+            const drawW = img.naturalWidth * scale;
+            const drawH = img.naturalHeight * scale;
+            const dx = (canvas.width - drawW) / 2;
+            const dy = (canvas.height - drawH) / 2;
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+            ctx.drawImage(img, dx, dy, drawW, drawH);
+
+            resolve(canvas.toDataURL("image/jpeg", 0.9));
+          };
+
+          img.onerror = () => resolve(original);
+          img.src = original;
+        };
+
+        reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function rotateImageData(dataUrl, direction) {
+      return new Promise((resolve, reject) => {
+        if (!dataUrl) {
+          resolve("");
+          return;
+        }
+
+        const img = new Image();
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 630;
+          canvas.height = 880;
+          const ctx = canvas.getContext("2d");
+
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          /*
+            Das Bild ist bereits auf 630x880 normalisiert.
+            Beim Drehen wird es direkt auf die volle Kartenfläche gezeichnet,
+            damit es nicht bei jeder Rotation kleiner wird.
+          */
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(direction === "left" ? -Math.PI / 2 : Math.PI / 2);
+          ctx.drawImage(img, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
+          ctx.restore();
+
+          resolve(canvas.toDataURL("image/jpeg", 0.9));
+        };
+
+        img.onerror = () => reject(new Error("Bild konnte nicht gedreht werden."));
+        img.src = dataUrl;
+      });
+    }
+
+    async function rotateFront(direction) {
+      if (!frontImage) {
+        showMessage("Bitte zuerst die Vorderseite hochladen.", "error");
+        return;
+      }
+      frontImage = await rotateImageData(frontImage, direction);
+      markersFront = [];
+      fineCropReady = false;
+      fineCrop = null;
+      refreshPreviews();
+      showMessage("Vorderseite wurde gedreht. Markierungen wurden zurückgesetzt.", "success");
+    }
+
+    async function rotateBack(direction) {
+      if (!backImage) {
+        showMessage("Bitte zuerst die Rückseite hochladen.", "error");
+        return;
+      }
+      backImage = await rotateImageData(backImage, direction);
+      markersBack = [];
+      fineCropReady = false;
+      fineCrop = null;
+      refreshPreviews();
+      showMessage("Rückseite wurde gedreht. Markierungen wurden zurückgesetzt.", "success");
+    }
+
+    function removeFrontImage() {
+      if (!frontImage) {
+        showMessage("Es ist keine Vorderseite vorhanden.", "error");
+        return;
+      }
+
+      if (!confirm("Vorderseite entfernen? Markierungen der Vorderseite werden ebenfalls gelöscht.")) return;
+
+      frontImage = "";
+      markersFront = [];
+      fineCropReady = false;
+      fineCrop = null;
+      $("frontFile").value = "";
+      refreshPreviews();
+      showMessage("Vorderseite wurde entfernt.", "success");
+    }
+
+    function removeBackImage() {
+      if (!backImage) {
+        showMessage("Es ist keine Rückseite vorhanden.", "error");
+        return;
+      }
+
+      if (!confirm("Rückseite entfernen? Markierungen der Rückseite werden ebenfalls gelöscht.")) return;
+
+      backImage = "";
+      markersBack = [];
+      fineCropReady = false;
+      fineCrop = null;
+      $("backFile").value = "";
+      refreshPreviews();
+      showMessage("Rückseite wurde entfernt.", "success");
+    }
+
+    function setImagePreview(el, source, label) {
+      if (!el) return;
+      if (!source) {
+        el.textContent = label;
+        return;
+      }
+      el.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = source;
+      img.alt = label;
+      img.onerror = () => { el.textContent = "Bild konnte nicht angezeigt werden"; };
+      el.appendChild(img);
+    }
+
+    function setCloseupPreview(element, source) {
+      if (!element) return;
+      if (!source) {
+        element.textContent = "Kein Close-up hinterlegt";
+        return;
+      }
+      element.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = source;
+      img.alt = "Close-up";
+      img.onerror = () => { element.textContent = "Close-up konnte nicht angezeigt werden"; };
+      element.appendChild(img);
+    }
+
+    function refreshPreviews() {
+      setImagePreview($("frontPreview"), frontImage, "Vorderseite");
+      setImagePreview($("backPreview"), backImage, "Rückseite");
+      setImagePreview($("extraPreview"), extraImages[0] || "", "Detailbilder");
+      $("frontStatus").textContent = frontImage ? "Vorderseite geladen." : "Kein Bild geladen.";
+      $("backStatus").textContent = backImage ? "Rückseite geladen." : "Kein Bild geladen.";
+      $("extraStatus").textContent = extraImages.length ? extraImages.length + " Detailbild(er) geladen." : "Keine Detailbilder geladen.";
+      const debug = $("coordinateDebug");
+      if (debug) {
+        debug.textContent = "Letzte Markierung gespeichert:\nSeite: " + (currentMarkerSide === "front" ? "Vorderseite" : "Rückseite") + "\nProzent: " + point.x.toFixed(3) + " / " + point.y.toFixed(3) + "\nPixelbasis: " + point.px + " / " + point.py + "\nHinweis: Die spätere Ansicht verwendet genau diese Pixelbasis.";
+      }
+
+      renderMarkerEditor();
+      updateSmartGradePreview();
+    }
+
+    async function handleFrontUpload() {
+      const file = $("frontFile").files[0];
+      if (!file) return;
+      setImagePreview($("frontPreview"), URL.createObjectURL(file), "Vorderseite");
+      $("frontStatus").textContent = "Vorderseite wird geladen ...";
+      frontImage = await readFile(file);
+      refreshPreviews();
+      showMessage("Vorderseite wurde geladen und auf Kartenformat normalisiert.");
+    }
+
+    async function handleBackUpload() {
+      const file = $("backFile").files[0];
+      if (!file) return;
+      setImagePreview($("backPreview"), URL.createObjectURL(file), "Rückseite");
+      $("backStatus").textContent = "Rückseite wird geladen ...";
+      backImage = await readFile(file);
+      refreshPreviews();
+      showMessage("Rückseite wurde geladen und auf Kartenformat normalisiert.");
+    }
+
+    async function handleExtraUpload() {
+      const files = Array.from($("extraFiles").files || []);
+      if (!files.length) return;
+      $("extraStatus").textContent = "Detailbilder werden geladen ...";
+      for (const file of files) {
+        extraImages.push(await readFile(file));
+      }
+      refreshPreviews();
+      showMessage(files.length + " Detailbild(er) wurden geladen.");
+    }
+
+    function currentMarkerImage() {
+      return currentMarkerSide === "front" ? frontImage : backImage;
+    }
+
+    function currentMarkers() {
+      return currentMarkerSide === "front" ? markersFront : markersBack;
+    }
+
+    let markersFront = [];
+    let markersBack = [];
+
+    function startDragMarker(event, index) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      draggingMarker = {
+        side: currentMarkerSide,
+        index
+      };
+
+      document.body.style.userSelect = "none";
+    }
+
+    function moveDragMarker(event) {
+      if (!draggingMarker) return;
+
+      const card = $("markerCard");
+      const pos = markerPositionFromEvent(event, card);
+      const list = getMarkerArray(draggingMarker.side);
+      const point = list[draggingMarker.index];
+
+      if (!point) return;
+
+      point.x = Number(pos.x.toFixed(3));
+      point.y = Number(pos.y.toFixed(3));
+      point.px = Math.round((pos.x / 100) * 630);
+      point.py = Math.round((pos.y / 100) * 880);
+
+      renderMarkerEditor();
+      updateSmartGradePreview();
+
+      const debug = $("coordinateDebug");
+      if (debug) {
+        debug.textContent = "Markierung verschoben:\nSeite: " + (draggingMarker.side === "front" ? "Vorderseite" : "Rückseite") + "\nProzent: " + point.x.toFixed(3) + " / " + point.y.toFixed(3) + "\nPixelbasis: " + point.px + " / " + point.py;
+      }
+    }
+
+    function endDragMarker() {
+      if (!draggingMarker) return;
+
+      draggingMarker = null;
+      document.body.style.userSelect = "";
+      renderMarkerEditor();
+    }
+
+    function renderMarkerEditor() {
+      const card = $("markerCard");
+      if (!card) return;
+      const img = currentMarkerImage();
+      const points = currentMarkers();
+
+      $("markFrontBtn").classList.toggle("active", currentMarkerSide === "front");
+      $("markBackBtn").classList.toggle("active", currentMarkerSide === "back");
+      $("fineModeBtn").classList.toggle("active", fineMode);
+      $("fineArea").classList.toggle("active", fineMode);
+
+      setImagePreview(card, img, currentMarkerSide === "front" ? "Vorderseite hochladen" : "Rückseite hochladen");
+
+      points.forEach((point, index) => {
+        const dot = document.createElement("div");
+        dot.className = "marker-dot draggable";
+        dot.textContent = index + 1;
+        positionDotByPoint(dot, point);
+        dot.addEventListener("mousedown", event => startDragMarker(event, index));
+        dot.addEventListener("touchstart", event => {
+          if (event.touches && event.touches.length) startDragMarker(event.touches[0], index);
+        }, { passive: false });
+        card.appendChild(dot);
+      });
+
+      if (fineMode && fineCropReady) {
+        const rough = document.createElement("div");
+        rough.className = "rough-dot";
+        positionDotByPoint(rough, fineCenter);
+        card.appendChild(rough);
+      }
+
+      const list = $("markerList");
+      list.innerHTML = "";
+      $("markerEmpty").style.display = points.length ? "none" : "block";
+
+      points.forEach((point, index) => {
+        const item = document.createElement("div");
+        item.className = "marker-item";
+        const p = normalizePoint(point);
+        item.innerHTML = `
+          <div class="marker-item-main">
+            <span>${index + 1}. ${escapeHtml(point.label)}</span>
+            <div class="damage-meta">
+              <span class="damage-badge">${escapeHtml(damageCategory(point))}</span>
+              <span class="damage-badge ${severityClass(damageSeverity(point))}">${severityLabel(damageSeverity(point))}</span>
+              <span class="damage-badge">${p.x.toFixed(2)}% / ${p.y.toFixed(2)}%</span>
+              ${point.closeup ? `<span class="damage-badge">Close-up</span>` : ""}
+            </div>
+          </div>`;
+        const edit = document.createElement("button");
+        edit.className = "secondary-button";
+        edit.type = "button";
+        edit.textContent = "Bearbeiten";
+        edit.dataset.damageEditContext = "form";
+        edit.dataset.damageEditSide = currentMarkerSide;
+        edit.dataset.damageEditIndex = String(index);
+        edit.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          openDamageEditor("form", currentMarkerSide, index);
+        });
+        item.appendChild(edit);
+        list.appendChild(item);
+      });
+
+      updateFineStage(fineCenter.x, fineCenter.y);
+    }
+
+    function renderFineCanvasCrop(imgSrc, centerXPercent, centerYPercent) {
+      const stage = $("fineStage");
+      if (!stage || !imgSrc) return;
+
+      stage.innerHTML = "";
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 630;
+      canvas.height = 880;
+      stage.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.onload = function () {
+        // Feste Feinzoom-Stufe: 6,5x.
+        const zoomFactor = 6.5;
+        const cropW = 630 / zoomFactor;
+        const cropH = 880 / zoomFactor;
+
+        const centerX = (centerXPercent / 100) * 630;
+        const centerY = (centerYPercent / 100) * 880;
+
+        let sx = centerX - cropW / 2;
+        let sy = centerY - cropH / 2;
+
+        sx = Math.max(0, Math.min(630 - cropW, sx));
+        sy = Math.max(0, Math.min(880 - cropH, sy));
+
+        fineCrop = { sx, sy, cropW, cropH };
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, canvas.width, canvas.height);
+      };
+
+      img.src = imgSrc;
+    }
+
+    function updateFineStage(x, y) {
+      fineCenter = { x, y };
+      const img = currentMarkerImage();
+      const stage = $("fineStage");
+      if (!stage) return;
+
+      if (!img) {
+        stage.innerHTML = "";
+        stage.textContent = "Bild hochladen";
+        fineCrop = null;
+        return;
+      }
+
+      if (!fineCropReady) {
+        stage.innerHTML = "";
+        stage.textContent = "Erst grob im Kartenbild klicken";
+        fineCrop = null;
+        return;
+      }
+
+      renderFineCanvasCrop(img, x, y);
+    }
+
+    function addMarker(x, y) {
+      const label = prompt("Beschreibung des Schadens:");
+      if (!label || !label.trim()) return;
+      const category = prompt("Kategorie des Schadens (Whitening, Kratzer, Druckstelle, Ecke, Kante, Oberfläche, Sonstiges):", "Sonstiges") || "Sonstiges";
+      const severityInput = prompt("Schweregrad: leicht, mittel oder stark", "leicht") || "leicht";
+      const severity = severityInput.toLowerCase().includes("stark") ? "high" : severityInput.toLowerCase().includes("mittel") ? "medium" : "low";
+      const point = {
+        x: Number(x.toFixed(3)),
+        y: Number(y.toFixed(3)),
+        px: Math.round((x / 100) * 630),
+        py: Math.round((y / 100) * 880),
+        label: label.trim(),
+        category: category.trim(),
+        severity,
+        closeup: ""
+      };
+      if (currentMarkerSide === "front") markersFront.push(point);
+      else markersBack.push(point);
+      renderMarkerEditor();
+    }
+
+    function markerPositionFromEvent(event, element) {
+      const rect = element.getBoundingClientRect();
+
+      const displayX = Math.min(rect.width, Math.max(0, event.clientX - rect.left));
+      const displayY = Math.min(rect.height, Math.max(0, event.clientY - rect.top));
+
+      const x = (displayX / rect.width) * 100;
+      const y = (displayY / rect.height) * 100;
+
+      return {
+        x,
+        y,
+        px: Math.round((x / 100) * 630),
+        py: Math.round((y / 100) * 880)
+      };
+    }
+
+    function normalizePoint(point) {
+      if (point.px !== undefined && point.py !== undefined) {
+        return {
+          x: (Number(point.px) / 630) * 100,
+          y: (Number(point.py) / 880) * 100,
+          px: Number(point.px),
+          py: Number(point.py),
+          label: point.label
+        };
+      }
+
+      return {
+        x: Number(point.x || 0),
+        y: Number(point.y || 0),
+        px: Math.round((Number(point.x || 0) / 100) * 630),
+        py: Math.round((Number(point.y || 0) / 100) * 880),
+        label: point.label
+      };
+    }
+
+    function positionDotByPoint(dot, point) {
+      const p = normalizePoint(point);
+      dot.style.left = p.x + "%";
+      dot.style.top = p.y + "%";
+    }
+
+    function severityLabel(value){return value==="high"?"stark":value==="medium"?"mittel":"leicht";}
+    function severityClass(value){return value==="high"?"high":value==="medium"?"medium":"low";}
+    function damageCategory(point){return point.category||"Sonstiges";}
+    function damageSeverity(point){return point.severity||"low";}
+    function getMarkerArray(side){return side==="front"?markersFront:markersBack;}
+    function setMarkerArray(side,value){if(side==="front")markersFront=value;else markersBack=value;}
+    function summarizeDamage(card){const pts=(card.damageFront||[]).concat(card.damageBack||[]);const s={low:0,medium:0,high:0};pts.forEach(p=>{s[damageSeverity(p)]=(s[damageSeverity(p)]||0)+1});return s;}
+
+    function openDamageEditor(context, side, index){
+      if (Number.isNaN(index)) return;
+      if (context !== "form" && !currentDetailCard) return;
+      const list=context==="form"?getMarkerArray(side):(side==="front"?(currentDetailCard.damageFront||[]):(currentDetailCard.damageBack||[]));
+      const point=list[index]; if(!point)return;
+      editingDamage={context,side,index};
+      $("damageEditKicker").textContent=(side==="front"?"Vorderseite":"Rückseite")+" · Markierung "+(index+1);
+      $("damageEditLabel").value=point.label||"";
+      $("damageEditCategory").value=point.category||"Sonstiges";
+      $("damageEditSeverity").value=point.severity||"low";
+      damageEditCloseupData = point.closeup || "";
+      if ($("damageEditCloseupFile")) $("damageEditCloseupFile").value = "";
+      setCloseupPreview($("damageEditCloseupPreview"), damageEditCloseupData);
+      $("damageEditBackdrop").style.display="flex";
+    }
+    function closeDamageEditor(){ $("damageEditBackdrop").style.display="none"; editingDamage=null; damageEditCloseupData=""; }
+
+    function refreshAfterDamageEdit() {
+      saveCards();
+
+      if (typeof renderDamageMap === "function") renderDamageMap();
+      if (typeof renderCards === "function") renderCards();
+
+      // Diese Version enthält nicht in jeder Datei alle Report-Funktionen.
+      // Darum werden sie nur ausgeführt, wenn sie vorhanden sind.
+      if (typeof renderReport === "function" && currentDetailCard) if (typeof renderReport === "function") renderReport(currentDetailCard);
+      if (typeof renderReviewBox === "function" && currentDetailCard) if (typeof renderReviewBox === "function") renderReviewBox(currentDetailCard);
+      if (typeof renderSmartGradeBox === "function" && typeof calculateSmartGradeForCard === "function" && currentDetailCard) {
+        renderSmartGradeBox("detailSmartGradeValue", "detailSmartGradeBreakdown", calculateSmartGradeForCard(currentDetailCard));
+      }
+    }
+    function saveDamageEditor(){
+      if(!editingDamage)return;
+      const label=$("damageEditLabel").value.trim()||"Schaden";
+      const category=$("damageEditCategory").value;
+      const severity=$("damageEditSeverity").value;
+      if(editingDamage.context==="form"){
+        const list=getMarkerArray(editingDamage.side);
+        if(list[editingDamage.index]){list[editingDamage.index].label=label;list[editingDamage.index].category=category;list[editingDamage.index].severity=severity;}
+        renderMarkerEditor();
+        updateSmartGradePreview();
+      } else if(currentDetailCard){
+        const list=editingDamage.side==="front"?currentDetailCard.damageFront:currentDetailCard.damageBack;
+        if(list&&list[editingDamage.index]){list[editingDamage.index].label=label;list[editingDamage.index].category=category;list[editingDamage.index].severity=severity;}
+        cards=cards.map(card=>card.id===currentDetailCard.id?currentDetailCard:card);
+        refreshAfterDamageEdit();
+      }
+      closeDamageEditor(); showToast("Markierung aktualisiert");
+    }
+    function deleteDamageEditor(){
+      if(!editingDamage)return;
+      if(editingDamage.context==="form"){
+        const list=getMarkerArray(editingDamage.side); list.splice(editingDamage.index,1); setMarkerArray(editingDamage.side,list); renderMarkerEditor();
+      } else if(currentDetailCard){
+        const list=editingDamage.side==="front"?currentDetailCard.damageFront:currentDetailCard.damageBack; if(list)list.splice(editingDamage.index,1);
+        cards=cards.map(card=>card.id===currentDetailCard.id?currentDetailCard:card); saveCards(); renderDamageMap(); if (typeof renderReport === "function") if (typeof renderReport === "function") renderReport(currentDetailCard); if (typeof renderReviewBox === "function") if (typeof renderReviewBox === "function") renderReviewBox(currentDetailCard); renderCards();
+      }
+      closeDamageEditor(); showToast("Markierung gelöscht");
+    }
+
+    function resetForm() {
+      editingId = null;
+      $("formHeadline").textContent = "Karte zur Sammlung hinzufügen";
+      $("saveCardBtn").textContent = "Karte speichern";
+      $("cancelEditBtn").style.display = "none";
+      ["cardId","cardName","cardNumber","cardSet","cardRarity","cardGrade","cardCondition","cardStorage","cardValue","purchasePrice","purchaseDate","salePrice","saleDate","platform","buyer","cardNotes"].forEach(id => { if ($(id)) $(id).value = ""; });
+      $("cardLanguage").selectedIndex = 0;
+      $("cardStatus").selectedIndex = 0;
+      frontImage = "";
+      backImage = "";
+      extraImages = [];
+      markersFront = [];
+      markersBack = [];
+      $("frontFile").value = "";
+      $("backFile").value = "";
+      $("extraFiles").value = "";
+      formTags = [];
+      renderFormTags();
+      refreshPreviews();
+    }
+
+    function saveCard() {
+      const id = $("cardId").value.trim();
+      if (!id || !$("cardName").value.trim() || !$("cardNumber").value.trim() || !$("cardGrade").value.trim()) {
+        showMessage("Bitte mindestens Sammlungs-ID, Kartenname, Kartennummer und eigene Note eintragen.", "error");
+        return;
+      }
+
+      const existing = cards.find(c => c.id === id);
+      if (!editingId && existing) {
+        showMessage("Diese Sammlungs-ID existiert bereits.", "error");
+        return;
+      }
+      if (editingId && id !== editingId && existing) {
+        showMessage("Diese Sammlungs-ID existiert bereits.", "error");
+        return;
+      }
+
+      const old = editingId ? cards.find(c => c.id === editingId) : null;
+      const card = {
+        id,
+        name: $("cardName").value.trim(),
+        number: $("cardNumber").value.trim(),
+        set: $("cardSet").value.trim(),
+        rarity: $("cardRarity").value.trim(),
+        language: $("cardLanguage").value,
+        status: $("cardStatus").value,
+        grade: $("cardGrade").value.trim(),
+        condition: $("cardCondition").value.trim(),
+        storage: $("cardStorage").value.trim(),
+        value: $("cardValue").value.trim(),
+        purchasePrice: $("purchasePrice") ? $("purchasePrice").value.trim() : "",
+        purchaseDate: $("purchaseDate") ? $("purchaseDate").value : "",
+        salePrice: $("salePrice") ? $("salePrice").value.trim() : "",
+        saleDate: $("saleDate") ? $("saleDate").value : "",
+        platform: $("platform") ? $("platform").value.trim() : "",
+        buyer: $("buyer") ? $("buyer").value.trim() : "",
+        tags: formTags.slice(),
+        notes: $("cardNotes").value.trim(),
+        images: [frontImage, backImage].concat(extraImages).filter(Boolean),
+        damageFront: JSON.parse(JSON.stringify(markersFront)),
+        damageBack: JSON.parse(JSON.stringify(markersBack)),
+        favorite: old ? old.favorite : false,
+        createdAt: old ? old.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (editingId) {
+        cards = cards.map(c => c.id === editingId ? card : c);
+      } else {
+        cards.unshift(card);
+      }
+
+      saveCards();
+      resetForm();
+      renderFormTags();
+      updateProfitPreview();
+      renderStats();
+      renderCards();
+      showPage("collectionPage");
+    }
+
+    function editCard(id) {
+      const card = cards.find(c => c.id === id);
+      if (!card) {
+        showToast("Karte zum Bearbeiten nicht gefunden");
+        return;
+      }
+
+      editingId = id;
+      showToast("Bearbeitungsmodus geöffnet");
+      $("formHeadline").textContent = "Karte bearbeiten";
+      $("saveCardBtn").textContent = "Änderungen speichern";
+      $("cancelEditBtn").style.display = "inline-flex";
+
+      $("cardId").value = card.id;
+      $("cardName").value = card.name || "";
+      $("cardNumber").value = card.number || "";
+      $("cardSet").value = card.set || "";
+      $("cardRarity").value = card.rarity || "";
+      $("cardLanguage").value = card.language || "English";
+      $("cardStatus").value = card.status || "Behalten";
+      $("cardGrade").value = card.grade || "";
+      $("cardCondition").value = card.condition || "";
+      $("cardStorage").value = card.storage || "";
+      $("cardValue").value = card.value || "";
+      if ($("purchasePrice")) $("purchasePrice").value = card.purchasePrice || "";
+      if ($("purchaseDate")) $("purchaseDate").value = card.purchaseDate || "";
+      if ($("salePrice")) $("salePrice").value = card.salePrice || "";
+      if ($("saleDate")) $("saleDate").value = card.saleDate || "";
+      if ($("platform")) $("platform").value = card.platform || "";
+      if ($("buyer")) $("buyer").value = card.buyer || "";
+      $("cardNotes").value = card.notes || "";
+      formTags = Array.isArray(card.tags) ? card.tags.slice() : [];
+      renderFormTags();
+      updateProfitPreview();
+
+      frontImage = (card.images || [])[0] || "";
+      backImage = (card.images || [])[1] || "";
+      extraImages = (card.images || []).slice(2);
+      markersFront = JSON.parse(JSON.stringify(card.damageFront || []));
+      markersBack = JSON.parse(JSON.stringify(card.damageBack || []));
+      currentMarkerSide = "front";
+      fineMode = false;
+      fineCropReady = false;
+      fineCrop = null;
+      fineCenter = { x: 50, y: 50 };
+      refreshPreviews();
+
+      if ($("detailBackdrop") && $("detailBackdrop").style.display === "flex") {
+        closeDetail();
+      }
+      showPage("addPage");
+    }
+
+    function renderStats() {
+      $("totalCardsStat").textContent = cards.length;
+      $("ratedCardsStat").textContent = cards.filter(c => c.grade).length;
+      $("totalValueStat").textContent = formatEuro(cards.reduce((sum, c) => sum + parseMoney(c.value), 0));
+      if (typeof renderProDashboard === "function") renderProDashboard();
+      if (typeof renderRecentDashboard === "function") renderRecentDashboard();
+    }
+
+    function hasHighDamage(card) {
+      const points = (card.damageFront || []).concat(card.damageBack || []);
+      return points.some(point => point.severity === "high");
+    }
+
+    function hasAnyDamage(card) {
+      return ((card.damageFront || []).length + (card.damageBack || []).length) > 0;
+    }
+
+    function matchesQuickFilter(card) {
+      if (activeQuickFilter === "all") return true;
+      if (activeQuickFilter === "favorites") return Boolean(card.favorite);
+      if (activeQuickFilter === "missing-back") return !(card.images || [])[1];
+      if (activeQuickFilter === "damaged") return hasAnyDamage(card);
+      if (activeQuickFilter === "high-damage") return hasHighDamage(card);
+      if (activeQuickFilter === "grade9") return parseGrade(card.grade) >= 9;
+      if (activeQuickFilter === "for-sale") return card.status === "Verkaufen";
+      if (activeQuickFilter === "incomplete") return documentationScore(card) < 80;
+      return true;
+    }
+
+    function updateQuickFilterButtons() {
+      if ($("openTrashBtn")) $("openTrashBtn").addEventListener("click", openTrash);
+      if ($("closeTrashBtn")) $("closeTrashBtn").addEventListener("click", closeTrash);
+      if ($("trashBackdrop")) $("trashBackdrop").addEventListener("click", event => {
+        if (event.target === $("trashBackdrop")) closeTrash();
+      });
+      if ($("restoreAllTrashBtn")) $("restoreAllTrashBtn").addEventListener("click", restoreAllTrash);
+      if ($("emptyTrashBtn")) $("emptyTrashBtn").addEventListener("click", emptyTrash);
+
+      if ($("importMergeBtn")) $("importMergeBtn").addEventListener("click", () => finishImport("merge"));
+      if ($("importOnlyNewBtn")) $("importOnlyNewBtn").addEventListener("click", () => finishImport("only-new"));
+      if ($("importReplaceBtn")) $("importReplaceBtn").addEventListener("click", () => finishImport("replace"));
+      if ($("importCancelBtn")) $("importCancelBtn").addEventListener("click", closeImportChoice);
+      if ($("importChoiceBackdrop")) $("importChoiceBackdrop").addEventListener("click", event => {
+        if (event.target === $("importChoiceBackdrop")) closeImportChoice();
+      });
+
+      if ($("toggleSelectModeBtn")) $("toggleSelectModeBtn").addEventListener("click", toggleSelectionMode);
+      if ($("bulkSelectAllBtn")) $("bulkSelectAllBtn").addEventListener("click", selectAllVisible);
+      if ($("bulkClearSelectionBtn")) $("bulkClearSelectionBtn").addEventListener("click", clearSelection);
+      if ($("bulkFavoriteBtn")) $("bulkFavoriteBtn").addEventListener("click", () => bulkUpdateSelected(card => { card.favorite = true; }));
+      if ($("bulkSellBtn")) $("bulkSellBtn").addEventListener("click", () => bulkUpdateSelected(card => { card.status = "Verkaufen"; }));
+      if ($("bulkKeepBtn")) $("bulkKeepBtn").addEventListener("click", () => bulkUpdateSelected(card => { card.status = "Behalten"; }));
+      if ($("bulkDeleteBtn")) $("bulkDeleteBtn").addEventListener("click", bulkDeleteSelected);
+
+      if ($("openCardReportBtn")) $("openCardReportBtn").addEventListener("click", () => {
+        if (currentDetailCard) openCardReport(currentDetailCard);
+      });
+      if ($("closeCardReportBtn")) $("closeCardReportBtn").addEventListener("click", closeCardReport);
+      if ($("printCardReportBtn")) $("printCardReportBtn").addEventListener("click", () => window.print());
+      if ($("cardReportBackdrop")) $("cardReportBackdrop").addEventListener("click", event => {
+        if (event.target === $("cardReportBackdrop")) closeCardReport();
+      });
+
+      if ($("fullscreenCloseBtn")) $("fullscreenCloseBtn").addEventListener("click", closeFullscreenImage);
+      if ($("fullscreenImageBackdrop")) $("fullscreenImageBackdrop").addEventListener("click", event => {
+        if (event.target === $("fullscreenImageBackdrop")) closeFullscreenImage();
+      });
+
+      if ($("floatingAddBtn")) $("floatingAddBtn").addEventListener("click", () => showPage("addPage"));
+      if ($("toggleFiltersBtn")) $("toggleFiltersBtn").addEventListener("click", toggleFilters);
+      if ($("resetFiltersBtn")) $("resetFiltersBtn").addEventListener("click", resetAllFilters);
+      if ($("emptyResetFiltersBtn")) $("emptyResetFiltersBtn").addEventListener("click", resetAllFilters);
+
+      document.addEventListener("keydown", event => {
+        const target = event.target;
+        const typing = target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+        if (event.key === "Escape") {
+          closeFullscreenImage();
+          if ($("importChoiceBackdrop")) closeImportChoice();
+          if ($("trashBackdrop")) closeTrash();
+          if ($("cardReportBackdrop")) closeCardReport();
+          return;
+        }
+
+        if (typing) return;
+
+        if (event.key === "/") {
+          event.preventDefault();
+          focusSearch();
+        }
+
+        if (event.key.toLowerCase() === "n") {
+          event.preventDefault();
+          showPage("addPage");
+        }
+
+        if (event.key.toLowerCase() === "a") {
+          event.preventDefault();
+          toggleSelectionMode();
+        }
+      });
+
+      document.querySelectorAll("[data-quick-filter]").forEach(button => {
+        button.classList.toggle("active", button.dataset.quickFilter === activeQuickFilter);
+      });
+    }
+
+    function renderCollectionAnalysis(filtered) {
+      const averageGradeEl = $("averageGradeStat");
+      if (!averageGradeEl) return;
+
+      const graded = filtered.map(card => parseGrade(card.grade)).filter(value => value > 0);
+      if (graded.length) {
+        const avg = graded.reduce((sum, value) => sum + value, 0) / graded.length;
+        $("averageGradeStat").textContent = avg.toFixed(1).replace(".", ",");
+      } else {
+        $("averageGradeStat").textContent = "-";
+      }
+
+      if (filtered.length) {
+        const avgDoc = filtered.reduce((sum, card) => sum + documentationScore(card), 0) / filtered.length;
+        $("averageDocStat").textContent = Math.round(avgDoc) + "%";
+      } else {
+        $("averageDocStat").textContent = "-";
+      }
+
+      $("valuedCardsStat").textContent = filtered.filter(card => parseMoney(card.value) > 0).length;
+    }
+
+    function normalizeTag(value) {
+      return String(value || "").trim().replace(/\s+/g, " ");
+    }
+
+    function renderFormTags() {
+      const list = $("formTagList");
+      if (!list) return;
+
+      list.innerHTML = "";
+      formTags.forEach((tag, index) => {
+        const chip = document.createElement("span");
+        chip.className = "custom-tag-chip";
+        chip.innerHTML = `${escapeHtml(tag)} <button type="button" title="Tag entfernen">×</button>`;
+        chip.querySelector("button").addEventListener("click", () => {
+          formTags.splice(index, 1);
+          renderFormTags();
+        });
+        list.appendChild(chip);
+      });
+    }
+
+    function addFormTag() {
+      const input = $("tagInput");
+      if (!input) return;
+
+      const raw = normalizeTag(input.value);
+      if (!raw) return;
+
+      raw.split(",").map(normalizeTag).filter(Boolean).forEach(tag => {
+        if (!formTags.some(existing => existing.toLowerCase() === tag.toLowerCase())) {
+          formTags.push(tag);
+        }
+      });
+
+      input.value = "";
+      renderFormTags();
+    }
+
+    function allTags() {
+      const map = new Map();
+      cards.forEach(card => {
+        (card.tags || []).forEach(tag => {
+          const clean = normalizeTag(tag);
+          if (!clean) return;
+          const key = clean.toLowerCase();
+          map.set(key, clean);
+        });
+      });
+      return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+    }
+
+    function renderTagCloud() {
+      const cloud = $("tagCloud");
+      if (!cloud) return;
+
+      const tags = allTags();
+      if (!tags.length) {
+        cloud.innerHTML = '<span class="hint">Noch keine Tags vorhanden.</span>';
+        return;
+      }
+
+      cloud.innerHTML = '<button class="tag-cloud-chip ' + (!activeTagFilter ? 'active' : '') + '" type="button" data-tag-filter="">Alle Tags</button>' +
+        tags.map(tag => `<button class="tag-cloud-chip ${activeTagFilter.toLowerCase() === tag.toLowerCase() ? "active" : ""}" type="button" data-tag-filter="${escapeHtml(tag)}">#${escapeHtml(tag)}</button>`).join("");
+
+      cloud.querySelectorAll("[data-tag-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeTagFilter = button.dataset.tagFilter || "";
+          renderCards();
+        });
+      });
+    }
+
+    function cardMatchesTag(card) {
+      if (!activeTagFilter) return true;
+      return (card.tags || []).some(tag => String(tag).toLowerCase() === activeTagFilter.toLowerCase());
+    }
+
+    function updateBulkToolbar() {
+      const toolbar = $("bulkToolbar");
+      const count = $("bulkSelectedCount");
+      const toggle = $("toggleSelectModeBtn");
+
+      if (toolbar) toolbar.classList.toggle("active", selectionMode);
+      if (count) count.textContent = selectedCardIds.size + " ausgewählt";
+      if (toggle) toggle.textContent = selectionMode ? "Auswahlmodus beenden" : "Auswahlmodus";
+
+      const cardsList = $("cardsList");
+      if (cardsList) cardsList.classList.toggle("selection-mode", selectionMode);
+    }
+
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      if (!selectionMode) selectedCardIds.clear();
+      renderCards();
+    }
+
+    function toggleCardSelected(id) {
+      if (selectedCardIds.has(id)) selectedCardIds.delete(id);
+      else selectedCardIds.add(id);
+      renderCards();
+    }
+
+    function clearSelection() {
+      selectedCardIds.clear();
+      renderCards();
+    }
+
+    function selectAllVisible() {
+      lastRenderedCardIds.forEach(id => selectedCardIds.add(id));
+      renderCards();
+    }
+
+    function bulkUpdateSelected(updater) {
+      if (!selectedCardIds.size) return;
+      cards = cards.map(card => {
+        if (!selectedCardIds.has(card.id)) return card;
+        const next = JSON.parse(JSON.stringify(card));
+        updater(next);
+        next.updatedAt = new Date().toISOString();
+        return next;
+      });
+      saveCards();
+      renderStats();
+      renderCards();
+    }
+
+    function bulkDeleteSelected() {
+      if (!selectedCardIds.size) return;
+      if (!confirm(selectedCardIds.size + " Karte(n) in den Papierkorb verschieben?")) return;
+      cards.forEach(card => {
+        if (selectedCardIds.has(card.id)) moveCardToTrash(card, "Mehrfachauswahl");
+      });
+      cards = cards.filter(card => !selectedCardIds.has(card.id));
+      selectedCardIds.clear();
+      saveCards();
+      renderStats();
+      renderCards();
+    }
+
+    function resetAllFilters() {
+      if ($("searchInput")) $("searchInput").value = "";
+      if ($("statusFilter")) $("statusFilter").value = "";
+      if ($("conditionFilter")) $("conditionFilter").value = "";
+      if ($("favoriteFilter")) $("favoriteFilter").value = "";
+      if ($("sortSelect")) $("sortSelect").value = "newest";
+      activeQuickFilter = "all";
+      activeTagFilter = "";
+      renderCards();
+    }
+
+    function toggleFilters() {
+      const panel = $("filterPanel");
+      const button = $("toggleFiltersBtn");
+      if (!panel || !button) return;
+
+      const collapsed = panel.classList.toggle("collapsed");
+      button.textContent = collapsed ? "Filter anzeigen" : "Filter ausblenden";
+    }
+
+    function focusSearch() {
+      showPage("collectionPage");
+      window.setTimeout(() => {
+        if ($("searchInput")) $("searchInput").focus();
+      }, 80);
+    }
+
+    function applyViewPreferences() {
+      const list = $("cardsList");
+      if (!list) return;
+
+      list.classList.toggle("compact-view", compactView);
+      if ($("compactViewBtn")) $("compactViewBtn").classList.toggle("active", compactView);
+
+      localStorage.setItem("cardVaultCompactView", String(compactView));
+      localStorage.setItem("cardVaultSort", $("sortSelect") ? $("sortSelect").value : "newest");
+      localStorage.setItem("cardVaultViewMode", list.classList.contains("grid-view") ? "grid" : "list");
+    }
+
+    function restoreViewPreferences() {
+      if ($("sortSelect")) {
+        const savedSort = localStorage.getItem("cardVaultSort");
+        if (savedSort && Array.from($("sortSelect").options).some(option => option.value === savedSort)) {
+          $("sortSelect").value = savedSort;
+        }
+      }
+
+      const savedMode = localStorage.getItem("cardVaultViewMode");
+      if (savedMode === "grid" && $("cardsList")) {
+        $("cardsList").classList.add("grid-view");
+        if ($("gridViewBtn")) $("gridViewBtn").classList.add("active");
+        if ($("listViewBtn")) $("listViewBtn").classList.remove("active");
+      }
+    }
+
+    function cardProfitValue(card) {
+      const f = typeof financeForCard === "function" ? financeForCard(card) : { profit: 0, purchase: 0, target: 0 };
+      return f.purchase && f.target ? f.profit : 0;
+    }
+
+    function renderCards() {
+      const query = $("searchInput").value.toLowerCase().trim();
+      const status = $("statusFilter").value;
+      const condition = $("conditionFilter").value;
+      const favorite = $("favoriteFilter").value;
+      const sort = $("sortSelect").value;
+
+      let filtered = cards.filter(card => {
+        const haystack = [card.id, card.name, card.number, card.set, card.rarity, card.language, card.status, card.grade, card.condition, card.storage, card.notes, (card.tags || []).join(" ")].join(" ").toLowerCase();
+        return (!query || haystack.includes(query))
+          && (!status || card.status === status)
+          && (!condition || String(card.condition || "").toLowerCase().includes(condition.toLowerCase()))
+          && (!favorite || card.favorite)
+          && matchesQuickFilter(card)
+          && cardMatchesTag(card);
+      });
+
+      filtered.sort((a,b) => {
+        if (sort === "name") return String(a.name).localeCompare(String(b.name));
+        if (sort === "value-desc") return parseMoney(b.value) - parseMoney(a.value);
+        if (sort === "value-asc") return parseMoney(a.value) - parseMoney(b.value);
+        if (sort === "grade-desc") return parseGrade(b.grade) - parseGrade(a.grade);
+        if (sort === "grade-asc") return parseGrade(a.grade) - parseGrade(b.grade);
+        if (sort === "doc-desc") return documentationScore(b) - documentationScore(a);
+        if (sort === "doc-asc") return documentationScore(a) - documentationScore(b);
+        if (sort === "profit-desc") return cardProfitValue(b) - cardProfitValue(a);
+        if (sort === "profit-asc") return cardProfitValue(a) - cardProfitValue(b);
+        if (sort === "updated-desc") return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+
+      lastRenderedCardIds = filtered.map(card => card.id);
+      $("cardsList").innerHTML = "";
+      $("resultCount").textContent = filtered.length;
+      $("filteredCount").textContent = filtered.length;
+      $("filteredValue").textContent = formatEuro(filtered.reduce((sum,c) => sum + parseMoney(c.value), 0));
+      $("favoriteCount").textContent = cards.filter(c => c.favorite).length;
+      $("markedCount").textContent = filtered.filter(c => (c.damageFront || []).length + (c.damageBack || []).length > 0).length;
+      renderCollectionAnalysis(filtered);
+      updateQuickFilterButtons();
+      renderTagCloud();
+      $("emptyState").style.display = filtered.length ? "none" : "block";
+
+      filtered.forEach(card => {
+        const el = document.createElement("article");
+        el.className = "glass card-row" + (selectedCardIds.has(card.id) ? " selected-card" : "");
+        const image = (card.images || [])[0];
+        const damageCount = (card.damageFront || []).length + (card.damageBack || []).length;
+        el.innerHTML = `
+          <div class="select-card-check">${selectedCardIds.has(card.id) ? "✓" : ""}</div>
+          <div class="card-image">${image ? `<img src="${image}" alt="${escapeHtml(card.name)}">` : "CARD"}</div>
+          <div>
+            <div class="tags">
+              ${card.favorite ? `<span class="tag gold">★ Favorit</span>` : ""}
+              <span class="tag green">In Sammlung</span>
+              <span class="tag">${escapeHtml(card.status || "-")}</span>
+              <span class="tag">${escapeHtml(card.language || "-")}</span>
+              ${damageCount ? `<span class="tag">${damageCount} Markierung(en)</span>` : ""}
+              ${(card.tags || []).slice(0, 4).map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join("")}
+            </div>
+            <div class="card-title-line">
+              <div class="card-title">${escapeHtml(card.name)}</div>
+              <div class="mini-score">${escapeHtml(card.grade || "-")}</div>
+            </div>
+            <div class="card-meta">${escapeHtml(card.number || "-")} · ${escapeHtml(card.set || "-")} · ${escapeHtml(card.rarity || "-")}</div>
+            <div class="details">
+              <div><div class="detail-label">ID</div><div class="detail-value">${escapeHtml(card.id)}</div></div>
+              <div><div class="detail-label">Zustand</div><div class="detail-value">${escapeHtml(card.condition || "-")}</div></div>
+              <div><div class="detail-label">Lagerort</div><div class="detail-value">${escapeHtml(card.storage || "-")}</div></div>
+              <div><div class="detail-label">Wert</div><div class="detail-value">${escapeHtml(card.value || "-")}</div></div>
+              <div><div class="detail-label">Gewinn</div><div class="detail-value">${formatProfit(card)}</div></div>
+            </div>
+            ${renderDocScore(card)}
+            ${!(card.images || [])[1] ? `<span class="missing-pill">Rückseite fehlt</span>` : ""}
+          </div>
+          <div class="card-tools">
+            <button class="favorite-button ${card.favorite ? "active" : ""}" type="button">${card.favorite ? "★ Favorit" : "☆ Favorit"}</button>
+            <button class="edit-button" type="button" data-card-edit="${escapeHtml(card.id)}" title="Karte bearbeiten">Bearbeiten</button>
+            <button class="duplicate-button" type="button">Duplizieren</button>
+            <button class="delete-button" type="button">Löschen</button>
+          </div>
+        `;
+
+        el.addEventListener("click", event => {
+          if (event.target.closest("button")) return;
+          if (selectionMode) {
+            toggleCardSelected(card.id);
+            return;
+          }
+          openDetail(card.id);
+        });
+        el.querySelector(".favorite-button").addEventListener("click", event => {
+          event.stopPropagation();
+          card.favorite = !card.favorite;
+          saveCards();
+          renderCards();
+          renderStats();
+        });
+        const editButton = el.querySelector(".edit-button");
+        if (editButton) {
+          editButton.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            editCard(card.id);
+            return false;
+          };
+        }
+
+        const duplicateButton = el.querySelector(".duplicate-button");
+        if (duplicateButton) {
+          duplicateButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            duplicateCard(card.id);
+          });
+        }
+
+        el.querySelector(".delete-button").addEventListener("click", event => {
+          event.stopPropagation();
+          if (!confirm("Karte in den Papierkorb verschieben?")) return;
+          moveCardToTrash(card);
+          cards = cards.filter(c => c.id !== card.id);
+          saveCards();
+          renderCards();
+          renderStats();
+        });
+
+        $("cardsList").appendChild(el);
+      });
+
+      updateBulkToolbar();
+      applyViewPreferences();
+    }
+
+    function cardImages(card) {
+      return (card.images || []).filter(Boolean);
+    }
+
+    function reportImageHtml(src, label) {
+      return `<div><div class="report-image">${src ? `<img src="${src}" alt="${escapeHtml(label)}">` : "Kein Bild"}</div><div class="thumb-label">${escapeHtml(label)}</div></div>`;
+    }
+
+    function reportKv(label, value) {
+      return `<div class="report-kv"><div class="report-k">${escapeHtml(label)}</div><div class="report-v">${escapeHtml(value || "-")}</div></div>`;
+    }
+
+    function openCardReport(card) {
+      if (!card) return;
+
+      const images = cardImages(card);
+      const damage = (card.damageFront || []).map(point => ({...point, side: "Vorderseite"}))
+        .concat((card.damageBack || []).map(point => ({...point, side: "Rückseite"})));
+
+      $("cardReportTitle").textContent = card.name || "Kartenreport";
+      $("cardReportSub").textContent = (card.id || "-") + " · " + (card.set || "-") + " · erstellt mit Card Vault";
+
+      const finance = typeof formatProfit === "function" ? formatProfit(card) : "-";
+      const docScore = typeof documentationScore === "function" ? documentationScore(card) + "%" : "-";
+
+      $("cardReportBody").innerHTML = `
+        <div class="report-image-stack">
+          ${reportImageHtml(images[0], "Vorderseite")}
+          ${reportImageHtml(images[1], "Rückseite")}
+        </div>
+
+        <div>
+          <div class="report-section">
+            <div class="report-section-title">Stammdaten</div>
+            <div class="report-kv-grid">
+              ${reportKv("ID", card.id)}
+              ${reportKv("Nummer", card.number)}
+              ${reportKv("Set", card.set)}
+              ${reportKv("Seltenheit", card.rarity)}
+              ${reportKv("Sprache", card.language)}
+              ${reportKv("Status", card.status)}
+              ${reportKv("Tags", (card.tags || []).join(", "))}
+              ${reportKv("Dokumentation", docScore)}
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Bewertung</div>
+            <div class="report-kv-grid">
+              ${reportKv("Eigene Note", card.grade)}
+              ${reportKv("Zustand", card.condition)}
+              ${reportKv("Centering", card.quality && card.quality.centering)}
+              ${reportKv("Ecken", card.quality && card.quality.corners)}
+              ${reportKv("Kanten", card.quality && card.quality.edges)}
+              ${reportKv("Oberfläche", card.quality && card.quality.surface)}
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Wert / Trading</div>
+            <div class="report-kv-grid">
+              ${reportKv("Marktwert", card.value)}
+              ${reportKv("Einkaufspreis", card.purchasePrice)}
+              ${reportKv("Verkaufspreis", card.salePrice)}
+              ${reportKv("Gewinn / Verlust", finance)}
+              ${reportKv("Plattform", card.platform)}
+              ${reportKv("Lagerort", card.storage)}
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Schäden</div>
+            <div class="report-damage-list">
+              ${damage.length ? damage.map((point, index) => `
+                <div class="report-damage-item">
+                  <strong>${index + 1}. ${escapeHtml(point.label || "Schaden")}</strong>
+                  <div class="report-damage-meta">${escapeHtml(point.side)} · ${escapeHtml(point.category || "Sonstiges")} · ${escapeHtml(point.severity === "high" ? "stark" : point.severity === "medium" ? "mittel" : "leicht")}</div>
+                </div>
+              `).join("") : `<div class="report-damage-item">Keine Schäden markiert.</div>`}
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-section-title">Notizen</div>
+            <div class="report-note">${escapeHtml(card.notes || "Keine Notizen vorhanden.")}</div>
+          </div>
+        </div>
+      `;
+
+      $("cardReportBackdrop").classList.add("active");
+    }
+
+    function closeCardReport() {
+      $("cardReportBackdrop").classList.remove("active");
+    }
+
+    function openDetail(id) {
+      const card = cards.find(c => c.id === id);
+      if (!card) return;
+      currentDetailCard = card;
+      currentDamageSide = "front";
+      if ($("detailEditBtn")) $("detailEditBtn").dataset.cardEdit = card.id;
+
+      $("detailKicker").textContent = card.id + " · " + (card.status || "-") + " · Note " + (card.grade || "-");
+      $("detailTitle").textContent = card.name || "Karte";
+      $("detailVerification").textContent = "Diese Karte ist in deiner Sammlung gespeichert.";
+      renderCompletionDetail(card);
+      renderFinanceDetail(card);
+
+      $("detailInfo").innerHTML = `
+        <div class="info-box"><div class="info-label">Kartennummer</div><div class="info-value">${escapeHtml(card.number || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Set</div><div class="info-value">${escapeHtml(card.set || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Seltenheit</div><div class="info-value">${escapeHtml(card.rarity || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Sprache</div><div class="info-value">${escapeHtml(card.language || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Status</div><div class="info-value">${escapeHtml(card.status || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Eigene Note</div><div class="info-value">${escapeHtml(card.grade || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Zustand</div><div class="info-value">${escapeHtml(card.condition || "-")}</div></div>
+        <div class="info-box"><div class="info-label">Lagerort</div><div class="info-value">${escapeHtml(card.storage || "-")}</div></div>
+      `;
+
+      const detailTagsBox = $("detailTagsBox");
+      const detailTagsList = $("detailTagsList");
+      if (detailTagsBox && detailTagsList) {
+        const tags = card.tags || [];
+        detailTagsBox.style.display = tags.length ? "block" : "none";
+        detailTagsList.innerHTML = tags.map(tag => `<span class="custom-tag-chip">#${escapeHtml(tag)}</span>`).join("");
+      }
+
+      if (card.notes) {
+        $("detailNoteBox").style.display = "block";
+        $("detailNotes").textContent = card.notes;
+      } else {
+        $("detailNoteBox").style.display = "none";
+      }
+
+      renderDetailImages(card);
+      renderDamageMap();
+      $("detailBackdrop").style.display = "flex";
+      document.body.style.overflow = "hidden";
+    }
+
+    function setDetailMainImage(card, index) {
+      const images = cardImages(card);
+      const main = $("detailMainImage");
+
+      if (!images.length) {
+        currentDetailImageIndex = 0;
+        main.textContent = "CARD";
+        return;
+      }
+
+      currentDetailImageIndex = Math.max(0, Math.min(index, images.length - 1));
+      setImagePreview(main, images[currentDetailImageIndex], card.name);
+
+      document.querySelectorAll(".thumb").forEach((thumb, thumbIndex) => {
+        thumb.classList.toggle("active", thumbIndex === currentDetailImageIndex);
+      });
+
+      if ($("showFrontImageBtn")) $("showFrontImageBtn").classList.toggle("active", currentDetailImageIndex === 0);
+      if ($("showBackImageBtn")) $("showBackImageBtn").classList.toggle("active", currentDetailImageIndex === 1);
+    }
+
+    function openFullscreenImage() {
+      if (!currentDetailCard) return;
+      const images = cardImages(currentDetailCard);
+      const src = images[currentDetailImageIndex];
+      if (!src) return;
+
+      $("fullscreenImage").src = src;
+      $("fullscreenImageBackdrop").classList.add("active");
+    }
+
+    function closeFullscreenImage() {
+      $("fullscreenImageBackdrop").classList.remove("active");
+      $("fullscreenImage").src = "";
+    }
+
+    function renderDetailImages(card) {
+      const images = cardImages(card);
+      const thumbs = $("thumbs");
+      thumbs.innerHTML = "";
+
+      if (!images.length) {
+        setDetailMainImage(card, 0);
+        return;
+      }
+
+      setDetailMainImage(card, 0);
+
+      images.forEach((img, index) => {
+        const wrap = document.createElement("div");
+        wrap.className = "thumb-wrap";
+
+        const btn = document.createElement("button");
+        btn.className = "thumb" + (index === 0 ? " active" : "");
+        btn.type = "button";
+        btn.innerHTML = `<img src="${img}" alt="Bild ${index + 1}">`;
+        btn.onclick = () => setDetailMainImage(card, index);
+
+        const label = document.createElement("div");
+        label.className = "thumb-label";
+        label.textContent = index === 0 ? "Vorne" : index === 1 ? "Hinten" : "Detail " + (index - 1);
+
+        wrap.appendChild(btn);
+        wrap.appendChild(label);
+        thumbs.appendChild(wrap);
+      });
+
+      if ($("showFrontImageBtn")) {
+        $("showFrontImageBtn").onclick = () => setDetailMainImage(card, 0);
+      }
+
+      if ($("showBackImageBtn")) {
+        $("showBackImageBtn").onclick = () => {
+          if (images[1]) setDetailMainImage(card, 1);
+        };
+        $("showBackImageBtn").disabled = !images[1];
+      }
+
+      if ($("fullscreenImageBtn")) {
+        $("fullscreenImageBtn").onclick = openFullscreenImage;
+      }
+    }
+
+    function renderDamageMap() {
+      if (!currentDetailCard) return;
+
+      $("damageFrontBtn").classList.toggle("active", currentDamageSide === "front");
+      $("damageBackBtn").classList.toggle("active", currentDamageSide === "back");
+
+      const img = currentDamageSide === "front" ? cardImages(currentDetailCard)[0] : (cardImages(currentDetailCard)[1] || cardImages(currentDetailCard)[0]);
+      const points = currentDamageSide === "front" ? (currentDetailCard.damageFront || []) : (currentDetailCard.damageBack || []);
+      const cardEl = $("damageCard");
+      setImagePreview(cardEl, img, "CARD");
+
+      points.forEach((point, index) => {
+        const dot = document.createElement("button");
+        dot.className = "damage-dot";
+        dot.type = "button";
+        dot.textContent = index + 1;
+        positionDotByPoint(dot, point);
+        dot.onclick = () => openZoom(point);
+        dot.ondblclick = (event) => { event.stopPropagation(); openDamageEditor("detail", currentDamageSide, index); };
+        cardEl.appendChild(dot);
+      });
+
+      $("damageList").innerHTML = "";
+      $("damageEmpty").style.display = points.length ? "none" : "block";
+      points.forEach((point, index) => {
+        const item = document.createElement("div");
+        item.className = "damage-item";
+        item.innerHTML = `
+          <div><strong>${index + 1}. ${escapeHtml(point.label)}</strong></div>
+          <div class="damage-meta">
+            <span class="damage-badge">${escapeHtml(damageCategory(point))}</span>
+            <span class="damage-badge ${severityClass(damageSeverity(point))}">${severityLabel(damageSeverity(point))}</span>
+            ${point.closeup ? `<span class="damage-badge">Close-up vorhanden</span>` : ""}
+          </div>
+          ${point.closeup ? `<div class="closeup-thumb"><img src="${point.closeup}" alt="Close-up"></div>` : ""}
+          <div class="closeup-section">
+            <button class="closeup-button" type="button">Zoom öffnen</button>
+            <button class="closeup-button" type="button" data-damage-edit-context="detail" data-damage-edit-side="${currentDamageSide}" data-damage-edit-index="${index}">Bearbeiten</button>
+          </div>`;
+        const zoomButton = item.querySelector(".closeup-button");
+        if (zoomButton) zoomButton.onclick = (event) => { event.stopPropagation(); point.closeup ? openCloseup(point) : openZoom(point); };
+
+        const thumb = item.querySelector(".closeup-thumb");
+        if (thumb) thumb.onclick = (event) => { event.stopPropagation(); openCloseup(point); };
+
+        const editDamageButton = item.querySelector("[data-damage-edit-context]");
+        if (editDamageButton) {
+          editDamageButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            openDamageEditor("detail", currentDamageSide, index);
+          });
+        }
+        item.addEventListener("dblclick", () => openDamageEditor("detail", currentDamageSide, index));
+        $("damageList").appendChild(item);
+      });
+    }
+
+    function openCloseup(point) {
+      if (!point.closeup) return;
+      currentZoom = { card: currentDetailCard, side: currentDamageSide, point, level: 800 };
+      $("zoomKicker").textContent = "Close-up Foto";
+      $("zoomTitle").textContent = point.label || "Close-up";
+      $("zoomDesc").textContent = "Hochgeladenes Detailfoto des Schadens.";
+      $("zoomStage").innerHTML = "";
+      const img = document.createElement("img");
+      img.src = point.closeup;
+      img.alt = "Close-up";
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "contain";
+      img.style.background = "white";
+      $("zoomStage").appendChild(img);
+      $("zoomBackdrop").style.display = "flex";
+    }
+
+    function openZoom(point) {
+      const img = currentDamageSide === "front" ? cardImages(currentDetailCard)[0] : (cardImages(currentDetailCard)[1] || cardImages(currentDetailCard)[0]);
+      if (!img) return;
+      currentZoom = { card: currentDetailCard, side: currentDamageSide, point, level: 800 };
+      const zp = normalizePoint(point);
+      $("zoomKicker").textContent = (currentDamageSide === "front" ? "Vorderseite" : "Rückseite") + " · " + zp.x.toFixed(2) + "% / " + zp.y.toFixed(2) + "%";
+      $("zoomTitle").textContent = point.label;
+      updateZoom();
+      $("zoomBackdrop").style.display = "flex";
+    }
+
+    function updateZoom() {
+      const imgSrc = currentZoom.side === "front"
+        ? cardImages(currentZoom.card)[0]
+        : (cardImages(currentZoom.card)[1] || cardImages(currentZoom.card)[0]);
+
+      const stage = $("zoomStage");
+      const info = $("zoomCropInfo");
+
+      if (!imgSrc || !currentZoom.point) {
+        stage.textContent = "Kein Bild verfügbar";
+        return;
+      }
+
+      document.querySelectorAll(".zoom-button").forEach(btn => {
+        btn.classList.toggle("active", Number(btn.dataset.zoom) === currentZoom.level);
+      });
+
+      stage.innerHTML = "";
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 630;
+      canvas.height = 880;
+      stage.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.onload = function () {
+        const zoomFactor = currentZoom.level / 100;
+
+        const normalizedPoint = normalizePoint(currentZoom.point);
+        const centerX = (normalizedPoint.x / 100) * img.naturalWidth;
+        const centerY = (normalizedPoint.y / 100) * img.naturalHeight;
+
+        let cropW = img.naturalWidth / zoomFactor;
+        let cropH = img.naturalHeight / zoomFactor;
+
+        // Kartenformat im Zoom beibehalten: 63:88
+        const targetRatio = canvas.width / canvas.height;
+        const cropRatio = cropW / cropH;
+
+        if (cropRatio > targetRatio) {
+          cropW = cropH * targetRatio;
+        } else {
+          cropH = cropW / targetRatio;
+        }
+
+        let sx = centerX - cropW / 2;
+        let sy = centerY - cropH / 2;
+
+        sx = Math.max(0, Math.min(img.naturalWidth - cropW, sx));
+        sy = Math.max(0, Math.min(img.naturalHeight - cropH, sy));
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, canvas.width, canvas.height);
+
+        if (info) {
+          info.textContent = "Ausschnitt zentriert auf: " + currentZoom.point.x + "% / " + currentZoom.point.y + "% · Zoom " + (zoomFactor.toString().replace(".", ",")) + "×";
+        }
+      };
+
+      img.onerror = function () {
+        stage.textContent = "Zoom konnte für dieses Bild nicht erstellt werden.";
+        if (info) info.textContent = "Hinweis: Bei externen Bild-URLs kann der Browser Canvas-Zoom blockieren. Hochgeladene Bilder funktionieren zuverlässig.";
+      };
+
+      img.src = imgSrc;
+    }
+
+    function closeDetail() {
+      $("detailBackdrop").style.display = "none";
+      $("zoomBackdrop").style.display = "none";
+      document.body.style.overflow = "auto";
+      currentDetailCard = null;
+    }
+
+    function csvEscape(value) {
+      const content = String(value ?? "");
+      return '"' + content.replaceAll('"', '""') + '"';
+    }
+
+    function financeForCard(card) {
+      const purchase = parseMoney(card.purchasePrice);
+      const sale = parseMoney(card.salePrice);
+      const current = parseMoney(card.value);
+      const target = sale || current;
+      const profit = purchase && target ? target - purchase : 0;
+      const percent = purchase && target ? (profit / purchase) * 100 : 0;
+
+      return { purchase, sale, current, target, profit, percent };
+    }
+
+    function formatProfit(card) {
+      const f = financeForCard(card);
+      if (!f.purchase || !f.target) return "-";
+      const sign = f.profit > 0 ? "+" : "";
+      return sign + formatEuro(f.profit) + " / " + sign + f.percent.toFixed(1).replace(".", ",") + "%";
+    }
+
+    function profitClass(card) {
+      const f = financeForCard(card);
+      if (!f.purchase || !f.target || f.profit === 0) return "profit-neutral";
+      return f.profit > 0 ? "profit-positive" : "profit-negative";
+    }
+
+    function updateProfitPreview() {
+      const preview = $("profitPreview");
+      if (!preview) return;
+
+      const temp = {
+        purchasePrice: $("purchasePrice") ? $("purchasePrice").value : "",
+        salePrice: $("salePrice") ? $("salePrice").value : "",
+        value: $("cardValue") ? $("cardValue").value : ""
+      };
+
+      preview.textContent = formatProfit(temp);
+      preview.className = "profit-pill " + profitClass(temp);
+    }
+
+    function documentationItems(card) {
+      const images = card.images || [];
+      const quality = card.quality || {};
+      const damageCount = (card.damageFront || []).length + (card.damageBack || []).length;
+
+      return [
+        ["Vorderseite", Boolean(images[0])],
+        ["Rückseite", Boolean(images[1])],
+        ["Eigene Note", Boolean(card.grade)],
+        ["Zustand", Boolean(card.condition)],
+        ["Lagerort", Boolean(card.storage)],
+        ["Marktwert", Boolean(card.value)],
+        ["Notizen", Boolean(card.notes)],
+        ["Subgrades", Boolean(quality.centering || quality.corners || quality.edges || quality.surface)],
+        ["Schäden geprüft", damageCount > 0 || Boolean(card.notes)]
+      ];
+    }
+
+    function documentationScore(card) {
+      const items = documentationItems(card);
+      const done = items.filter(item => item[1]).length;
+      return Math.round((done / items.length) * 100);
+    }
+
+    function scoreClass(score) {
+      if (score >= 80) return "doc-score-good";
+      if (score >= 50) return "doc-score-mid";
+      return "doc-score-low";
+    }
+
+    function renderDocScore(card) {
+      const score = documentationScore(card);
+      return `
+        <div class="doc-score ${scoreClass(score)}">
+          <div class="doc-score-head"><span><span class="status-dot ${score >= 80 ? "ok" : score >= 50 ? "warn" : "bad"}"></span>Dokumentation</span><span>${score}%</span></div>
+          <div class="doc-score-bar"><div class="doc-score-fill" style="width:${score}%"></div></div>
+        </div>
+      `;
+    }
+
+    function nextDuplicateId(baseId) {
+      const year = new Date().getFullYear();
+      const existing = new Set(cards.map(card => card.id));
+      let n = cards.length + 1;
+      let candidate = "COL-" + year + "-" + String(n).padStart(4, "0");
+
+      while (existing.has(candidate)) {
+        n++;
+        candidate = "COL-" + year + "-" + String(n).padStart(4, "0");
+      }
+
+      return candidate;
+    }
+
+    function duplicateCard(id) {
+      const original = cards.find(card => card.id === id);
+      if (!original) return;
+
+      const copy = JSON.parse(JSON.stringify(original));
+      copy.id = nextDuplicateId(original.id);
+      copy.name = original.name;
+      copy.favorite = false;
+      copy.createdAt = new Date().toISOString();
+      copy.updatedAt = new Date().toISOString();
+      copy.notes = (copy.notes ? copy.notes + "\n\n" : "") + "Duplikat von " + original.id + ". Bilder/Zustand bitte prüfen.";
+
+      // Bilder und Schäden werden bewusst nicht übernommen, weil jedes Exemplar einzeln dokumentiert werden sollte.
+      copy.images = [];
+      copy.damageFront = [];
+      copy.damageBack = [];
+
+      cards.unshift(copy);
+      saveCards();
+      renderStats();
+      renderCards();
+      showPage("collectionPage");
+      if (typeof showToast === "function") showToast("Exemplar dupliziert: " + copy.id);
+    }
+
+    function damageSummaryText(card) {
+      const points = (card.damageFront || []).concat(card.damageBack || []);
+      if (!points.length) return "keine";
+      return points.map(point => {
+        const category = point.category || "Sonstiges";
+        const severity = point.severity === "high" ? "stark" : point.severity === "medium" ? "mittel" : "leicht";
+        return (point.label || "Schaden") + " (" + category + ", " + severity + ")";
+      }).join(" | ");
+    }
+
+    function exportCsv() {
+      const headers = [
+        "ID",
+        "Name",
+        "Kartennummer",
+        "Set",
+        "Seltenheit",
+        "Sprache",
+        "Status",
+        "Tags",
+        "Eigene Note",
+        "Zustand",
+        "Lagerort",
+        "Marktwert",
+        "Einkaufspreis",
+        "Verkaufspreis",
+        "Gewinn/Verlust",
+        "Plattform",
+        "Gekauft am",
+        "Verkauft am",
+        "Favorit",
+        "Vorderseite vorhanden",
+        "Rückseite vorhanden",
+        "Anzahl Schäden",
+        "Dokumentation %",
+        "Schäden",
+        "Notizen",
+        "Erstellt",
+        "Aktualisiert"
+      ];
+
+      const rows = cards.map(card => {
+        const images = card.images || [];
+        const damageCount = (card.damageFront || []).length + (card.damageBack || []).length;
+
+        return [
+          card.id,
+          card.name,
+          card.number,
+          card.set,
+          card.rarity,
+          card.language,
+          card.status,
+          (card.tags || []).join(", "),
+          card.grade,
+          card.condition,
+          card.storage,
+          card.value,
+          card.purchasePrice || "",
+          card.salePrice || "",
+          formatProfit(card),
+          card.platform || "",
+          card.purchaseDate || "",
+          card.saleDate || "",
+          card.favorite ? "ja" : "nein",
+          images[0] ? "ja" : "nein",
+          images[1] ? "ja" : "nein",
+          damageCount,
+          documentationScore(card),
+          damageSummaryText(card),
+          card.notes,
+          card.createdAt,
+          card.updatedAt || card.createdAt
+        ].map(csvEscape).join(";");
+      });
+
+      const csv = "\ufeff" + [headers.map(csvEscape).join(";")].concat(rows).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "card-vault-export.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      markBackupExported();
+    }
+
+    function renderProDashboard() {
+      const topValueEl = $("topValueCard");
+      if (!topValueEl) return;
+
+      const byValue = cards
+        .filter(card => parseMoney(card.value) > 0)
+        .slice()
+        .sort((a, b) => parseMoney(b.value) - parseMoney(a.value));
+
+      if (byValue[0]) {
+        $("topValueCard").textContent = formatEuro(parseMoney(byValue[0].value));
+        $("topValueCardSub").textContent = byValue[0].name || byValue[0].id;
+      } else {
+        $("topValueCard").textContent = "-";
+        $("topValueCardSub").textContent = "Noch keine Werte eingetragen.";
+      }
+
+      const byGrade = cards
+        .filter(card => parseGrade(card.grade) > 0)
+        .slice()
+        .sort((a, b) => parseGrade(b.grade) - parseGrade(a.grade));
+
+      if (byGrade[0]) {
+        $("bestGradeCard").textContent = byGrade[0].grade;
+        $("bestGradeCardSub").textContent = byGrade[0].name || byGrade[0].id;
+      } else {
+        $("bestGradeCard").textContent = "-";
+        $("bestGradeCardSub").textContent = "Noch keine Bewertung vorhanden.";
+      }
+
+      $("missingBackCount").textContent = cards.filter(card => !(card.images || [])[1]).length;
+
+      $("highDamageCount").textContent = cards.filter(card => {
+        const points = (card.damageFront || []).concat(card.damageBack || []);
+        return points.some(point => point.severity === "high");
+      }).length;
+
+      if ($("profitDashboardValue")) {
+        const totalProfit = cards.reduce((sum, card) => {
+          const f = financeForCard(card);
+          return sum + (f.purchase && f.target ? f.profit : 0);
+        }, 0);
+        $("profitDashboardValue").textContent = formatEuro(totalProfit);
+      }
+    }
+
+    function renderFinanceDetail(card) {
+      const grid = $("detailFinanceGrid");
+      if (!grid) return;
+
+      const f = financeForCard(card);
+
+      grid.innerHTML = `
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Einkaufspreis</div>
+          <div class="finance-summary-value">${escapeHtml(card.purchasePrice || "-")}</div>
+        </div>
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Aktueller Wert</div>
+          <div class="finance-summary-value">${escapeHtml(card.value || "-")}</div>
+        </div>
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Verkaufspreis</div>
+          <div class="finance-summary-value">${escapeHtml(card.salePrice || "-")}</div>
+        </div>
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Gewinn / Verlust</div>
+          <div class="finance-summary-value"><span class="profit-pill ${profitClass(card)}">${formatProfit(card)}</span></div>
+        </div>
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Plattform / Quelle</div>
+          <div class="finance-summary-value">${escapeHtml(card.platform || "-")}</div>
+        </div>
+        <div class="finance-summary-item">
+          <div class="finance-summary-label">Gekauft / Verkauft</div>
+          <div class="finance-summary-value">${escapeHtml(card.purchaseDate || "-")} / ${escapeHtml(card.saleDate || "-")}</div>
+        </div>
+      `;
+    }
+
+    function renderCompletionDetail(card) {
+      const scoreEl = $("detailCompletionScore");
+      const listEl = $("detailCompletionList");
+      if (!scoreEl || !listEl) return;
+
+      const score = documentationScore(card);
+      scoreEl.innerHTML = "Dokumentation: <strong>" + score + "%</strong>";
+
+      listEl.innerHTML = documentationItems(card).map(item => {
+        return `
+          <div class="completion-item">
+            <span>${escapeHtml(item[0])}</span>
+            <span class="${item[1] ? "completion-ok" : "completion-missing"}">${item[1] ? "vorhanden" : "fehlt"}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function cardUpdatedTime(card) {
+      return new Date(card.updatedAt || card.createdAt || 0).getTime();
+    }
+
+    function shortDate(value) {
+      if (!value) return "-";
+      try {
+        return new Intl.DateTimeFormat("de-DE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit"
+        }).format(new Date(value));
+      } catch {
+        return "-";
+      }
+    }
+
+    function cardTodoReason(card) {
+      const reasons = [];
+      if (!(card.images || [])[0]) reasons.push("Vorderseite fehlt");
+      if (!(card.images || [])[1]) reasons.push("Rückseite fehlt");
+      if (!card.grade) reasons.push("Note fehlt");
+      if (!card.condition) reasons.push("Zustand fehlt");
+      if (typeof documentationScore === "function" && documentationScore(card) < 80) reasons.push("Dokumentation unvollständig");
+      return reasons;
+    }
+
+    function renderRecentDashboard() {
+      const recentEl = $("recentCardsList");
+      const todoEl = $("todoCardsList");
+      if (!recentEl || !todoEl) return;
+
+      const recent = cards
+        .slice()
+        .sort((a, b) => cardUpdatedTime(b) - cardUpdatedTime(a))
+        .slice(0, 5);
+
+      if (!recent.length) {
+        recentEl.innerHTML = '<div class="recent-empty">Noch keine Karten in der Sammlung.</div>';
+      } else {
+        recentEl.innerHTML = recent.map(card => `
+          <button class="recent-item" type="button" data-open-card="${escapeHtml(card.id)}">
+            <div class="recent-item-title">${escapeHtml(card.name || card.id)}</div>
+            <div class="recent-item-sub">${escapeHtml(card.number || "-")} · Note ${escapeHtml(card.grade || "-")} · ${shortDate(card.updatedAt || card.createdAt)}</div>
+          </button>
+        `).join("");
+      }
+
+      const todos = cards
+        .map(card => ({ card, reasons: cardTodoReason(card) }))
+        .filter(item => item.reasons.length)
+        .sort((a, b) => a.reasons.length - b.reasons.length)
+        .slice(0, 5);
+
+      if (!todos.length) {
+        todoEl.innerHTML = '<div class="recent-empty">Alles sieht vollständig aus.</div>';
+      } else {
+        todoEl.innerHTML = todos.map(item => `
+          <button class="recent-item" type="button" data-open-card="${escapeHtml(item.card.id)}">
+            <div class="recent-item-title">${escapeHtml(item.card.name || item.card.id)}</div>
+            <div class="recent-item-sub">${escapeHtml(item.reasons.slice(0, 3).join(" · "))}</div>
+            <span class="todo-pill">${item.reasons.length} To-do${item.reasons.length === 1 ? "" : "s"}</span>
+          </button>
+        `).join("");
+      }
+
+      document.querySelectorAll("[data-open-card]").forEach(button => {
+        button.addEventListener("click", () => openDetail(button.dataset.openCard));
+      });
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify({ app: "Card Vault", version: "stable-v1", cards }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "card-vault-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      markBackupExported();
+    }
+
+    function analyzeImport(imported) {
+      const existingIds = new Set(cards.map(card => card.id));
+      const duplicates = imported.filter(card => existingIds.has(card.id)).length;
+      return {
+        total: imported.length,
+        duplicates,
+        fresh: imported.length - duplicates
+      };
+    }
+
+    function openImportChoice(imported) {
+      pendingImportCards = imported;
+      const stats = analyzeImport(imported);
+
+      $("importCountStat").textContent = stats.total;
+      $("importNewStat").textContent = stats.fresh;
+      $("importDuplicateStat").textContent = stats.duplicates;
+
+      $("importChoiceText").textContent = stats.duplicates
+        ? "Der Import enthält IDs, die bereits in deiner Sammlung vorhanden sind."
+        : "Alle importierten Karten haben neue IDs.";
+
+      $("importChoiceBackdrop").classList.add("active");
+    }
+
+    function closeImportChoice() {
+      pendingImportCards = [];
+      $("importChoiceBackdrop").classList.remove("active");
+      if ($("importFile")) $("importFile").value = "";
+    }
+
+    function finishImport(mode) {
+      if (!pendingImportCards.length) {
+        closeImportChoice();
+        return;
+      }
+
+      if (mode === "replace") {
+        if (!confirm("Aktuelle Sammlung wirklich vollständig ersetzen?")) return;
+        cards = pendingImportCards;
+      }
+
+      if (mode === "only-new") {
+        const existingIds = new Set(cards.map(card => card.id));
+        const fresh = pendingImportCards.filter(card => !existingIds.has(card.id));
+        cards = fresh.concat(cards);
+      }
+
+      if (mode === "merge") {
+        const map = new Map(cards.map(card => [card.id, card]));
+        pendingImportCards.forEach(card => {
+          map.set(card.id, card);
+        });
+        cards = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      }
+
+      saveCards();
+      renderStats();
+      renderCards();
+      closeImportChoice();
+      showPage("collectionPage");
+
+      if (typeof showToast === "function") showToast("Import abgeschlossen");
+    }
+
+    function importData(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          const imported = Array.isArray(data) ? data : data.cards;
+          if (!Array.isArray(imported)) throw new Error("Keine Kartenliste.");
+          openImportChoice(imported);
+        } catch {
+          alert("Import fehlgeschlagen.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateBackupReminder();
+      if ($("backupNowBtn")) $("backupNowBtn").addEventListener("click", exportData);
+      if ($("backupDismissBtn")) $("backupDismissBtn").addEventListener("click", dismissBackupReminder);
+
+      initTheme();
+      if ($("themeToggleBtn")) $("themeToggleBtn").addEventListener("click", toggleTheme);
+
+      document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+
+      document.addEventListener("click", function(event) {
+        const cardEditButton = event.target.closest("[data-card-edit]");
+        if (cardEditButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          editCard(cardEditButton.dataset.cardEdit);
+          return;
+        }
+
+        const damageEditButton = event.target.closest("[data-damage-edit-context]");
+        if (damageEditButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          const context = damageEditButton.dataset.damageEditContext;
+          const side = damageEditButton.dataset.damageEditSide;
+          const index = Number(damageEditButton.dataset.damageEditIndex);
+          openDamageEditor(context, side, index);
+          return;
+        }
+      });
+
+
+      $("frontFile").addEventListener("change", handleFrontUpload);
+      $("backFile").addEventListener("change", handleBackUpload);
+      $("extraFiles").addEventListener("change", handleExtraUpload);
+
+      $("rotateFrontLeftBtn").addEventListener("click", () => rotateFront("left"));
+      $("rotateFrontRightBtn").addEventListener("click", () => rotateFront("right"));
+      $("rotateBackLeftBtn").addEventListener("click", () => rotateBack("left"));
+      $("rotateBackRightBtn").addEventListener("click", () => rotateBack("right"));
+      $("removeFrontBtn").addEventListener("click", removeFrontImage);
+      $("removeBackBtn").addEventListener("click", removeBackImage);
+      ["purchasePrice","salePrice","cardValue"].forEach(id => {
+        if ($(id)) $(id).addEventListener("input", updateProfitPreview);
+      });
+
+      if ($("addTagBtn")) $("addTagBtn").addEventListener("click", addFormTag);
+      if ($("tagInput")) {
+        $("tagInput").addEventListener("keydown", event => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            addFormTag();
+          }
+        });
+      }
+
+      $("saveCardBtn").addEventListener("click", saveCard);
+      $("cancelEditBtn").addEventListener("click", resetForm);
+
+      $("markFrontBtn").addEventListener("click", () => {
+        currentMarkerSide = "front";
+        fineCropReady = false;
+        fineCenter = { x: 50, y: 50 };
+        renderMarkerEditor();
+      });
+      $("markBackBtn").addEventListener("click", () => {
+        currentMarkerSide = "back";
+        fineCropReady = false;
+        fineCenter = { x: 50, y: 50 };
+        renderMarkerEditor();
+      });
+      $("fineModeBtn").addEventListener("click", () => {
+        fineMode = !fineMode;
+        fineCropReady = false;
+        fineCenter = { x: 50, y: 50 };
+        renderMarkerEditor();
+      });
+      $("clearMarkersBtn").addEventListener("click", () => {
+        if (currentMarkerSide === "front") markersFront = [];
+        else markersBack = [];
+        renderMarkerEditor();
+      });
+
+      $("markerCard").addEventListener("mousemove", event => {
+        // Feinmarkierung ist bewusst zweistufig:
+        // 1. grob klicken, 2. im fixierten Ausschnitt exakt markieren.
+      });
+
+      document.addEventListener("mousemove", moveDragMarker);
+      document.addEventListener("mouseup", endDragMarker);
+      document.addEventListener("touchmove", function (event) {
+        if (!draggingMarker || !event.touches || !event.touches.length) return;
+        moveDragMarker(event.touches[0]);
+      }, { passive: false });
+      document.addEventListener("touchend", endDragMarker);
+
+      $("markerCard").addEventListener("click", event => {
+        if (!currentMarkerImage()) {
+          alert(currentMarkerSide === "front" ? "Bitte zuerst die Vorderseite hochladen." : "Bitte zuerst die Rückseite hochladen.");
+          return;
+        }
+        const pos = markerPositionFromEvent(event, $("markerCard"));
+        if (fineMode) {
+          fineCropReady = true;
+          updateFineStage(pos.x, pos.y);
+          renderMarkerEditor();
+        } else {
+          addMarker(pos.x, pos.y);
+        }
+      });
+
+      $("fineStage").addEventListener("click", event => {
+        if (!currentMarkerImage()) return;
+        if (!fineCropReady || !fineCrop) {
+          alert("Bitte zuerst im normalen Kartenbild grob auf die Schadensstelle klicken.");
+          return;
+        }
+
+        const rect = $("fineStage").getBoundingClientRect();
+        const localX = Math.min(rect.width, Math.max(0, event.clientX - rect.left));
+        const localY = Math.min(rect.height, Math.max(0, event.clientY - rect.top));
+
+        // Klick im Canvas-Ausschnitt zurück auf die Originalkarte 630x880 rechnen.
+        const imageX = fineCrop.sx + (localX / rect.width) * fineCrop.cropW;
+        const imageY = fineCrop.sy + (localY / rect.height) * fineCrop.cropH;
+
+        const x = Math.min(100, Math.max(0, (imageX / 630) * 100));
+        const y = Math.min(100, Math.max(0, (imageY / 880) * 100));
+
+        addMarker(x, y);
+        fineCropReady = false;
+        fineCrop = null;
+        renderMarkerEditor();
+      });
+
+      document.querySelectorAll("[data-quick-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          activeQuickFilter = button.dataset.quickFilter;
+          if (activeQuickFilter === "all") $("favoriteFilter").value = "";
+          renderCards();
+        });
+      });
+
+      ["searchInput","statusFilter","conditionFilter","sortSelect","favoriteFilter"].forEach(id => $(id).addEventListener("input", () => {
+        renderCards();
+        applyViewPreferences();
+      }));
+      ["statusFilter","conditionFilter","sortSelect","favoriteFilter"].forEach(id => $(id).addEventListener("change", renderCards));
+
+      $("listViewBtn").addEventListener("click", () => {
+        $("cardsList").classList.remove("grid-view");
+        $("listViewBtn").classList.add("active");
+        $("gridViewBtn").classList.remove("active");
+        applyViewPreferences();
+      });
+      if ($("compactViewBtn")) $("compactViewBtn").addEventListener("click", () => {
+        compactView = !compactView;
+        renderCards();
+      });
+
+      $("gridViewBtn").addEventListener("click", () => {
+        $("cardsList").classList.add("grid-view");
+        $("gridViewBtn").classList.add("active");
+        $("listViewBtn").classList.remove("active");
+        applyViewPreferences();
+      });
+
+      $("exportBtn").addEventListener("click", exportData);
+      if ($("csvExportBtn")) $("csvExportBtn").addEventListener("click", exportCsv);
+      $("importBtn").addEventListener("click", () => $("importFile").click());
+      $("importFile").addEventListener("change", () => {
+        const file = $("importFile").files[0];
+        if (file) importData(file);
+      });
+
+      $("checkBtn").addEventListener("click", () => {
+        const id = $("checkInput").value.trim();
+        const card = cards.find(c => c.id === id);
+        const result = $("checkResult");
+        if (!id) {
+          result.className = "tool-message error";
+          result.textContent = "Bitte eine Sammlungs-ID eingeben.";
+          return;
+        }
+        if (!card) {
+          result.className = "tool-message error";
+          result.textContent = "Diese Sammlungs-ID wurde nicht gefunden.";
+          return;
+        }
+        result.className = "tool-message success";
+        result.innerHTML = "Karte gefunden: <strong>" + escapeHtml(card.name) + "</strong> · Note " + escapeHtml(card.grade || "-");
+        openDetail(card.id);
+      });
+
+      $("detailEditBtn").onclick = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (currentDetailCard) editCard(currentDetailCard.id);
+        return false;
+      };
+      $("closeDetailBtn").addEventListener("click", closeDetail);
+      $("detailBackdrop").addEventListener("click", event => { if (event.target === $("detailBackdrop")) closeDetail(); });
+
+      $("damageFrontBtn").addEventListener("click", () => { currentDamageSide = "front"; renderDamageMap(); });
+      $("damageBackBtn").addEventListener("click", () => { currentDamageSide = "back"; renderDamageMap(); });
+
+      $("closeDamageEditBtn").addEventListener("click", closeDamageEditor);
+      $("cancelDamageEditBtn").addEventListener("click", closeDamageEditor);
+      $("saveDamageEditBtn").addEventListener("click", saveDamageEditor);
+      $("deleteDamageEditBtn").addEventListener("click", deleteDamageEditor);
+      $("damageEditCloseupFile").addEventListener("change", async () => {
+        const file = $("damageEditCloseupFile").files[0];
+        if (!file) return;
+        damageEditCloseupData = await readFile(file);
+        setCloseupPreview($("damageEditCloseupPreview"), damageEditCloseupData);
+      });
+      $("damageEditBackdrop").addEventListener("click", event => { if (event.target === $("damageEditBackdrop")) closeDamageEditor(); });
+
+      $("closeZoomBtn").addEventListener("click", () => $("zoomBackdrop").style.display = "none");
+      $("zoomBackdrop").addEventListener("click", event => { if (event.target === $("zoomBackdrop")) $("zoomBackdrop").style.display = "none"; });
+      document.querySelectorAll(".zoom-button").forEach(btn => btn.addEventListener("click", () => {
+        currentZoom.level = Number(btn.dataset.zoom);
+        updateZoom();
+      }));
+
+      restoreViewPreferences();
+      refreshPreviews();
+      renderMarkerEditor();
+      renderStats();
+      renderCards();
+    });
+  </script>
+</body>
+</html>
