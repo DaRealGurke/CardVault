@@ -4252,6 +4252,314 @@
       border-color: rgba(255,210,133,0.18);
     }
 
+
+    .collection-options-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .collection-options-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      width: min(310px, calc(100vw - 32px));
+      border-radius: 24px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.20);
+      backdrop-filter: blur(22px);
+      padding: 10px;
+      display: none;
+      z-index: 130;
+    }
+
+    .collection-options-menu.active {
+      display: grid;
+      gap: 8px;
+    }
+
+    .collection-options-title {
+      padding: 8px 10px 4px;
+      color: #86868b;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .collection-options-button {
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: #111;
+      padding: 11px 12px;
+      font-size: 13px;
+      font-weight: 760;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      display: grid;
+      gap: 3px;
+    }
+
+    .collection-options-button:hover {
+      background: #f5f5f7;
+    }
+
+    .collection-options-button span {
+      color: #6e6e73;
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .collection-options-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.08);
+      margin: 4px 6px;
+    }
+
+    body.dark .collection-options-menu {
+      background: rgba(28,28,32,0.96);
+      border-color: rgba(255,255,255,0.10);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.42);
+    }
+
+    body.dark .collection-options-button {
+      color: #f5f5f7;
+    }
+
+    body.dark .collection-options-button:hover {
+      background: #2c2c31;
+    }
+
+    body.dark .collection-options-button span,
+    body.dark .collection-options-title {
+      color: #a1a1a6;
+    }
+
+    body.dark .collection-options-divider {
+      background: rgba(255,255,255,0.10);
+    }
+
+    @media (max-width: 760px) {
+      .collection-options-menu {
+        right: auto;
+        left: 0;
+      }
+    }
+
+
+    /* Sammlung: dauerhaft kompakte Galerieansicht */
+    #cardsList.cards,
+    .cards {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+      gap: 14px !important;
+    }
+
+    .card-item,
+    .collection-card,
+    .card-row {
+      min-width: 0;
+    }
+
+    body.force-gallery .cards {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+      gap: 14px !important;
+    }
+
+    body.force-gallery .card-row,
+    body.force-gallery .card-item {
+      border-radius: 22px;
+    }
+
+    @media (max-width: 760px) {
+      #cardsList.cards,
+      .cards,
+      body.force-gallery .cards {
+        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+        gap: 12px !important;
+      }
+    }
+
+
+    .card-actions-menu-wrap {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 20;
+    }
+
+    .card-actions-trigger {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.88);
+      color: #111;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+      backdrop-filter: blur(14px);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      font-family: inherit;
+    }
+
+    .card-actions-trigger:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .card-actions-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: 178px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.20);
+      backdrop-filter: blur(18px);
+      padding: 7px;
+      display: none;
+      z-index: 35;
+    }
+
+    .card-actions-menu.active {
+      display: grid;
+      gap: 5px;
+    }
+
+    .card-action-menu-button {
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: #111;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .card-action-menu-button:hover {
+      background: #f5f5f7;
+    }
+
+    .card-action-menu-button.danger {
+      color: #b42318;
+    }
+
+    .card-action-menu-button.danger:hover {
+      background: #fff1f1;
+    }
+
+    .card-actions,
+    .card-buttons,
+    .row-actions {
+      display: none !important;
+    }
+
+    .card,
+    .card-item,
+    .collection-card,
+    .card-row {
+      position: relative;
+      overflow: visible;
+    }
+
+    body.dark .card-actions-trigger {
+      background: rgba(28,28,32,0.88);
+      color: #f5f5f7;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.34);
+    }
+
+    body.dark .card-actions-trigger:hover {
+      background: #2c2c31;
+    }
+
+    body.dark .card-actions-menu {
+      background: rgba(28,28,32,0.96);
+      border-color: rgba(255,255,255,0.10);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.42);
+    }
+
+    body.dark .card-action-menu-button {
+      color: #f5f5f7;
+    }
+
+    body.dark .card-action-menu-button:hover {
+      background: #2c2c31;
+    }
+
+    body.dark .card-action-menu-button.danger {
+      color: #ffb4ab;
+    }
+
+    body.dark .card-action-menu-button.danger:hover {
+      background: rgba(180,35,24,0.18);
+    }
+
+
+    .edit-button,
+    .duplicate-button,
+    .delete-button {
+      display: none !important;
+    }
+
+    .compact-card-tools {
+      display: flex !important;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .compact-card-tools .favorite-button {
+      min-width: 38px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+
+    .card-actions-menu-wrap,
+    .card-actions-trigger,
+    .card-actions-menu {
+      pointer-events: auto !important;
+    }
+
+    .card-actions-menu-wrap {
+      z-index: 80 !important;
+    }
+
+    .card-actions-menu {
+      z-index: 100 !important;
+    }
+
+    .card-actions-menu.active {
+      display: grid !important;
+    }
+
+    #cardsList {
+      overflow: visible !important;
+    }
+
+
+    #collectionPage .section-head {
+      margin-bottom: 14px;
+    }
+
+    #collectionPage .collection-dashboard,
+    #collectionPage .stats-grid,
+    #collectionPage .summary-grid,
+    #collectionPage .pro-dashboard,
+    #collectionPage .collection-stats {
+      display: none !important;
+    }
+
 </style>
 </head>
 <body>
@@ -4705,15 +5013,9 @@
           <div>
             <div class="section-kicker">Sammlung</div>
             <h2>Meine Karten</h2>
-            <div class="keyboard-hint"><span class="kbd">/</span> Suche <span class="kbd">N</span> Neue Karte <span class="kbd">Q</span> Schnell <span class="kbd">A</span> Auswahl <span class="kbd">←/→</span> Details</div>
           </div>
           <div class="collection-header-actions">
             <div class="auto-market-box" id="autoMarketStatus">Auto-Load: erwartet <strong>price_guide_18.json</strong> und <strong>products_singles_18.json</strong> im gleichen Ordner wie diese HTML-Datei.</div>
-            <button class="soft-button" id="openQuickAddBtn" type="button">Schnellerfassung</button>
-            <button class="soft-button" id="openTrashBtn" type="button">Papierkorb</button>
-            <button class="soft-button" id="toggleSelectModeBtn" type="button">Auswahlmodus</button>
-            <button class="soft-button" id="toggleFiltersBtn" type="button">Filter ausblenden</button>
-            <button class="soft-button" id="resetFiltersBtn" type="button">Filter zurücksetzen</button>
             <div class="hint"><span id="resultCount">0</span> Ergebnisse</div>
           </div>
         </div>
@@ -4740,13 +5042,11 @@
 
         <div class="analysis-strip">
           <div class="analysis-card">
-            <div class="analysis-label">Durchschnittliche Note</div>
-            <div class="analysis-value" id="averageGradeStat">-</div>
+            
             <div class="analysis-sub">Basierend auf gefilterten Karten.</div>
           </div>
           <div class="analysis-card">
-            <div class="analysis-label">Ø Dokumentation</div>
-            <div class="analysis-value" id="averageDocStat">-</div>
+            
             <div class="analysis-sub">Vollständigkeit der gefilterten Karten.</div>
           </div>
           <div class="analysis-card">
@@ -4808,37 +5108,50 @@
         </div>
 
         <div class="toolbar-extra">
-          <div class="control-panel">
-            <label for="sortSelect">Sortieren</label>
-            <select id="sortSelect">
-              <option value="newest">Neueste zuerst</option>
-              <option value="name">Name A–Z</option>
-              <option value="value-desc">Wert absteigend</option>
-              <option value="value-asc">Wert aufsteigend</option>
-              <option value="grade-desc">Note absteigend</option>
-              <option value="grade-asc">Note aufsteigend</option>
-              <option value="doc-desc">Dokumentation absteigend</option>
-              <option value="doc-asc">Dokumentation aufsteigend</option>
-              <option value="profit-desc">Gewinn absteigend</option>
-              <option value="profit-asc">Gewinn aufsteigend</option>
-              <option value="updated-desc">Zuletzt aktualisiert</option>
-            </select>
-          </div>
-          <div class="control-panel">
-            <label for="favoriteFilter">Favoriten</label>
-            <select id="favoriteFilter">
-              <option value="">Alle Karten</option>
-              <option value="favorites">Nur Favoriten</option>
-            </select>
-          </div>
+          
           <div class="view-toggle">
-            <button class="view-button active" id="listViewBtn" type="button">Listenansicht</button>
-            <button class="view-button" id="gridViewBtn" type="button">Galerieansicht</button>
-            <button class="view-density-toggle" id="compactViewBtn" type="button">Kompakt</button>
-            <button class="secondary-button" id="exportBtn" type="button">Backup</button>
-            <button class="secondary-button" id="csvExportBtn" type="button">CSV für Excel</button>
-            <button class="secondary-button" id="importBtn" type="button">Import</button>
             <input id="importFile" type="file" accept="application/json,.json" style="display:none;" />
+            <div class="collection-options-wrap">
+              <button class="secondary-button" id="openCollectionOptionsBtn" type="button">Sammlungsoptionen</button>
+              <div class="collection-options-menu" id="collectionOptionsMenu">
+                <div class="collection-options-title">Sammlung</div>
+                <button class="collection-options-button" id="menuExportBackupBtn" type="button">
+                  Backup erstellen
+                  <span>Exportiert deine Sammlung als JSON-Backup.</span>
+                </button>
+                <button class="collection-options-button" id="menuCsvExportBtn" type="button">
+                  CSV für Excel
+                  <span>Exportiert deine Sammlung als CSV-Datei.</span>
+                </button>
+                <button class="collection-options-button" id="menuImportBackupBtn" type="button">
+                  Backup importieren
+                  <span>Importiert ein gespeichertes JSON-Backup.</span>
+                </button>
+                <div class="collection-options-divider"></div>
+                <button class="collection-options-button" id="menuToggleFiltersBtn" type="button">
+                  Filter anzeigen/ausblenden
+                  <span>Blendet die Filterleiste ein oder aus.</span>
+                </button>
+                <button class="collection-options-button" id="menuResetFiltersBtn" type="button">
+                  Filter zurücksetzen
+                  <span>Setzt Suche, Filter und Sortierung zurück.</span>
+                </button>
+                <div class="collection-options-divider"></div>
+                <button class="collection-options-button" id="menuToggleSelectModeBtn" type="button">
+                  Auswahlmodus
+                  <span>Mehrere Karten auswählen und gemeinsam bearbeiten.</span>
+                </button>
+                <button class="collection-options-button" id="menuOpenTrashBtn" type="button">
+                  Papierkorb
+                  <span>Gelöschte Karten ansehen oder wiederherstellen.</span>
+                </button>
+                <div class="collection-options-divider"></div>
+                <button class="collection-options-button" id="menuOpenQuickAddBtn" type="button">
+                  Schnellerfassung
+                  <span>Optional: Karte grob vormerken und später ergänzen.</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -5213,7 +5526,7 @@
     let selectionMode = false;
     let selectedCardIds = new Set();
     let lastRenderedCardIds = [];
-    let compactView = localStorage.getItem("cardVaultCompactView") === "true";
+    let compactView = true;
     let pendingImportCards = [];
     let cardmarketPrices = loadCardmarketPrices();
     let cardmarketProducts = loadCardmarketProducts();
@@ -5304,6 +5617,7 @@
       saveCards();
       saveTrash();
       renderStats();
+      enforceGalleryView();
       renderCards();
       updateMobileNav("overviewPage");
       updateScrollTopButton();
@@ -5559,6 +5873,18 @@
 
       const btn = $("themeToggleBtn");
       if (btn) btn.textContent = dark ? "☀️ Hell" : "🌙 Dunkel";
+    }
+
+    function toggleCollectionOptionsMenu(force) {
+      const menu = $("collectionOptionsMenu");
+      if (!menu) return;
+
+      const shouldOpen = typeof force === "boolean" ? force : !menu.classList.contains("active");
+      menu.classList.toggle("active", shouldOpen);
+    }
+
+    function closeCollectionOptionsMenu() {
+      toggleCollectionOptionsMenu(false);
     }
 
     function toggleOptionsMenu(force) {
@@ -6526,6 +6852,7 @@
           if ($("cardReportBackdrop")) closeCardReport();
           if ($("quickAddBackdrop")) closeQuickAdd();
           closeOptionsMenu();
+          closeCollectionOptionsMenu();
           return;
         }
 
@@ -6577,19 +6904,19 @@
       const graded = filtered.map(card => parseGrade(card.grade)).filter(value => value > 0);
       if (graded.length) {
         const avg = graded.reduce((sum, value) => sum + value, 0) / graded.length;
-        $("averageGradeStat").textContent = avg.toFixed(1).replace(".", ",");
+        textIfExists("averageGradeStat", avg.toFixed(1).replace(".", ","));
       } else {
-        $("averageGradeStat").textContent = "-";
+        textIfExists("averageGradeStat", "-");
       }
 
       if (filtered.length) {
         const avgDoc = filtered.reduce((sum, card) => sum + documentationScore(card), 0) / filtered.length;
-        $("averageDocStat").textContent = Math.round(avgDoc) + "%";
+        textIfExists("averageDocStat", Math.round(avgDoc) + "%");
       } else {
-        $("averageDocStat").textContent = "-";
+        textIfExists("averageDocStat", "-");
       }
 
-      $("valuedCardsStat").textContent = filtered.filter(card => parseMoney(card.value) > 0).length;
+      textIfExists("valuedCardsStat", filtered.filter(card => parseMoney(card.value) > 0).length);
     }
 
     function normalizeTag(value) {
@@ -6732,11 +7059,11 @@
     }
 
     function resetAllFilters() {
-      if ($("searchInput")) $("searchInput").value = "";
-      if ($("statusFilter")) $("statusFilter").value = "";
-      if ($("conditionFilter")) $("conditionFilter").value = "";
-      if ($("favoriteFilter")) $("favoriteFilter").value = "";
-      if ($("sortSelect")) $("sortSelect").value = "newest";
+      setValueIfExists("searchInput", "");
+      setValueIfExists("statusFilter", "");
+      setValueIfExists("conditionFilter", "");
+      setValueIfExists("favoriteFilter", "");
+      setValueIfExists("sortSelect", "newest");
       activeQuickFilter = "all";
       activeTagFilter = "";
       renderCards();
@@ -6765,7 +7092,7 @@
       list.classList.toggle("compact-view", compactView);
       if ($("compactViewBtn")) $("compactViewBtn").classList.toggle("active", compactView);
 
-      localStorage.setItem("cardVaultCompactView", String(compactView));
+      localStorage.setItem("cardVaultCompactView", "true");
       localStorage.setItem("cardVaultSort", $("sortSelect") ? $("sortSelect").value : "newest");
       localStorage.setItem("cardVaultViewMode", list.classList.contains("grid-view") ? "grid" : "list");
     }
@@ -6891,26 +7218,26 @@
 
     function currentViewState() {
       return {
-        search: $("searchInput") ? $("searchInput").value : "",
-        status: $("statusFilter") ? $("statusFilter").value : "",
-        condition: $("conditionFilter") ? $("conditionFilter").value : "",
-        sort: $("sortSelect") ? $("sortSelect").value : "newest",
-        favorite: $("favoriteFilter") ? $("favoriteFilter").value : "",
+        search: valueOf("searchInput"),
+        status: valueOf("statusFilter"),
+        condition: valueOf("conditionFilter"),
+        sort: valueOf("sortSelect", "newest"),
+        favorite: valueOf("favoriteFilter"),
         quick: activeQuickFilter || "all",
         tag: activeTagFilter || "",
-        compact: compactView
+        compact: true
       };
     }
 
     function applyViewState(state) {
-      if ($("searchInput")) $("searchInput").value = state.search || "";
-      if ($("statusFilter")) $("statusFilter").value = state.status || "";
-      if ($("conditionFilter")) $("conditionFilter").value = state.condition || "";
-      if ($("sortSelect")) $("sortSelect").value = state.sort || "newest";
-      if ($("favoriteFilter")) $("favoriteFilter").value = state.favorite || "";
+      setValueIfExists("searchInput", state.search || "");
+      setValueIfExists("statusFilter", state.status || "");
+      setValueIfExists("conditionFilter", state.condition || "");
+      setValueIfExists("sortSelect", state.sort || "newest");
+      setValueIfExists("favoriteFilter", state.favorite || "");
       activeQuickFilter = state.quick || "all";
       activeTagFilter = state.tag || "";
-      compactView = Boolean(state.compact);
+      compactView = true;
       renderCards();
     }
 
@@ -6972,12 +7299,162 @@
       });
     }
 
+    function valueOf(id, fallback = "") {
+      const el = $(id);
+      return el ? el.value : fallback;
+    }
+
+    function setValueIfExists(id, value) {
+      const el = $(id);
+      if (el) el.value = value;
+    }
+
+    function textIfExists(id, value) {
+      const el = $(id);
+      if (el) el.textContent = value;
+    }
+
+    function enforceGalleryView() {
+      compactView = true;
+      if (typeof currentView !== "undefined") currentView = "grid";
+      if (typeof viewMode !== "undefined") viewMode = "grid";
+      document.body.classList.add("force-gallery");
+      const cardsList = $("cardsList");
+      if (cardsList) {
+        cardsList.classList.add("grid-view", "compact-view");
+        cardsList.classList.remove("list-view");
+      }
+    }
+
+    function deleteCard(id) {
+      const card = cards.find(item => item.id === id);
+      if (!card) return;
+      if (!confirm("Karte in den Papierkorb verschieben?")) return;
+      if (typeof moveCardToTrash === "function") moveCardToTrash(card);
+      cards = cards.filter(item => item.id !== id);
+      saveCards();
+      renderStats();
+      renderCards();
+    }
+
+    function setupDelegatedCardActionMenus() {
+      if (window.__cardActionMenuDelegated) return;
+      window.__cardActionMenuDelegated = true;
+
+      document.addEventListener("click", event => {
+        const menuButton = event.target.closest("[data-card-menu]");
+        if (menuButton) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const cardEl = menuButton.closest(".card, .card-item, .collection-card, .card-row");
+          const menu = cardEl ? cardEl.querySelector(".card-actions-menu") : null;
+          if (!menu) return;
+
+          const wasActive = menu.classList.contains("active");
+          closeAllCardActionMenus();
+          menu.classList.toggle("active", !wasActive);
+          return;
+        }
+
+        const editButton = event.target.closest("[data-action-edit]");
+        if (editButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          editCard(editButton.dataset.actionEdit);
+          return;
+        }
+
+        const duplicateButton = event.target.closest("[data-action-duplicate]");
+        if (duplicateButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          duplicateCard(duplicateButton.dataset.actionDuplicate);
+          return;
+        }
+
+        const deleteButton = event.target.closest("[data-action-delete]");
+        if (deleteButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          deleteCard(deleteButton.dataset.actionDelete);
+          return;
+        }
+
+        if (!event.target.closest(".card-actions-menu")) {
+          closeAllCardActionMenus();
+        }
+      }, true);
+    }
+
+    function closeAllCardActionMenus() {
+      document.querySelectorAll(".card-actions-menu.active").forEach(menu => menu.classList.remove("active"));
+    }
+
+    function cssEscapeSafe(value) {
+      if (window.CSS && typeof CSS.escape === "function") return CSS.escape(String(value));
+      return String(value).replace(/"/g, '\"');
+    }
+
+    function bindCardActionMenus() {
+      document.querySelectorAll("[data-card-menu]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const id = button.dataset.cardMenu;
+          const menu = document.querySelector(`[data-card-menu-panel="${cssEscapeSafe(id)}"]`);
+          if (!menu) return;
+
+          const wasActive = menu.classList.contains("active");
+          closeAllCardActionMenus();
+          menu.classList.toggle("active", !wasActive);
+        });
+      });
+
+      document.querySelectorAll("[data-card-menu-panel]").forEach(menu => {
+        menu.addEventListener("click", event => event.stopPropagation());
+      });
+
+      document.querySelectorAll("[data-action-edit]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          editCard(button.dataset.actionEdit);
+        });
+      });
+
+      document.querySelectorAll("[data-action-duplicate]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          duplicateCard(button.dataset.actionDuplicate);
+        });
+      });
+
+      document.querySelectorAll("[data-action-delete]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          closeAllCardActionMenus();
+          deleteCard(button.dataset.actionDelete);
+        });
+      });
+    }
+
     function renderCards() {
-      const query = $("searchInput").value.toLowerCase().trim();
-      const status = $("statusFilter").value;
-      const condition = $("conditionFilter").value;
-      const favorite = $("favoriteFilter").value;
-      const sort = $("sortSelect").value;
+      enforceGalleryView();
+
+      const query = valueOf("searchInput").toLowerCase().trim();
+      const status = valueOf("statusFilter");
+      const condition = valueOf("conditionFilter");
+      const favorite = valueOf("favoriteFilter");
+      const sort = valueOf("sortSelect", "newest");
 
       let filtered = cards.filter(card => {
         const haystack = [card.id, card.name, card.number, card.set, card.rarity, card.language, card.status, card.grade, card.condition, card.storage, card.notes, (card.tags || []).join(" ")].join(" ").toLowerCase();
@@ -7006,14 +7483,15 @@
       lastRenderedCardIds = filtered.map(card => card.id);
       currentDetailOrder = lastRenderedCardIds.slice();
       $("cardsList").innerHTML = "";
-      $("resultCount").textContent = filtered.length;
-      $("filteredCount").textContent = filtered.length;
-      $("filteredValue").textContent = formatEuro(filtered.reduce((sum,c) => sum + parseMoney(c.value), 0));
-      $("favoriteCount").textContent = cards.filter(c => c.favorite).length;
-      $("markedCount").textContent = filtered.filter(c => (c.damageFront || []).length + (c.damageBack || []).length > 0).length;
+      textIfExists("resultCount", filtered.length);
+      textIfExists("filteredCount", filtered.length);
+      textIfExists("filteredValue", formatEuro(filtered.reduce((sum,c) => sum + parseMoney(c.value), 0)));
+      textIfExists("favoriteCount", cards.filter(c => c.favorite).length);
+      textIfExists("markedCount", filtered.filter(c => (c.damageFront || []).length + (c.damageBack || []).length > 0).length);
       renderCollectionAnalysis(filtered);
       updateQuickFilterButtons();
       renderTagCloud();
+      bindCardActionMenus();
       $("emptyState").style.display = filtered.length ? "none" : "block";
 
       filtered.forEach(card => {
@@ -7022,7 +7500,16 @@
         const image = (card.images || [])[0];
         const damageCount = (card.damageFront || []).length + (card.damageBack || []).length;
         el.innerHTML = `
-          <div class="select-card-check">${selectedCardIds.has(card.id) ? "✓" : ""}</div>
+          
+          <div class="card-actions-menu-wrap">
+            <button class="card-actions-trigger" type="button" data-card-menu="${escapeHtml(card.id)}" title="Kartenoptionen" aria-label="Kartenoptionen">⋯</button>
+            <div class="card-actions-menu" data-card-menu-panel="${escapeHtml(card.id)}">
+              <button class="card-action-menu-button" type="button" data-action-edit="${escapeHtml(card.id)}">Bearbeiten</button>
+              <button class="card-action-menu-button" type="button" data-action-duplicate="${escapeHtml(card.id)}">Duplizieren</button>
+              <button class="card-action-menu-button danger" type="button" data-action-delete="${escapeHtml(card.id)}">Löschen</button>
+            </div>
+          </div>
+<div class="select-card-check">${selectedCardIds.has(card.id) ? "✓" : ""}</div>
           <div class="card-image">${image ? `<img src="${image}" alt="${escapeHtml(card.name)}">` : "CARD"}</div>
           <div>
             <div class="tags">
@@ -7049,11 +7536,8 @@
             ${renderDocScore(card)}
             ${!(card.images || [])[1] ? `<span class="missing-pill">Rückseite fehlt</span>` : ""}
           </div>
-          <div class="card-tools">
-            <button class="favorite-button ${card.favorite ? "active" : ""}" type="button">${card.favorite ? "★ Favorit" : "☆ Favorit"}</button>
-            <button class="edit-button" type="button" data-card-edit="${escapeHtml(card.id)}" title="Karte bearbeiten">Bearbeiten</button>
-            <button class="duplicate-button" type="button">Duplizieren</button>
-            <button class="delete-button" type="button">Löschen</button>
+          <div class="card-tools compact-card-tools">
+            <button class="favorite-button ${card.favorite ? "active" : ""}" type="button">${card.favorite ? "★" : "☆"}</button>
           </div>
         `;
 
@@ -7065,22 +7549,14 @@
           }
           openDetail(card.id);
         });
-        el.querySelector(".favorite-button").addEventListener("click", event => {
+        const favoriteButton = el.querySelector(".favorite-button");
+        if (favoriteButton) favoriteButton.addEventListener("click", event => {
           event.stopPropagation();
           card.favorite = !card.favorite;
           saveCards();
           renderCards();
           renderStats();
         });
-        const editButton = el.querySelector(".edit-button");
-        if (editButton) {
-          editButton.onclick = function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            editCard(card.id);
-            return false;
-          };
-        }
 
         const duplicateButton = el.querySelector(".duplicate-button");
         if (duplicateButton) {
@@ -7091,15 +7567,6 @@
           });
         }
 
-        el.querySelector(".delete-button").addEventListener("click", event => {
-          event.stopPropagation();
-          if (!confirm("Karte in den Papierkorb verschieben?")) return;
-          moveCardToTrash(card);
-          cards = cards.filter(c => c.id !== card.id);
-          saveCards();
-          renderCards();
-          renderStats();
-        });
 
         $("cardsList").appendChild(el);
       });
@@ -8765,8 +9232,8 @@
           <button class="market-action-button secondary" type="button" id="copyProductIdBtn">Product-ID kopieren</button>
         `;
 
-        $("applyTrendPriceBtn").addEventListener("click", () => applyMarketPriceToCard(price));
-        $("copyProductIdBtn").addEventListener("click", () => navigator.clipboard?.writeText(String(price.idProduct || "")));
+        if ($("applyTrendPriceBtn")) $("applyTrendPriceBtn").addEventListener("click", () => applyMarketPriceToCard(price));
+        if ($("copyProductIdBtn")) $("copyProductIdBtn").addEventListener("click", () => navigator.clipboard?.writeText(String(price.idProduct || "")));
       }
 
       const product = findCardmarketProduct(card);
@@ -9391,17 +9858,63 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      setupDelegatedCardActionMenus();
       updateBackupReminder();
       if ($("backupNowBtn")) $("backupNowBtn").addEventListener("click", exportData);
       if ($("backupDismissBtn")) $("backupDismissBtn").addEventListener("click", dismissBackupReminder);
 
       initTheme();
+      if ($("openCollectionOptionsBtn")) $("openCollectionOptionsBtn").addEventListener("click", event => {
+        event.stopPropagation();
+        toggleCollectionOptionsMenu();
+      });
+      if ($("collectionOptionsMenu")) $("collectionOptionsMenu").addEventListener("click", event => event.stopPropagation());
+
+      if ($("menuExportBackupBtn")) $("menuExportBackupBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        exportData();
+      });
+      if ($("menuCsvExportBtn")) $("menuCsvExportBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        if (typeof exportCsv === "function") exportCsv();
+      });
+      if ($("menuImportBackupBtn")) $("menuImportBackupBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        const input = $("importFile");
+        if (input) input.click();
+      });
+
+      if ($("menuOpenQuickAddBtn")) $("menuOpenQuickAddBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        openQuickAdd();
+      });
+      if ($("menuOpenTrashBtn")) $("menuOpenTrashBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        openTrash();
+      });
+      if ($("menuToggleSelectModeBtn")) $("menuToggleSelectModeBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        if (typeof toggleSelectMode === "function") toggleSelectMode();
+      });
+      if ($("menuToggleFiltersBtn")) $("menuToggleFiltersBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        if (typeof toggleFilters === "function") toggleFilters();
+      });
+      if ($("menuResetFiltersBtn")) $("menuResetFiltersBtn").addEventListener("click", () => {
+        closeCollectionOptionsMenu();
+        if (typeof resetFilters === "function") resetFilters();
+      });
+
       if ($("openOptionsMenuBtn")) $("openOptionsMenuBtn").addEventListener("click", event => {
         event.stopPropagation();
         toggleOptionsMenu();
       });
       if ($("optionsMenu")) $("optionsMenu").addEventListener("click", event => event.stopPropagation());
-      document.addEventListener("click", closeOptionsMenu);
+      document.addEventListener("click", () => {
+        closeOptionsMenu();
+        closeCollectionOptionsMenu();
+        closeAllCardActionMenus();
+      });
       if ($("optionsThemeBtn")) $("optionsThemeBtn").addEventListener("click", () => {
         toggleTheme();
         closeOptionsMenu();
@@ -9435,16 +9948,16 @@
       });
 
 
-      $("frontFile").addEventListener("change", handleFrontUpload);
-      $("backFile").addEventListener("change", handleBackUpload);
-      $("extraFiles").addEventListener("change", handleExtraUpload);
+      if ($("frontFile")) $("frontFile").addEventListener("change", handleFrontUpload);
+      if ($("backFile")) $("backFile").addEventListener("change", handleBackUpload);
+      if ($("extraFiles")) $("extraFiles").addEventListener("change", handleExtraUpload);
 
-      $("rotateFrontLeftBtn").addEventListener("click", () => rotateFront("left"));
-      $("rotateFrontRightBtn").addEventListener("click", () => rotateFront("right"));
-      $("rotateBackLeftBtn").addEventListener("click", () => rotateBack("left"));
-      $("rotateBackRightBtn").addEventListener("click", () => rotateBack("right"));
-      $("removeFrontBtn").addEventListener("click", removeFrontImage);
-      $("removeBackBtn").addEventListener("click", removeBackImage);
+      if ($("rotateFrontLeftBtn")) $("rotateFrontLeftBtn").addEventListener("click", () => rotateFront("left"));
+      if ($("rotateFrontRightBtn")) $("rotateFrontRightBtn").addEventListener("click", () => rotateFront("right"));
+      if ($("rotateBackLeftBtn")) $("rotateBackLeftBtn").addEventListener("click", () => rotateBack("left"));
+      if ($("rotateBackRightBtn")) $("rotateBackRightBtn").addEventListener("click", () => rotateBack("right"));
+      if ($("removeFrontBtn")) $("removeFrontBtn").addEventListener("click", removeFrontImage);
+      if ($("removeBackBtn")) $("removeBackBtn").addEventListener("click", removeBackImage);
       ["purchasePrice","salePrice","cardValue"].forEach(id => {
         if ($(id)) $(id).addEventListener("input", updateProfitPreview);
       });
@@ -9459,7 +9972,7 @@
 
       if ($("addTimelineBtn")) $("addTimelineBtn").addEventListener("click", addTimelineEntry);
       if ($("timelineText")) {
-        $("timelineText").addEventListener("keydown", event => {
+        if ($("timelineText")) $("timelineText").addEventListener("keydown", event => {
           if (event.key === "Enter") {
             event.preventDefault();
             addTimelineEntry();
@@ -9469,7 +9982,7 @@
 
       if ($("addTagBtn")) $("addTagBtn").addEventListener("click", addFormTag);
       if ($("tagInput")) {
-        $("tagInput").addEventListener("keydown", event => {
+        if ($("tagInput")) $("tagInput").addEventListener("keydown", event => {
           if (event.key === "Enter") {
             event.preventDefault();
             addFormTag();
@@ -9477,34 +9990,34 @@
         });
       }
 
-      $("saveCardBtn").addEventListener("click", saveCard);
-      $("cancelEditBtn").addEventListener("click", resetForm);
+      if ($("saveCardBtn")) $("saveCardBtn").addEventListener("click", saveCard);
+      if ($("cancelEditBtn")) $("cancelEditBtn").addEventListener("click", resetForm);
 
-      $("markFrontBtn").addEventListener("click", () => {
+      if ($("markFrontBtn")) $("markFrontBtn").addEventListener("click", () => {
         currentMarkerSide = "front";
         fineCropReady = false;
         fineCenter = { x: 50, y: 50 };
         renderMarkerEditor();
       });
-      $("markBackBtn").addEventListener("click", () => {
+      if ($("markBackBtn")) $("markBackBtn").addEventListener("click", () => {
         currentMarkerSide = "back";
         fineCropReady = false;
         fineCenter = { x: 50, y: 50 };
         renderMarkerEditor();
       });
-      $("fineModeBtn").addEventListener("click", () => {
+      if ($("fineModeBtn")) $("fineModeBtn").addEventListener("click", () => {
         fineMode = !fineMode;
         fineCropReady = false;
         fineCenter = { x: 50, y: 50 };
         renderMarkerEditor();
       });
-      $("clearMarkersBtn").addEventListener("click", () => {
+      if ($("clearMarkersBtn")) $("clearMarkersBtn").addEventListener("click", () => {
         if (currentMarkerSide === "front") markersFront = [];
         else markersBack = [];
         renderMarkerEditor();
       });
 
-      $("markerCard").addEventListener("mousemove", event => {
+      if ($("markerCard")) $("markerCard").addEventListener("mousemove", event => {
         // Feinmarkierung ist bewusst zweistufig:
         // 1. grob klicken, 2. im fixierten Ausschnitt exakt markieren.
       });
@@ -9517,7 +10030,7 @@
       }, { passive: false });
       document.addEventListener("touchend", endDragMarker);
 
-      $("markerCard").addEventListener("click", event => {
+      if ($("markerCard")) $("markerCard").addEventListener("click", event => {
         if (!currentMarkerImage()) {
           alert(currentMarkerSide === "front" ? "Bitte zuerst die Vorderseite hochladen." : "Bitte zuerst die Rückseite hochladen.");
           return;
@@ -9532,7 +10045,7 @@
         }
       });
 
-      $("fineStage").addEventListener("click", event => {
+      if ($("fineStage")) $("fineStage").addEventListener("click", event => {
         if (!currentMarkerImage()) return;
         if (!fineCropReady || !fineCrop) {
           alert("Bitte zuerst im normalen Kartenbild grob auf die Schadensstelle klicken.");
@@ -9569,34 +10082,15 @@
         applyViewPreferences();
       }));
       ["statusFilter","conditionFilter","sortSelect","favoriteFilter"].forEach(id => $(id).addEventListener("change", renderCards));
-
-      $("listViewBtn").addEventListener("click", () => {
-        $("cardsList").classList.remove("grid-view");
-        $("listViewBtn").classList.add("active");
-        $("gridViewBtn").classList.remove("active");
-        applyViewPreferences();
-      });
-      if ($("compactViewBtn")) $("compactViewBtn").addEventListener("click", () => {
-        compactView = !compactView;
-        renderCards();
-      });
-
-      $("gridViewBtn").addEventListener("click", () => {
-        $("cardsList").classList.add("grid-view");
-        $("gridViewBtn").classList.add("active");
-        $("listViewBtn").classList.remove("active");
-        applyViewPreferences();
-      });
-
-      $("exportBtn").addEventListener("click", exportData);
+if ($("exportBtn")) $("exportBtn").addEventListener("click", exportData);
       if ($("csvExportBtn")) $("csvExportBtn").addEventListener("click", exportCsv);
-      $("importBtn").addEventListener("click", () => $("importFile").click());
-      $("importFile").addEventListener("change", () => {
+      if ($("importBtn")) $("importBtn").addEventListener("click", () => { const input = $("importFile"); if (input) input.click(); });
+      if ($("importFile")) $("importFile").addEventListener("change", () => {
         const file = $("importFile").files[0];
         if (file) importData(file);
       });
 
-      $("checkBtn").addEventListener("click", () => {
+      if ($("checkBtn")) $("checkBtn").addEventListener("click", () => {
         const id = $("checkInput").value.trim();
         const card = cards.find(c => c.id === id);
         const result = $("checkResult");
@@ -9623,26 +10117,26 @@
       };
       if ($("prevDetailBtn")) $("prevDetailBtn").addEventListener("click", () => openAdjacentDetail(-1));
       if ($("nextDetailBtn")) $("nextDetailBtn").addEventListener("click", () => openAdjacentDetail(1));
-      $("closeDetailBtn").addEventListener("click", closeDetail);
-      $("detailBackdrop").addEventListener("click", event => { if (event.target === $("detailBackdrop")) closeDetail(); });
+      if ($("closeDetailBtn")) $("closeDetailBtn").addEventListener("click", closeDetail);
+      if ($("detailBackdrop")) $("detailBackdrop").addEventListener("click", event => { if (event.target === $("detailBackdrop")) closeDetail(); });
 
-      $("damageFrontBtn").addEventListener("click", () => { currentDamageSide = "front"; renderDamageMap(); });
-      $("damageBackBtn").addEventListener("click", () => { currentDamageSide = "back"; renderDamageMap(); });
+      if ($("damageFrontBtn")) $("damageFrontBtn").addEventListener("click", () => { currentDamageSide = "front"; renderDamageMap(); });
+      if ($("damageBackBtn")) $("damageBackBtn").addEventListener("click", () => { currentDamageSide = "back"; renderDamageMap(); });
 
-      $("closeDamageEditBtn").addEventListener("click", closeDamageEditor);
-      $("cancelDamageEditBtn").addEventListener("click", closeDamageEditor);
-      $("saveDamageEditBtn").addEventListener("click", saveDamageEditor);
-      $("deleteDamageEditBtn").addEventListener("click", deleteDamageEditor);
-      $("damageEditCloseupFile").addEventListener("change", async () => {
+      if ($("closeDamageEditBtn")) $("closeDamageEditBtn").addEventListener("click", closeDamageEditor);
+      if ($("cancelDamageEditBtn")) $("cancelDamageEditBtn").addEventListener("click", closeDamageEditor);
+      if ($("saveDamageEditBtn")) $("saveDamageEditBtn").addEventListener("click", saveDamageEditor);
+      if ($("deleteDamageEditBtn")) $("deleteDamageEditBtn").addEventListener("click", deleteDamageEditor);
+      if ($("damageEditCloseupFile")) $("damageEditCloseupFile").addEventListener("change", async () => {
         const file = $("damageEditCloseupFile").files[0];
         if (!file) return;
         damageEditCloseupData = await readFile(file);
         setCloseupPreview($("damageEditCloseupPreview"), damageEditCloseupData);
       });
-      $("damageEditBackdrop").addEventListener("click", event => { if (event.target === $("damageEditBackdrop")) closeDamageEditor(); });
+      if ($("damageEditBackdrop")) $("damageEditBackdrop").addEventListener("click", event => { if (event.target === $("damageEditBackdrop")) closeDamageEditor(); });
 
-      $("closeZoomBtn").addEventListener("click", () => $("zoomBackdrop").style.display = "none");
-      $("zoomBackdrop").addEventListener("click", event => { if (event.target === $("zoomBackdrop")) $("zoomBackdrop").style.display = "none"; });
+      if ($("closeZoomBtn")) $("closeZoomBtn").addEventListener("click", () => $("zoomBackdrop").style.display = "none");
+      if ($("zoomBackdrop")) $("zoomBackdrop").addEventListener("click", event => { if (event.target === $("zoomBackdrop")) $("zoomBackdrop").style.display = "none"; });
       document.querySelectorAll(".zoom-button").forEach(btn => btn.addEventListener("click", () => {
         currentZoom.level = Number(btn.dataset.zoom);
         updateZoom();
