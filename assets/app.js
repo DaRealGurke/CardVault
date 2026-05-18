@@ -1719,7 +1719,7 @@ refreshPreviews();
       return "Normal";
     }
     function updateProfileGradePreview() {
-      if (!$("profileGradePreview") && !document.querySelector("[data-grading-profile-disabled]")) return;}
+      if (!$("gradingProfilePanel")) return;}
 
     function todayIsoDate() {
       return new Date().toISOString().slice(0, 10);

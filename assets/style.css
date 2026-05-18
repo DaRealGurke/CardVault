@@ -4653,10 +4653,12 @@
     }
 
 
+    /* Bewertungsprofil entfernt */
+    #gradingProfilePanel,
     [data-grading-profile],
-    .grading-profile,
-    .profile-grade,
-    .grading-profile-row,
-    .profile-grade-preview {
+    .grading-profile-panel,
+    .grading-profile-tab,
+    .profile-grade-grid,
+    .profile-breakdown {
       display: none !important;
     }
