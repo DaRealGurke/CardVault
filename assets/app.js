@@ -1,4 +1,27 @@
 
+    window.addEventListener("error", event => {
+      const box = document.getElementById("appErrorBox");
+      const message = event && event.error && event.error.stack
+        ? event.error.stack
+        : ((event && event.message) ? event.message : "Unbekannter Scriptfehler");
+      if (box) {
+        box.style.display = "block";
+        box.textContent = "Fehler: " + message;
+      }
+      console.error(event.error || event.message || event);
+    });
+
+    window.addEventListener("unhandledrejection", event => {
+      const box = document.getElementById("appErrorBox");
+      const reason = event.reason && event.reason.stack ? event.reason.stack : String(event.reason || "Unbekannter Promise-Fehler");
+      if (box) {
+        box.style.display = "block";
+        box.textContent = "Fehler: " + reason;
+      }
+      console.error(event.reason || event);
+    });
+
+
     const TRASH_KEY = "cardVaultTrash";
     window.addEventListener("error", function(event) {
       const box = document.getElementById("appErrorBox");
@@ -28,7 +51,7 @@
     let formTags = [];
     let formTimeline = [];
     let activeTagFilter = "";
-    let activeGradingProfile = localStorage.getItem("cardVaultGradingProfile") || "normal";
+    let activeGradingProfile = "normal";
     let currentDetailImageIndex = 0;
     let currentDetailOrder = [];
     let selectionMode = false;
@@ -128,6 +151,7 @@
       enforceGalleryView();
       renderCards();
       updateMobileNav("overviewPage");
+      initializePendingEdit();
       updateScrollTopButton();
       maybeAutoLoadCardmarketData();
       renderTrash();
@@ -445,6 +469,25 @@
       updateMobileNav(current);
     }
 
+    function getQueryParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function isAddPageActiveFile() {
+      return Boolean(document.getElementById("addPage"));
+    }
+
+    function openEditOnAddPage(id) {
+      if (!id) return;
+      localStorage.setItem("cardVaultPendingEditId", id);
+      if (isAddPageActiveFile()) {
+        const card = cards.find(item => item.id === id);
+        if (card) editCard(id, true);
+      } else {
+        window.location.href = "add.html?edit=" + encodeURIComponent(id);
+      }
+    }
+
     function pageIdToHref(pageId) {
       const map = {
         overviewPage: "index.html",
@@ -693,6 +736,7 @@
     }
 
     function refreshPreviews() {
+      if (!$("frontPreview") && !$("backPreview")) return;
       setImagePreview($("frontPreview"), frontImage, "Vorderseite");
       setImagePreview($("backPreview"), backImage, "Rückseite");
       setImagePreview($("extraPreview"), extraImages[0] || "", "Detailbilder");
@@ -700,9 +744,7 @@
       textIfExists("backStatus", backImage ? "Rückseite geladen." : "Kein Bild geladen.");
       textIfExists("extraStatus", extraImages.length ? extraImages.length + " Detailbild(er) geladen." : "Keine Detailbilder geladen.");
       const debug = $("coordinateDebug");
-      if (debug) {
-        debug.textContent = "Letzte Markierung gespeichert:\nSeite: " + (currentMarkerSide === "front" ? "Vorderseite" : "Rückseite") + "\nProzent: " + point.x.toFixed(3) + " / " + point.y.toFixed(3) + "\nPixelbasis: " + point.px + " / " + point.py + "\nHinweis: Die spätere Ansicht verwendet genau diese Pixelbasis.";
-      }
+      if (debug) debug.textContent = "Noch keine Markierung gesetzt.";
 
       renderMarkerEditor();
       updateSmartGradePreview();
@@ -797,15 +839,16 @@
     }
 
     function renderMarkerEditor() {
+      if (!$("markerCard")) return;
       const card = $("markerCard");
       if (!card) return;
       const img = currentMarkerImage();
       const points = currentMarkers();
 
-      $("markFrontBtn").classList.toggle("active", currentMarkerSide === "front");
-      $("markBackBtn").classList.toggle("active", currentMarkerSide === "back");
-      $("fineModeBtn").classList.toggle("active", fineMode);
-      $("fineArea").classList.toggle("active", fineMode);
+      if ($("markFrontBtn")) $("markFrontBtn").classList.toggle("active", currentMarkerSide === "front");
+      if ($("markBackBtn")) $("markBackBtn").classList.toggle("active", currentMarkerSide === "back");
+      if ($("fineModeBtn")) $("fineModeBtn").classList.toggle("active", fineMode);
+      if ($("fineArea")) $("fineArea").classList.toggle("active", fineMode);
 
       setImagePreview(card, img, currentMarkerSide === "front" ? "Vorderseite hochladen" : "Rückseite hochladen");
 
@@ -829,8 +872,9 @@
       }
 
       const list = $("markerList");
+      if (!list) return;
       list.innerHTML = "";
-      $("markerEmpty").style.display = points.length ? "none" : "block";
+      if ($("markerEmpty")) $("markerEmpty").style.display = points.length ? "none" : "block";
 
       points.forEach((point, index) => {
         const item = document.createElement("div");
@@ -1065,18 +1109,18 @@
       editingId = null;
       textIfExists("formHeadline", "Karte zur Sammlung hinzufügen");
       textIfExists("saveCardBtn", "Karte speichern");
-      $("cancelEditBtn").style.display = "none";
+      if ($("cancelEditBtn")) $("cancelEditBtn").style.display = "none";
       ["cardId","cardName","cardNumber","cardmarketProductId","cardSet","cardGrade","cardCondition","cardStorage","cardValue","purchasePrice","purchaseDate","salePrice","saleDate","platform","buyer","cardNotes"].forEach(id => { if ($(id)) $(id).value = ""; });
-      $("cardLanguage").selectedIndex = 0;
-      $("cardStatus").selectedIndex = 0;
+      if ($("cardLanguage")) $("cardLanguage").selectedIndex = 0;
+      if ($("cardStatus")) $("cardStatus").selectedIndex = 0;
       frontImage = "";
       backImage = "";
       extraImages = [];
       markersFront = [];
       markersBack = [];
-      $("frontFile").value = "";
-      $("backFile").value = "";
-      $("extraFiles").value = "";
+      if ($("frontFile")) $("frontFile").value = "";
+      if ($("backFile")) $("backFile").value = "";
+      if ($("extraFiles")) $("extraFiles").value = "";
       selectedCatalogProduct = null;
       if ($("catalogSelectedBox")) {
         $("catalogSelectedBox").classList.remove("active");
@@ -1091,18 +1135,13 @@
       renderFormTags();
       renderFormTimeline();
       if ($("timelineDate")) $("timelineDate").value = todayIsoDate();
-
-      const productForExistingCard = card.marketProductId
-        ? cardmarketProducts.find(product => String(product.idProduct) === String(card.marketProductId))
-        : null;
-      selectedCatalogProduct = productForExistingCard || null;
-      renderInlineCatalogSelection(productForExistingCard);
-      refreshPreviews();
+      renderInlineCatalogSelection(null);
+refreshPreviews();
     }
 
     function saveCard() {
-      const id = $("cardId").value.trim();
-      if (!id || !$("cardName").value.trim() || !$("cardNumber").value.trim() || !$("cardGrade").value.trim()) {
+      const id = valueOf("cardId").trim();
+      if (!id || !valueOf("cardName").trim() || !valueOf("cardNumber").trim() || ($("cardGrade") && !valueOf("cardGrade").trim())) {
         showMessage("Bitte mindestens Sammlungs-ID, Kartenname, Kartennummer und eigene Note eintragen.", "error");
         return;
       }
@@ -1120,17 +1159,17 @@
       const old = editingId ? cards.find(c => c.id === editingId) : null;
       const card = {
         id,
-        name: $("cardName").value.trim(),
-        number: $("cardNumber").value.trim(),
+        name: valueOf("cardName").trim(),
+        number: valueOf("cardNumber").trim(),
         marketProductId: $("cardmarketProductId") ? $("cardmarketProductId").value.trim() : "",
-        set: $("cardSet").value.trim(),
+        set: valueOf("cardSet").trim(),
         rarity: "",
         language: "",
-        status: $("cardStatus").value,
-        grade: $("cardGrade").value.trim(),
-        condition: $("cardCondition").value.trim(),
-        storage: $("cardStorage").value.trim(),
-        value: $("cardValue").value.trim(),
+        status: valueOf("cardStatus", "Behalten"),
+        grade: valueOf("cardGrade").trim(),
+        condition: valueOf("cardCondition").trim(),
+        storage: valueOf("cardStorage").trim(),
+        value: valueOf("cardValue").trim(),
         purchasePrice: $("purchasePrice") ? $("purchasePrice").value.trim() : "",
         purchaseDate: $("purchaseDate") ? $("purchaseDate").value : "",
         salePrice: $("salePrice") ? $("salePrice").value.trim() : "",
@@ -1139,7 +1178,7 @@
         buyer: $("buyer") ? $("buyer").value.trim() : "",
         tags: formTags.slice(),
         timeline: formTimeline.slice(),
-        notes: $("cardNotes").value.trim(),
+        notes: valueOf("cardNotes").trim(),
         images: [frontImage, backImage].concat(extraImages).filter(Boolean),
         damageFront: JSON.parse(JSON.stringify(markersFront)),
         damageBack: JSON.parse(JSON.stringify(markersBack)),
@@ -1166,65 +1205,64 @@
       showPage("collectionPage");
     }
 
-    function editCard(id) {
-      const card = cards.find(c => c.id === id);
-      if (!card) {
-        showToast("Karte zum Bearbeiten nicht gefunden");
+    function editCard(id, stayOnPage = false) {
+      const card = cards.find(item => item.id === id);
+      if (!card) return;
+
+      if (!isAddPageActiveFile() && !stayOnPage) {
+        openEditOnAddPage(id);
         return;
       }
 
       editingId = id;
-      showToast("Bearbeitungsmodus geöffnet");
+      showPage("addPage");
+
       textIfExists("formHeadline", "Karte bearbeiten");
       textIfExists("saveCardBtn", "Änderungen speichern");
-      $("cancelEditBtn").style.display = "inline-flex";
+      if ($("cancelEditBtn")) $("cancelEditBtn").style.display = "inline-flex";
 
-      $("cardId").value = card.id;
-      $("cardName").value = card.name || "";
-      $("cardNumber").value = card.number || "";
-      if ($("cardmarketProductId")) $("cardmarketProductId").value = card.marketProductId || card.idProduct || "";
-      $("cardSet").value = card.set || "";
-      if ($("cardRarity")) if ($("cardRarity")) $("cardRarity").value = card.rarity || "";
-      $("cardLanguage").value = card.language || "English";
-      $("cardStatus").value = card.status || "Behalten";
-      $("cardGrade").value = card.grade || "";
-      $("cardCondition").value = card.condition || "";
-      $("cardStorage").value = card.storage || "";
-      $("cardValue").value = card.value || "";
-      if ($("purchasePrice")) $("purchasePrice").value = card.purchasePrice || "";
-      if ($("purchaseDate")) $("purchaseDate").value = card.purchaseDate || "";
-      if ($("salePrice")) $("salePrice").value = card.salePrice || "";
-      if ($("saleDate")) $("saleDate").value = card.saleDate || "";
-      if ($("platform")) $("platform").value = card.platform || "";
-      if ($("buyer")) $("buyer").value = card.buyer || "";
-      $("cardNotes").value = card.notes || "";
+      setValueIfExists("cardId", card.id || "");
+      setValueIfExists("cardName", card.name || "");
+      setValueIfExists("cardNumber", card.number || "");
+      setValueIfExists("cardmarketProductId", card.marketProductId || card.idProduct || "");
+      setValueIfExists("cardSet", card.set || "");
+      setValueIfExists("cardStatus", card.status || "Behalten");
+      setValueIfExists("cardGrade", card.grade || "");
+      setValueIfExists("cardCondition", card.condition || "");
+      setValueIfExists("cardStorage", card.storage || "");
+      setValueIfExists("cardValue", card.value || "");
+      setValueIfExists("purchasePrice", card.purchasePrice || "");
+      setValueIfExists("purchaseDate", card.purchaseDate || "");
+      setValueIfExists("salePrice", card.salePrice || "");
+      setValueIfExists("saleDate", card.saleDate || "");
+      setValueIfExists("platform", card.platform || "");
+      setValueIfExists("buyer", card.buyer || "");
+      setValueIfExists("cardNotes", card.notes || "");
+
       selectedCatalogProduct = null;
-      formTags = Array.isArray(card.tags) ? card.tags.slice() : [];
-      formTimeline = Array.isArray(card.timeline) ? JSON.parse(JSON.stringify(card.timeline)) : [];
-      renderFormTags();
-      renderFormTimeline();
-      if ($("timelineDate")) $("timelineDate").value = todayIsoDate();
-      updateProfitPreview();
+      if (card.marketProductId && Array.isArray(cardmarketProducts)) {
+        selectedCatalogProduct = cardmarketProducts.find(product => String(product.idProduct) === String(card.marketProductId)) || null;
+      }
+      renderInlineCatalogSelection(selectedCatalogProduct);
 
+      formTags = Array.isArray(card.tags) ? card.tags.slice() : [];
+      formTimeline = Array.isArray(card.timeline) ? card.timeline.slice() : [];
       frontImage = (card.images || [])[0] || "";
       backImage = (card.images || [])[1] || "";
       extraImages = (card.images || []).slice(2);
       markersFront = JSON.parse(JSON.stringify(card.damageFront || []));
       markersBack = JSON.parse(JSON.stringify(card.damageBack || []));
-      currentMarkerSide = "front";
-      fineMode = false;
-      fineCropReady = false;
-      fineCrop = null;
-      fineCenter = { x: 50, y: 50 };
-      refreshPreviews();
 
-      if ($("detailBackdrop") && $("detailBackdrop").style.display === "flex") {
-        closeDetail();
-      }
-      showPage("addPage");
+      renderFormTags();
+      renderFormTimeline();
+      refreshPreviews();
+      updateProfitPreview();
+      updateProfileGradePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function renderStats() {
+      if (!$("overviewPage") && !$("collectionPage")) return;
       textIfExists("totalCardsStat", cards.length);
       textIfExists("ratedCardsStat", cards.filter(c => c.grade).length);
       textIfExists("totalValueStat", formatEuro(cards.reduce((sum, c) => sum + parseMoney(c.value), 0)));
@@ -1379,7 +1417,12 @@
         renderCards();
       });
 
-      if ($("floatingAddBtn")) onIfExists("floatingAddBtn", "click", () => showPage("addPage"));
+      if ($("floatingAddBtn")) onIfExists("floatingAddBtn", "click", event => {
+        if (document.getElementById("addPage")) {
+          event.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
       if ($("toggleFiltersBtn")) onIfExists("toggleFiltersBtn", "click", toggleFilters);
       if ($("resetFiltersBtn")) onIfExists("resetFiltersBtn", "click", resetAllFilters);
       if ($("emptyResetFiltersBtn")) onIfExists("emptyResetFiltersBtn", "click", resetAllFilters);
@@ -1466,6 +1509,7 @@
     }
 
     function renderFormTags() {
+      if (!$("formTagsList")) return;
       const list = $("formTagList");
       if (!list) return;
 
@@ -1513,6 +1557,7 @@
     }
 
     function renderTagCloud() {
+      if (!$("tagCloud")) return;
       const cloud = $("tagCloud");
       if (!cloud) return;
 
@@ -1628,6 +1673,7 @@
     }
 
     function applyViewPreferences() {
+      if (!$("cardsList")) return;
       const list = $("cardsList");
       if (!list) return;
 
@@ -1640,6 +1686,7 @@
     }
 
     function restoreViewPreferences() {
+      if (!$("cardsList")) return;
       if ($("sortSelect")) {
         const savedSort = localStorage.getItem("cardVaultSort");
         if (savedSort && Array.from($("sortSelect").options).some(option => option.value === savedSort)) {
@@ -1671,7 +1718,8 @@
       if (profile === "strict") return "Streng";
       return "Normal";
     }
-    function updateProfileGradePreview() {}
+    function updateProfileGradePreview() {
+      if (!$("profileGradePreview") && !document.querySelector("[data-grading-profile-disabled]")) return;}
 
     function todayIsoDate() {
       return new Date().toISOString().slice(0, 10);
@@ -1691,6 +1739,7 @@
     }
 
     function renderFormTimeline() {
+      if (!$("formTimelineList")) return;
       const list = $("formTimelineList");
       if (!list) return;
       if (!formTimeline.length) {
@@ -1810,6 +1859,7 @@
     }
 
     function renderSavedViews() {
+      if (!$("savedViewsList")) return;
       const list = $("savedViewsList");
       const bar = $("savedViewsBar");
       if (!list || !bar) return;
@@ -1839,6 +1889,23 @@
 
         list.appendChild(chip);
       });
+    }
+
+    function safeRun(label, fn) {
+      try {
+        if (typeof fn === "function") fn();
+      } catch (error) {
+        console.error(label, error);
+        const box = $("appErrorBox");
+        if (box) {
+          box.style.display = "block";
+          box.textContent = "Fehler in " + label + ": " + (error && error.stack ? error.stack : error);
+        }
+      }
+    }
+
+    function hasPage(pageId) {
+      return Boolean(document.getElementById(pageId));
     }
 
     function onIfExists(id, eventName, handler, options) {
@@ -2004,6 +2071,7 @@
     }
 
     function renderCards() {
+      if (!$("cardsList")) return;
       enforceGalleryView();
 
       const query = valueOf("searchInput").toLowerCase().trim();
@@ -3114,6 +3182,7 @@
     }
 
     function renderSmartSuggestions() {
+      if (!$("smartSuggestionsGrid")) return;
       const grid = $("smartSuggestionsGrid");
       if (!grid) return;
 
@@ -3138,6 +3207,7 @@
     }
 
     function renderRecentDashboard() {
+      if (!$("recentCardsList") && !$("todoCardsList")) return;
       const recentEl = $("recentCardsList");
       const todoEl = $("todoCardsList");
       if (!recentEl || !todoEl) return;
@@ -4413,6 +4483,19 @@
       reader.readAsText(file);
     }
 
+    function initializePendingEdit() {
+      if (!isAddPageActiveFile()) return;
+
+      const editId = getQueryParam("edit") || localStorage.getItem("cardVaultPendingEditId");
+      if (!editId) return;
+
+      localStorage.removeItem("cardVaultPendingEditId");
+      const card = cards.find(item => item.id === editId);
+      if (card) {
+        editCard(editId, true);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       markCurrentNav();
       setupDelegatedCardActionMenus();
@@ -4481,7 +4564,14 @@
       if ($("scrollTopBtn")) onIfExists("scrollTopBtn", "click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
       window.addEventListener("scroll", updateScrollTopButton, { passive: true });
 
-      document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+      document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", event => {
+        const targetPage = btn.dataset.page;
+        if (!document.getElementById(targetPage) && btn.tagName === "A" && btn.getAttribute("href")) {
+          return;
+        }
+        event.preventDefault();
+        showPage(targetPage);
+      }));
 
       document.addEventListener("click", function(event) {
         const cardEditButton = event.target.closest("[data-card-edit]");
@@ -4520,7 +4610,7 @@
         if (el) el.addEventListener("input", updateProfitPreview);
       });
 
-      document.querySelectorAll("[data-grading-profile]").forEach(button => {
+      document.querySelectorAll("[data-grading-profile-disabled]").forEach(button => {
         button.addEventListener("click", () => {
           activeGradingProfile = button.dataset.gradingProfile;
           localStorage.setItem("cardVaultGradingProfile", activeGradingProfile);

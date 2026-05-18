@@ -4563,3 +4563,100 @@
       display: none !important;
     }
 
+
+
+    .floating-add[href],
+    .mobile-nav-button[href] {
+      text-decoration: none;
+    }
+
+
+    #collectionPage #savedViewsBar,
+    #collectionPage .saved-views-bar,
+    #collectionPage .summary-strip {
+      display: none !important;
+    }
+
+
+    #overviewPage .summary-strip {
+      display: none !important;
+    }
+
+
+    #collectionPage .analysis-strip,
+    #collectionPage .analysis-card {
+      display: none !important;
+    }
+
+
+    /* Sammlung: Optionen dezenter rechts im Header */
+    #collectionPage .section-head {
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    #collectionPage .collection-header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #collectionPage .collection-options-wrap {
+      margin-left: auto;
+    }
+
+    #collectionPage #openCollectionOptionsBtn {
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(255,255,255,0.72);
+      color: #515154;
+      border: 1px solid rgba(0,0,0,0.07);
+      box-shadow: none;
+    }
+
+    #collectionPage #openCollectionOptionsBtn:hover {
+      background: #fff;
+      color: #111;
+      transform: translateY(-1px);
+    }
+
+    body.dark #collectionPage #openCollectionOptionsBtn {
+      background: rgba(255,255,255,0.08);
+      color: #d1d1d6;
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    body.dark #collectionPage #openCollectionOptionsBtn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #f5f5f7;
+    }
+
+    #collectionPage .collection-options-menu {
+      right: 0;
+      left: auto;
+    }
+
+    @media (max-width: 760px) {
+      #collectionPage .collection-header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      #collectionPage .collection-options-wrap {
+        margin-left: 0;
+      }
+    }
+
+
+    [data-grading-profile],
+    .grading-profile,
+    .profile-grade,
+    .grading-profile-row,
+    .profile-grade-preview {
+      display: none !important;
+    }

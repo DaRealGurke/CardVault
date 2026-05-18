@@ -86,190 +86,7 @@
 
         <div class="glass form-panel">
           <div class="form-grid">
-            <div class="field">
-              <label for="cardId">Sammlungs-ID</label>
-              <input id="cardId" type="text" placeholder="z. B. COL-2026-0001" />
-            </div>
-            <div class="field">
-              <label for="cardName">Kartenname</label>
-              <input id="cardName" type="text" placeholder="z. B. Monkey D. Luffy" />
-            </div>
-            <div class="field">
-              <label for="cardNumber">Kartennummer</label>
-              <input id="cardNumber" type="text" placeholder="z. B. OP05-060" />
-            </div>
-
-            <input id="cardmarketProductId" type="hidden" />
-
-            <div class="inline-selected-cardmarket" id="inlineSelectedCardmarket">
-              <div>
-                <strong id="inlineSelectedTitle">Cardmarket-Karte ausgewählt</strong>
-                <span id="inlineSelectedMeta"></span>
-              </div>
-              <button class="inline-clear-selection" id="clearInlineCatalogSelectionBtn" type="button">Auswahl lösen</button>
-            </div>
-
-            <div class="inline-catalog-suggestions" id="inlineCatalogSuggestions">
-              <div class="inline-suggestion-head">
-                <span>Cardmarket-Vorschläge</span>
-                <span id="inlineSuggestionCount">0 Treffer</span>
-              </div>
-              <div class="inline-suggestion-list" id="inlineCatalogSuggestionList"></div>
-            </div>
-
-            <div class="cardmarket-info-panel" id="cardmarketInfoPanel">
-              <div class="cardmarket-info-head">
-                <div>
-                  <div class="cardmarket-info-title" id="cardmarketInfoTitle">Cardmarket-Karte ausgewählt</div>
-                  <div class="cardmarket-info-sub" id="cardmarketInfoSub">Automatisch aus dem Produktkatalog übernommen.</div>
-                </div>
-                <button class="inline-clear-selection" id="clearCardmarketInfoBtn" type="button">Auswahl lösen</button>
-              </div>
-              <div class="cardmarket-info-grid" id="cardmarketInfoGrid"></div>
-            </div>
-            <div class="field">
-              <label for="cardSet">Set</label>
-              <input id="cardSet" type="text" placeholder="z. B. OP05 – Awakening" />
-            </div>
-            <div class="field">
-              
-              <select id="cardLanguage">
-                <option>English</option>
-                <option>Japanese</option>
-                <option>German</option>
-                <option>French</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="cardStatus">Status</label>
-              <select id="cardStatus">
-                <option>Behalten</option>
-                <option>Verkaufen</option>
-                <option>Tauschen</option>
-                <option>Prüfen</option>
-                <option>Wishlist</option>
-                <option>Sonstige</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="cardGrade">Eigene Note</label>
-              <input id="cardGrade" type="text" placeholder="z. B. 8.5" />
-            </div>
-
-            <div class="field">
-              <label for="cardCondition">Zustand</label>
-              <input id="cardCondition" type="text" placeholder="z. B. Near Mint" />
-            </div>
-            <div class="field">
-              <label for="cardStorage">Lagerort</label>
-              <input id="cardStorage" type="text" placeholder="z. B. Binder 1 / Seite 4" />
-            </div>
-            <div class="field">
-              <label for="cardValue">Marktwert</label>
-              <input id="cardValue" type="text" placeholder="z. B. 250 €" />
-            </div>
-
-            <div class="finance-panel">
-              <div class="finance-title">Wert / Verkauf</div>
-              <div class="field">
-                <label for="purchasePrice">Einkaufspreis</label>
-                <input id="purchasePrice" type="text" placeholder="z. B. 180 €" />
-              </div>
-              <div class="field">
-                <label for="purchaseDate">Gekauft am</label>
-                <input id="purchaseDate" type="date" />
-              </div>
-              <div class="field">
-                <label for="salePrice">Verkaufspreis</label>
-                <input id="salePrice" type="text" placeholder="z. B. 275 €" />
-              </div>
-              <div class="field">
-                <label for="saleDate">Verkauft am</label>
-                <input id="saleDate" type="date" />
-              </div>
-              <div class="field">
-                <label for="platform">Plattform / Quelle</label>
-                <input id="platform" type="text" placeholder="z. B. Cardmarket, eBay, Privat" />
-              </div>
-              <div class="field">
-                <label for="buyer">Käufer / Verkäufer</label>
-                <input id="buyer" type="text" placeholder="optional" />
-              </div>
-              <div class="field">
-                <label>Gewinn / Verlust</label>
-                <div class="profit-pill profit-neutral" id="profitPreview">-</div>
-              </div>
-            </div>
-
-            <div class="upload-grid">
-              <div class="upload-box">
-                <label for="frontFile">Vorderseite hochladen</label>
-                <input id="frontFile" type="file" accept="image/*" />
-                <div class="preview" id="frontPreview">Vorderseite</div>
-                <div class="image-tools">
-                  <button class="image-tool-button" id="rotateFrontLeftBtn" type="button">↶ Links</button>
-                  <button class="image-tool-button" id="rotateFrontRightBtn" type="button">↷ Rechts</button>
-                  <button class="image-tool-button danger-mini" id="removeFrontBtn" type="button">Entfernen</button>
-                </div>
-                <div class="hint" id="frontStatus">Kein Bild geladen.</div>
-              </div>
-              <div class="upload-box">
-                <label for="backFile">Rückseite hochladen</label>
-                <input id="backFile" type="file" accept="image/*" />
-                <div class="preview" id="backPreview">Rückseite</div>
-                <div class="image-tools">
-                  <button class="image-tool-button" id="rotateBackLeftBtn" type="button">↶ Links</button>
-                  <button class="image-tool-button" id="rotateBackRightBtn" type="button">↷ Rechts</button>
-                  <button class="image-tool-button danger-mini" id="removeBackBtn" type="button">Entfernen</button>
-                </div>
-                <div class="hint" id="backStatus">Kein Bild geladen.</div>
-              </div>
-              <div class="upload-box">
-                <label for="extraFiles">Detailbilder hochladen</label>
-                <input id="extraFiles" type="file" accept="image/*" multiple />
-                <div class="preview" id="extraPreview">Detailbilder</div>
-                <div class="hint" id="extraStatus">Keine Detailbilder geladen.</div>
-              </div>
-            </div>
-
-            <div class="field wide">
-              <label for="tagInput">Tags / Kategorien</label>
-              <div class="tag-input-row">
-                <input id="tagInput" type="text" placeholder="z. B. Manga, Alt Art, PSA-Kandidat" />
-                <button class="tiny-button" id="addTagBtn" type="button">Tag hinzufügen</button>
-              </div>
-              <div class="hint">Enter oder Button nutzen. Tags helfen beim Filtern und Export.</div>
-              <div class="tag-chip-list" id="formTagList"></div>
-            </div>
-
-            <div class="field wide">
-              <label for="cardNotes">Notizen</label>
-              <textarea id="cardNotes" placeholder="z. B. kleine Stelle unten rechts, sonst sehr sauber."></textarea>
-            </div>
-
-            <div class="timeline-panel" id="timelinePanel">
-              <div class="timeline-title">Verlauf / Ereignisse</div>
-              <div class="timeline-input-row">
-                <div class="field">
-                  <label for="timelineDate">Datum</label>
-                  <input id="timelineDate" type="date" />
-                </div>
-                <div class="field">
-                  <label for="timelineText">Eintrag</label>
-                  <input id="timelineText" type="text" placeholder="z. B. gekauft, Wert geprüft, Schaden bewertet" />
-                </div>
-                <button class="tiny-button" id="addTimelineBtn" type="button">Hinzufügen</button>
-              </div>
-              <div class="timeline-list" id="formTimelineList"></div>
-            </div>
-
-              <div class="grading-profile-panel" id="gradingProfilePanel">
-                <div class="grading-profile-head">
-                  <div class="grading-profile-title">Bewertungsprofil</div>
                   <div class="grading-profile-tabs">
-                    <button class="grading-profile-tab" type="button" data-grading-profile="loose">Locker</button>
-                    <button class="grading-profile-tab active" type="button" data-grading-profile="normal">Normal</button>
-                    <button class="grading-profile-tab" type="button" data-grading-profile="strict">Streng</button>
                   </div>
                 </div>
                 <div class="profile-grade-grid" id="profileGradeGrid"></div>
@@ -609,15 +426,13 @@
     <button class="mobile-nav-button" data-page="collectionPage" type="button">
       <span>▦</span><span>Sammlung</span>
     </button>
-    <button class="mobile-nav-button" data-page="addPage" type="button">
-      <span>＋</span><span>Neu</span>
-    </button>
+    <a class="mobile-nav-button" href="add.html" data-page="addPage"><span>＋</span><span>Neu</span></a>
     <button class="mobile-nav-button" id="mobileBackupBtn" type="button">
       <span>⇩</span><span>Backup</span>
     </button>
   </div>
 
-  <button class="floating-add" id="floatingAddBtn" type="button"><span>＋</span><span>Neue Karte</span></button>
+  <a class="floating-add" id="floatingAddBtn" href="add.html" title="Neue Karte eintragen"><span>＋</span><span>Neue Karte</span></a>
 
   
 
