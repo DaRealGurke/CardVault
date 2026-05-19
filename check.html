@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Vault – ID prüfen</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="cv-toast-stack" id="cvToastStack"></div>
+  <div class="global-settings-wrap">
+    <button class="global-settings-button" id="openOptionsMenuBtn" type="button" title="Einstellungen" aria-label="Einstellungen">⚙</button>
+    <div class="options-menu" id="optionsMenu">
+      <div class="options-menu-title">Darstellung</div>
+      <button class="options-menu-button" id="optionsThemeBtn" type="button">
+        Hell/Dunkel umschalten
+        <span>Wechselt zwischen hellem und dunklem Modus.</span>
+      </button>
+      <div class="options-menu-divider"></div>
+      <div class="options-menu-title">Cardmarket</div>
+      <button class="options-menu-button" id="autoLoadCardmarketBtn" type="button">
+        Cardmarket automatisch laden
+        <span>Sucht und lädt Preisdatei und Produktkatalog automatisch aus dem Ordner.</span>
+      </button>
+      <div class="settings-warning" id="autoLoadLocalWarning" style="display:none;">
+        Auto-Load funktioniert nur über http://localhost oder online, nicht per Doppelklick auf die HTML-Datei.
+      </div>
+      <button class="options-menu-button" id="cardmarketImportBtn" type="button">
+        Preise importieren
+        <span>Importiert das Cardmarket-Preisverzeichnis.</span>
+      </button>
+      <button class="options-menu-button" id="cardmarketCatalogImportBtn" type="button">
+        Produktkatalog importieren
+        <span>Importiert den Cardmarket-Produktkatalog für Kartensuche und Varianten.</span>
+      </button>
+      <button class="options-menu-button" id="clearCardmarketStorageBtn" type="button">
+        Cardmarket Speicher leeren
+        <span>Entfernt nur Preis- und Produktkatalogdaten, nicht deine Karten.</span>
+      </button>
+    </div>
+  </div>
+
+  <input id="cardmarketPriceFile" type="file" accept=".json,.csv,.txt,application/json,text/csv,text/plain" style="display:none;" />
+  <input id="cardmarketCatalogFile" type="file" accept=".json,.csv,.txt,application/json,text/csv,text/plain" style="display:none;" />
+  <header>
+    <div class="nav">
+      <button class="brand-home" data-page="overviewPage" type="button" title="Zur Startseite">
+        <div class="brand-icon">C</div>
+        <div>
+          <div class="brand-title">Card Vault</div>
+          <div class="brand-subtitle">Meine Kartensammlung</div>
+        </div>
+      </button>
+
+      <nav class="nav-links">
+        <button class="nav-link active" data-page="overviewPage" type="button">Übersicht</button>
+        <button class="nav-link" data-page="collectionPage" type="button">Sammlung</button>
+        <button class="import-action-button" id="importOnlyNewBtn" type="button">
+          <strong>Nur neue Karten hinzufügen</strong>
+          <span>Karten mit bereits vorhandener ID werden übersprungen.</span>
+        </button>
+        <button class="import-action-button danger" id="importReplaceBtn" type="button">
+          <strong>Sammlung ersetzen</strong>
+          <span>Aktuelle Sammlung vollständig durch Import ersetzen.</span>
+        </button>
+        <button class="import-action-button" id="importCancelBtn" type="button">
+          <strong>Abbrechen</strong>
+          <span>Import nicht durchführen.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page-backdrop" id="cardReportBackdrop">
+    <div class="report-page" id="cardReportPage">
+      <div class="report-page-header">
+        <div>
+          <div class="report-page-title" id="cardReportTitle">Kartenreport</div>
+          <div class="report-page-sub" id="cardReportSub">Sammlungs- und Bewertungsreport</div>
+        </div>
+        <div class="report-page-actions">
+          <button class="secondary-button" id="printCardReportBtn" type="button">Drucken</button>
+          <button class="close-button" id="closeCardReportBtn" type="button">×</button>
+        </div>
+      </div>
+      <div class="report-page-body" id="cardReportBody"></div>
+    </div>
+  </div>
+
+  <div class="fullscreen-image-backdrop" id="fullscreenImageBackdrop">
+    <div class="fullscreen-image-box">
+      <button class="fullscreen-close" id="fullscreenCloseBtn" type="button">×</button>
+      <img id="fullscreenImage" src="" alt="Karte groß" />
+    </div>
+  </div>
+
+  <button class="scroll-top-button" id="scrollTopBtn" type="button" title="Nach oben">↑</button>
+
+  <div class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="mobile-nav-button" data-page="overviewPage" type="button">
+      <span>⌂</span><span>Start</span>
+    </button>
+    <button class="mobile-nav-button" data-page="collectionPage" type="button">
+      <span>▦</span><span>Sammlung</span>
+    </button>
+    <a class="mobile-nav-button" href="add.html" data-page="addPage"><span>＋</span><span>Neu</span></a>
+    <button class="mobile-nav-button" id="mobileBackupBtn" type="button">
+      <span>⇩</span><span>Backup</span>
+    </button>
+  </div>
+
+  <a class="floating-add" id="floatingAddBtn" href="add.html" title="Neue Karte eintragen"><span>＋</span><span>Neue Karte</span></a>
+
+  
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
