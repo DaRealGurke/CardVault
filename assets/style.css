@@ -4662,3 +4662,23 @@
     .profile-breakdown {
       display: none !important;
     }
+
+
+    /* Kompakter Cardmarket-Infoblock */
+    #cardmarketInfoPanel .cardmarket-info-grid {
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+    }
+
+    #cardmarketInfoPanel .cardmarket-info-head {
+      margin-bottom: 10px;
+    }
+
+    #cardmarketInfoPanel .cardmarket-info-sub {
+      opacity: 0.85;
+    }
+
+    @media (max-width: 620px) {
+      #cardmarketInfoPanel .cardmarket-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }

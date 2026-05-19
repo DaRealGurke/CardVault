@@ -4034,44 +4034,19 @@ refreshPreviews();
 
       panel.classList.add("active");
       if (title) title.textContent = catalogProductDisplayName(product);
-      if (sub) sub.textContent = "Diese Produkt-ID wird für die genaue Preiszuordnung genutzt.";
+      if (sub) sub.textContent = "Aus dem Cardmarket-Produktkatalog übernommen.";
 
       grid.innerHTML = `
-        <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Product-ID</div>
-          <div class="cardmarket-info-value">${escapeHtml(product.idProduct || "-")}</div>
-        </div>
         <div class="cardmarket-info-item">
           <div class="cardmarket-info-label">Kartennummer</div>
           <div class="cardmarket-info-value">${escapeHtml(product.number || "-")}</div>
         </div>
         <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Kategorie</div>
-          <div class="cardmarket-info-value">${escapeHtml(product.categoryName || "-")}</div>
-        </div>
-        <div class="cardmarket-info-item">
           <div class="cardmarket-info-label">Trendpreis</div>
           <div class="cardmarket-info-value">${trend !== "" ? formatMarketEuro(trend) : "-"}</div>
         </div>
-        <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Expansion-ID</div>
-          <div class="cardmarket-info-value">${escapeHtml(product.idExpansion || "-")}</div>
-        </div>
-        <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Metacard-ID</div>
-          <div class="cardmarket-info-value">${escapeHtml(product.idMetacard || "-")}</div>
-        </div>
-        <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Hinzugefügt</div>
-          <div class="cardmarket-info-value">${escapeHtml(product.dateAdded || "-")}</div>
-        </div>
-        <div class="cardmarket-info-item">
-          <div class="cardmarket-info-label">Quelle</div>
-          <div class="cardmarket-info-value">Cardmarket Produktkatalog</div>
-        </div>
       `;
     }
-
     function toggleManualExtraFields() {
       const fields = $("manualExtraFields");
       const button = $("toggleManualExtraBtn");
