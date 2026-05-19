@@ -4113,9 +4113,9 @@ refreshPreviews();
       if (!box || !list) return;
 
       if (!cardmarketProducts.length) {
-        box.classList.remove("active");
-        list.innerHTML = "";
-        if (count) count.textContent = "0 Treffer";
+        box.classList.add("active");
+        list.innerHTML = '<div class="market-warning-box">Produktkatalog noch nicht geladen. Lege products_singles_18.json in den App-Ordner oder nutze im Zahnrad-Menü „Produktkatalog importieren“.</div>';
+        if (count) count.textContent = "Katalog fehlt";
         return;
       }
 
@@ -4184,6 +4184,43 @@ refreshPreviews();
       selectedCatalogProduct = null;
       if ($("cardmarketProductId")) $("cardmarketProductId").value = "";
       renderInlineCatalogSelection(null);
+      updateInlineCatalogSuggestions();
+    }
+
+    function initializeAddPageCatalogSearch() {
+      if (!document.getElementById("addPage")) return;
+      if (window.__addPageCatalogSearchInitialized) return;
+      window.__addPageCatalogSearchInitialized = true;
+
+      const nameInput = $("cardName");
+      const numberInput = $("cardNumber");
+
+      if (nameInput) {
+        nameInput.addEventListener("input", debounce(() => {
+          selectedCatalogProduct = null;
+          updateInlineCatalogSuggestions();
+        }, 180));
+      }
+
+      if (numberInput) {
+        numberInput.addEventListener("input", debounce(() => {
+          selectedCatalogProduct = null;
+          updateInlineCatalogSuggestions();
+        }, 180));
+      }
+
+      if ($("cardmarketProductId")) onIfExists("cardmarketProductId", "input", () => {
+        if (!valueOf("cardmarketProductId").trim()) {
+          selectedCatalogProduct = null;
+          renderInlineCatalogSelection(null);
+        }
+      });
+
+      if ($("clearInlineCatalogSelectionBtn")) onIfExists("clearInlineCatalogSelectionBtn", "click", clearInlineCatalogSelection);
+      if ($("clearCardmarketInfoBtn")) onIfExists("clearCardmarketInfoBtn", "click", clearInlineCatalogSelection);
+      if ($("toggleManualExtraBtn")) onIfExists("toggleManualExtraBtn", "click", toggleManualExtraFields);
+
+      // Falls der Katalog schon im Browser-Speicher liegt, direkt Vorschläge ermöglichen.
       updateInlineCatalogSuggestions();
     }
 
@@ -4296,6 +4333,7 @@ refreshPreviews();
 
         renderCards();
         if (currentDetailCard) renderMarketPriceDetail(currentDetailCard);
+        initializeAddPageCatalogSearch();
         if (typeof updateInlineCatalogSuggestions === "function") updateInlineCatalogSuggestions();
 
         setAutoMarketStatus("Auto-Load aktiv: " + prices.length + " Preise aus " + priceFile.fileName + " und " + products.length + " Produkte aus " + productFile.fileName + " geladen.");
@@ -4671,6 +4709,7 @@ refreshPreviews();
         });
       }
 
+      initializeAddPageCatalogSearch();
       if ($("saveCardBtn")) onIfExists("saveCardBtn", "click", saveCard);
       if ($("cancelEditBtn")) onIfExists("cancelEditBtn", "click", resetForm);
 
