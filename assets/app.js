@@ -1328,7 +1328,7 @@ refreshPreviews();
 
       if ($("autoLoadCardmarketBtn")) onIfExists("autoLoadCardmarketBtn", "click", () => {
         closeOptionsMenu();
-        autoLoadCardmarketData(true);
+        autoLoadCardmarketData(true, true);
       });
       if ($("clearCardmarketStorageBtn")) onIfExists("clearCardmarketStorageBtn", "click", () => {
         closeOptionsMenu();
@@ -4197,6 +4197,37 @@ refreshPreviews();
       renderCatalogSearchResults("quickCatalogResults", searchCatalogProducts(query, 8), "quick");
     }
 
+    const CARDMARKET_PRICE_AUTO_CANDIDATES = [
+      "price_guide_18.json",
+      "price_guide_18(1).json",
+      "price_guide_18(2).json",
+      "price_guide_18(3).json",
+      "price_guide_18_1.json",
+      "price_guide_18_2.json"
+    ];
+
+    const CARDMARKET_PRODUCTS_AUTO_CANDIDATES = [
+      "products_singles_18.json",
+      "products_singles_18(1).json",
+      "products_singles_18(2).json",
+      "products_singles_18(3).json",
+      "products_singles_18_1.json",
+      "products_singles_18_2.json"
+    ];
+
+    async function fetchFirstAvailableTextFile(candidates) {
+      let lastError = null;
+      for (const fileName of candidates) {
+        try {
+          const text = await fetchTextFile(fileName);
+          return { fileName, text };
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("Keine passende Datei gefunden.");
+    }
+
     const CARDMARKET_PRICE_AUTO_FILE = "price_guide_18.json";
     const CARDMARKET_PRODUCTS_AUTO_FILE = "products_singles_18.json";
 
@@ -4230,27 +4261,32 @@ refreshPreviews();
       return await response.text();
     }
 
-    async function autoLoadCardmarketData(manual = false) {
+    async function autoLoadCardmarketData(manual = false, force = false) {
       if (isLocalFileMode()) {
-        const message = "Der Browser blockiert Auto-Load bei file://. Öffne die Seite über http://localhost oder nutze den manuellen Import.";
+        const message = "Auto-Load funktioniert bei direktem Doppelklick/file:// nicht. Öffne die App über http://localhost oder nutze den manuellen Import.";
         setAutoMarketStatus(message);
         if (manual) showImportToast("Auto-Load nicht möglich", message, "error");
-        return;
+        return false;
+      }
+
+      if (!force && cardmarketPrices.length && cardmarketProducts.length) {
+        setAutoMarketStatus("Cardmarket-Daten bereits geladen: " + cardmarketPrices.length + " Preise, " + cardmarketProducts.length + " Produkte.");
+        return true;
       }
 
       try {
-        setAutoMarketStatus("Auto-Load läuft… Preisverzeichnis und Produktkatalog werden geladen.");
+        setAutoMarketStatus("Auto-Load läuft… Preisverzeichnis und Produktkatalog werden gesucht.");
 
-        const [priceText, productText] = await Promise.all([
-          fetchTextFile(CARDMARKET_PRICE_AUTO_FILE),
-          fetchTextFile(CARDMARKET_PRODUCTS_AUTO_FILE)
+        const [priceFile, productFile] = await Promise.all([
+          fetchFirstAvailableTextFile(CARDMARKET_PRICE_AUTO_CANDIDATES),
+          fetchFirstAvailableTextFile(CARDMARKET_PRODUCTS_AUTO_CANDIDATES)
         ]);
 
-        const prices = parseMarketFileContent(priceText).map(compactCardmarketPriceRecord);
-        const products = parseCatalogFileContent(productText).map(compactCardmarketProductRecord);
+        const prices = parseMarketFileContent(priceFile.text).map(compactCardmarketPriceRecord);
+        const products = parseCatalogFileContent(productFile.text).map(compactCardmarketProductRecord);
 
-        if (!prices.length) throw new Error("Keine Preisdatensätze in " + CARDMARKET_PRICE_AUTO_FILE + " erkannt.");
-        if (!products.length) throw new Error("Keine Produktdatensätze in " + CARDMARKET_PRODUCTS_AUTO_FILE + " erkannt.");
+        if (!prices.length) throw new Error("Keine Preisdatensätze in " + priceFile.fileName + " erkannt.");
+        if (!products.length) throw new Error("Keine Produktdatensätze in " + productFile.fileName + " erkannt.");
 
         cardmarketPrices = prices;
         cardmarketProducts = products;
@@ -4260,42 +4296,39 @@ refreshPreviews();
 
         renderCards();
         if (currentDetailCard) renderMarketPriceDetail(currentDetailCard);
+        if (typeof updateInlineCatalogSuggestions === "function") updateInlineCatalogSuggestions();
 
-        setAutoMarketStatus(
-          "Auto-Load aktiv: " + prices.length + " Preisdatensätze und " + products.length + " Produktdatensätze geladen."
-        );
+        setAutoMarketStatus("Auto-Load aktiv: " + prices.length + " Preise aus " + priceFile.fileName + " und " + products.length + " Produkte aus " + productFile.fileName + " geladen.");
 
         if (manual) {
-          showImportToast("Cardmarket automatisch geladen", prices.length + " Preise und " + products.length + " Produkte geladen.", "success");
+          showImportToast("Cardmarket automatisch geladen", priceFile.fileName + " + " + productFile.fileName, "success");
         }
+
+        return true;
       } catch (error) {
         console.warn(error);
         const detail = error && error.message ? error.message : "Dateien konnten nicht automatisch geladen werden.";
         setAutoMarketStatus(
-          "Auto-Load nicht möglich. Prüfe, ob <strong>" + CARDMARKET_PRICE_AUTO_FILE + "</strong> und <strong>" + CARDMARKET_PRODUCTS_AUTO_FILE + "</strong> im gleichen Ordner liegen und die Seite über <strong>http://localhost</strong> geöffnet wurde. Details: " + escapeHtml(detail)
+          "Auto-Load nicht möglich. Lege eine Preisdatei wie <strong>price_guide_18.json</strong> und einen Produktkatalog wie <strong>products_singles_18.json</strong> in denselben Ordner wie index.html und öffne die App über <strong>http://localhost</strong>. Details: " + escapeHtml(detail)
         );
         if (manual) {
-          showImportToast("Auto-Load nicht möglich", "Dateien nicht erreichbar. Nutze http://localhost oder den manuellen Import.", "error");
+          showImportToast("Auto-Load nicht möglich", "Dateien nicht gefunden oder nicht erreichbar.", "error");
         }
+        return false;
       }
     }
 
+    
     function maybeAutoLoadCardmarketData() {
       setupAutoLoadAvailability();
 
       if (isLocalFileMode()) return;
 
-      const hasPrices = Array.isArray(cardmarketPrices) && cardmarketPrices.length > 0;
-      const hasProducts = Array.isArray(cardmarketProducts) && cardmarketProducts.length > 0;
-
-      if (hasPrices && hasProducts) {
-        setAutoMarketStatus("Cardmarket-Daten sind bereits im Browser-Speicher vorhanden: " + cardmarketPrices.length + " Preise, " + cardmarketProducts.length + " Produkte.");
-        return;
-      }
-
-      autoLoadCardmarketData(false);
+      // Beim Öffnen automatisch laden. Wenn Daten schon vorhanden sind, nicht unnötig neu laden.
+      autoLoadCardmarketData(false, false);
     }
 
+    
     function clearCardmarketStorage() {
       if (!confirm("Cardmarket Preis- und Produktkatalogdaten aus dem Browser-Speicher löschen? Deine Karten bleiben erhalten.")) return;
       localStorage.removeItem("cardVaultCardmarketPrices");
