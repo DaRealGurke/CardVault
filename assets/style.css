@@ -4714,9 +4714,40 @@
     }
 
 
-    /* v109: Extra Neue-Karte-Buttons ausblenden, Hauptnavigation und Floating-Button bleiben */
+    /* v110: Nur den oberen Eintragen-Button ausblenden; Floating-Button unten bleibt */
     .hero-actions [data-page="addPage"],
+    .hero-actions a[href="add.html"],
     .section-head [data-page="addPage"],
-    .collection-header-actions [data-page="addPage"] {
+    .section-head a[href="add.html"],
+    .collection-header-actions [data-page="addPage"],
+    .collection-header-actions a[href="add.html"] {
+      display: none !important;
+    }
+
+    .floating-add {
+      display: flex !important;
+    }
+
+
+    /* v111: Desktop-Navigationspunkt Eintragen oben ausblenden.
+       Floating-Button unten rechts und mobile Neu-Navigation bleiben sichtbar. */
+    header .nav-link[data-page="addPage"],
+    .top-nav .nav-link[data-page="addPage"],
+    .desktop-nav .nav-link[data-page="addPage"],
+    nav .nav-link[data-page="addPage"] {
+      display: none !important;
+    }
+
+    .floating-add {
+      display: flex !important;
+    }
+
+    .mobile-nav-button[data-page="addPage"],
+    .mobile-nav-button[href="add.html"] {
+      display: flex !important;
+    }
+
+
+    .top-add-nav-hidden {
       display: none !important;
     }
