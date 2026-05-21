@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Vault – Eintragen</title>
+  <link rel="stylesheet" href="assets/style.css?v=202" />
+
+  <style id="critical-header-fix">
+    body { padding-top: 82px !important; }
+    body > header, header {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      z-index: 9990 !important;
+      background: #123524 !important;
+      border-bottom: 2px solid rgba(255,255,255,0.22) !important;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.28) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    header .nav,
+    header .nav-links,
+    header .nav-link,
+    header .brand-title,
+    header .brand-subtitle { color: #fff !important; }
+    header .brand-icon { background: #fff !important; color: #123524 !important; }
+    header .nav-link.active::after { background: #fff !important; }
+    main { padding-top: 24px !important; }
+    .global-settings-wrap { z-index: 10000 !important; }
+    @media (max-width: 760px) {
+      body { padding-top: 76px !important; }
+      main { padding-top: 20px !important; }
+    }
+  </style>
+
+</head>
+<body>
+  <div class="cv-toast-stack" id="cvToastStack"></div>
+  <div class="global-settings-wrap">
+    <button class="global-settings-button" id="openOptionsMenuBtn" type="button" title="Menü" aria-label="Menü"><span class="hamburger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
+    <div class="options-menu" id="optionsMenu">
+      <div class="options-menu-title">Darstellung</div>
+      <button class="options-menu-button" id="optionsThemeBtn" type="button">
+        Hell/Dunkel umschalten
+        <span>Wechselt zwischen hellem und dunklem Modus.</span>
+      </button>
+      <button class="options-menu-button" id="optionsOpenTrashBtn" type="button">
+        Papierkorb
+        <span>Gelöschte Karten ansehen oder wiederherstellen.</span>
+      </button>
+
+      <div class="options-menu-divider"></div>
+      <div class="options-menu-title">Cardmarket</div>
+      <button class="options-menu-button" id="autoLoadCardmarketBtn" type="button">
+        Cardmarket automatisch laden
+        <span>Sucht und lädt Preisdatei und Produktkatalog automatisch aus dem Ordner.</span>
+      </button>
+      <div class="settings-warning" id="autoLoadLocalWarning" style="display:none;">
+        Auto-Load funktioniert nur über http://localhost oder online, nicht per Doppelklick auf die HTML-Datei.
+      </div>
+      <button class="options-menu-button" id="cardmarketImportBtn" type="button">
+        Preise importieren
+        <span>Importiert das Cardmarket-Preisverzeichnis.</span>
+      </button>
+      <button class="options-menu-button" id="cardmarketCatalogImportBtn" type="button">
+        Produktkatalog importieren
+        <span>Importiert den Cardmarket-Produktkatalog für Kartensuche und Varianten.</span>
+      </button>
+      <button class="options-menu-button" id="clearCardmarketStorageBtn" type="button">
+        Cardmarket Speicher leeren
+        <span>Entfernt nur Preis- und Produktkatalogdaten, nicht deine Karten.</span>
+      </button>
+    </div>
+  </div>
+
+  <input id="cardmarketPriceFile" type="file" accept=".json,.csv,.txt,application/json,text/csv,text/plain" style="display:none;" />
+  <input id="cardmarketCatalogFile" type="file" accept=".json,.csv,.txt,application/json,text/csv,text/plain" style="display:none;" />
+  <header>
+    <div class="nav">
+      <button class="brand-home" data-page="overviewPage" type="button" title="Zur Startseite">
+        <div class="brand-icon">C</div>
+        <div>
+          <div class="brand-title">Card Vault</div>
+          <div class="brand-subtitle">Meine Kartensammlung</div>
+        </div>
+      </button>
+
+      <nav class="nav-links">
+        <button class="nav-link active" data-page="overviewPage" type="button">Übersicht</button>
+        <button class="nav-link" data-page="collectionPage" type="button">Sammlung</button>
+        <button class="nav-link" data-page="checkPage" type="button">ID prüfen</button>
+      </nav>
+
+      <button class="theme-toggle" id="themeToggleBtn" type="button">🌙 Dunkel</button>
+    </div>
+  </header>
+
+  <div id="appErrorBox" style="display:none;max-width:1180px;margin:16px auto 0;padding:12px 16px;border-radius:16px;background:#fff1f1;color:#b42318;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;"></div>
+<div class="backup-reminder" id="backupReminder">
+    <div id="backupReminderText">Backup empfohlen.</div>
+    <div class="backup-reminder-actions">
+      <button class="backup-main" id="backupNowBtn" type="button">Backup erstellen</button>
+      <button class="backup-secondary" id="backupDismissBtn" type="button">Später</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="page active" id="addPage">
+      <section id="addSection">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Eintragen</div>
+            <h2 id="formHeadline">Karte zur Sammlung hinzufügen</h2>
+          </div>
+        </div>
+
+        <div class="glass form-panel">
+          <div class="form-grid">
+            <div class="field">
+              <label for="cardId">Sammlungs-ID</label>
+              <input id="cardId" type="text" placeholder="z. B. COL-2026-0001" />
+            </div>
+            <div class="field">
+              <label for="cardName">Kartenname</label>
+              <input id="cardName" type="text" placeholder="z. B. Monkey D. Luffy" />
+            </div>
+            <div class="field">
+              <label for="cardNumber">Kartennummer</label>
+              <input id="cardNumber" type="text" placeholder="z. B. OP05-060" />
+            </div>
+
+            <input id="cardmarketProductId" type="hidden" />
+
+            <div class="inline-selected-cardmarket" id="inlineSelectedCardmarket">
+              <div>
+                <strong id="inlineSelectedTitle">Cardmarket-Karte ausgewählt</strong>
+                <span id="inlineSelectedMeta"></span>
+              </div>
+              <button class="inline-clear-selection" id="clearInlineCatalogSelectionBtn" type="button">Auswahl lösen</button>
+            </div>
+
+            <div class="inline-catalog-suggestions" id="inlineCatalogSuggestions">
+              <div class="inline-suggestion-head">
+                <span>Cardmarket-Vorschläge</span>
+                <span id="inlineSuggestionCount">0 Treffer</span>
+              </div>
+              <div class="inline-suggestion-list" id="inlineCatalogSuggestionList"></div>
+            </div>
+
+            <div class="cardmarket-info-panel" id="cardmarketInfoPanel">
+              <div class="cardmarket-info-head">
+                <div>
+                  <div class="cardmarket-info-title" id="cardmarketInfoTitle">Cardmarket-Karte ausgewählt</div>
+                  <div class="cardmarket-info-sub" id="cardmarketInfoSub">Automatisch aus dem Produktkatalog übernommen.</div>
+                </div>
+                <button class="inline-clear-selection" id="clearCardmarketInfoBtn" type="button">Auswahl lösen</button>
+              </div>
+              <div class="cardmarket-info-grid" id="cardmarketInfoGrid"></div>
+            </div>
+            <div class="field">
+              <label for="cardSet">Set</label>
+              <input id="cardSet" type="text" placeholder="z. B. OP05 – Awakening" />
+            </div>
+            <div class="field">
+              
+              <select id="cardLanguage">
+                <option>English</option>
+                <option>Japanese</option>
+                <option>German</option>
+                <option>French</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cardStatus">Status</label>
+              <select id="cardStatus">
+                <option>Behalten</option>
+                <option>Verkaufen</option>
+                <option>Tauschen</option>
+                <option>Prüfen</option>
+                <option>Wishlist</option>
+                <option>Sonstige</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cardGrade">Eigene Note</label>
+              <input id="cardGrade" type="number" / min="1" max="10" step="0.1" inputmode="decimal" placeholder="1–10">
+            </div>
+
+            <div class="field">
+              <label for="cardCondition">Zustand</label>
+              <input id="cardCondition" type="text" placeholder="z. B. Near Mint" />
+            </div>
+            <div class="field">
+              <label for="cardStorage">Lagerort</label>
+              <input id="cardStorage" type="text" placeholder="z. B. Binder 1 / Seite 4" />
+            </div>
+            <div class="field">
+              <label for="cardValue">Marktwert</label>
+              <input id="cardValue" type="text" placeholder="z. B. 250 €" />
+            </div>
+
+            <div class="finance-panel">
+              <div class="finance-title">Wert / Verkauf</div>
+              <div class="field">
+                <label for="purchasePrice">Einkaufspreis</label>
+                <input id="purchasePrice" type="text" placeholder="z. B. 180 €" />
+              </div>
+              <div class="field">
+                <label for="purchaseDate">Gekauft am</label>
+                <input id="purchaseDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="salePrice">Verkaufspreis</label>
+                <input id="salePrice" type="text" placeholder="z. B. 275 €" />
+              </div>
+              <div class="field">
+                <label for="saleDate">Verkauft am</label>
+                <input id="saleDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="platform">Plattform / Quelle</label>
+                <input id="platform" type="text" placeholder="z. B. Cardmarket, eBay, Privat" />
+              </div>
+              <div class="field">
+                <label for="buyer">Käufer / Verkäufer</label>
+                <input id="buyer" type="text" placeholder="optional" />
+              </div>
+              <div class="field">
+                <label>Gewinn / Verlust</label>
+                <div class="profit-pill profit-neutral" id="profitPreview">-</div>
+              </div>
+            </div>
+
+            <div class="upload-grid">
+              <div class="upload-box">
+                <label for="frontFile">Vorderseite hochladen</label>
+                <input id="frontFile" type="file" accept="image/*" />
+                <div class="preview" id="frontPreview">Vorderseite</div>
+                <div class="image-tools">
+                  <button class="image-tool-button" id="rotateFrontLeftBtn" type="button">↶ Links</button>
+                  <button class="image-tool-button" id="rotateFrontRightBtn" type="button">↷ Rechts</button>
+                  <button class="image-tool-button danger-mini" id="removeFrontBtn" type="button">Entfernen</button>
+                </div>
+                <div class="hint" id="frontStatus">Kein Bild geladen.</div>
+              </div>
+              <div class="upload-box">
+                <label for="backFile">Rückseite hochladen</label>
+                <input id="backFile" type="file" accept="image/*" />
+                <div class="preview" id="backPreview">Rückseite</div>
+                <div class="image-tools">
+                  <button class="image-tool-button" id="rotateBackLeftBtn" type="button">↶ Links</button>
+                  <button class="image-tool-button" id="rotateBackRightBtn" type="button">↷ Rechts</button>
+                  <button class="image-tool-button danger-mini" id="removeBackBtn" type="button">Entfernen</button>
+                </div>
+                <div class="hint" id="backStatus">Kein Bild geladen.</div>
+              </div>
+              <div class="upload-box">
+                <label for="extraFiles">Detailbilder hochladen</label>
+                <input id="extraFiles" type="file" accept="image/*" multiple />
+                <div class="preview" id="extraPreview">Detailbilder</div>
+                <div class="hint" id="extraStatus">Keine Detailbilder geladen.</div>
+              </div>
+            </div>
+
+            <div class="field wide">
+              <label for="tagInput">Tags / Kategorien</label>
+              <div class="tag-input-row">
+                <input id="tagInput" type="text" placeholder="z. B. Manga, Alt Art, PSA-Kandidat" />
+                <button class="tiny-button" id="addTagBtn" type="button">Tag hinzufügen</button>
+              </div>
+              <div class="hint">Enter oder Button nutzen. Tags helfen beim Filtern und Export.</div>
+              <div class="tag-chip-list" id="formTagList"></div>
+            </div>
+
+            <div class="field wide">
+              <label for="cardNotes">Notizen</label>
+              <textarea id="cardNotes" placeholder="z. B. kleine Stelle unten rechts, sonst sehr sauber."></textarea>
+            </div>
+
+            <div class="timeline-panel" id="timelinePanel">
+              <div class="timeline-title">Verlauf / Ereignisse</div>
+              <div class="timeline-input-row">
+                <div class="field">
+                  <label for="timelineDate">Datum</label>
+                  <input id="timelineDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="timelineText">Eintrag</label>
+                  <input id="timelineText" type="text" placeholder="z. B. gekauft, Wert geprüft, Schaden bewertet" />
+                </div>
+                <button class="tiny-button" id="addTimelineBtn" type="button">Hinzufügen</button>
+              </div>
+              <div class="timeline-list" id="formTimelineList"></div>
+            </div>
+
+              <div class="marker-panel">
+              <div class="marker-toolbar">
+                <div class="side-switch">
+                  <button class="side-button active" id="markFrontBtn" type="button">Vorderseite markieren</button>
+                  <button class="side-button" id="markBackBtn" type="button">Rückseite markieren</button>
+                </div>
+                <div class="side-switch">
+                  <button class="fine-button" id="fineModeBtn" type="button">Feinmarkierung / Zoom</button>
+                  <button class="secondary-button" id="clearMarkersBtn" type="button">Aktuelle Seite leeren</button>
+                </div>
+              </div>
+
+              <div class="marker-layout">
+                <div>
+                  <div class="marker-card" id="markerCard">Bild hochladen</div>
+                  <div class="fine-area" id="fineArea">
+                    <div class="hint" style="margin-bottom: 10px;">1. Grob im normalen Kartenbild auf den Schaden klicken. 2. Danach im vergrößerten Ausschnitt exakt markieren.</div>
+                    <div class="fine-stage" id="fineStage"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="hint" style="margin-bottom: 12px;">
+                    Ohne Feinmarkierung: direkt auf die Karte klicken. Mit Feinmarkierung: erst grob im normalen Bild anklicken, dann im vergrößerten Ausschnitt exakt markieren.
+                  </div>
+                  <div class="marker-list" id="markerList"></div>
+                  <div class="hint" id="markerEmpty">Noch keine Schäden markiert.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <div class="hint" id="editHint">Bilder werden beim Upload in ein einheitliches Kartenformat gebracht. Drehst du ein Bild nachträglich, werden die Markierungen dieser Seite zurückgesetzt. Die Bildgröße bleibt dabei erhalten.</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="secondary-button" id="cancelEditBtn" type="button" style="display:none;">Bearbeiten abbrechen</button>
+              <button class="primary-button" id="saveCardBtn" type="button">Karte speichern</button>
+            </div>
+          </div>
+          <div class="tool-message" id="toolMessage"></div>
+        </div>
+      </section>
+    </div>
+
+    
+    </div>
+
+    
+    </div>
+
+    
+  </main>
+
+  <div class="modal-backdrop" id="detailBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-kicker" id="detailKicker">Sammlungs-ID</div>
+          <div class="modal-title" id="detailTitle">Kartendetails</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="secondary-button" id="detailEditBtn" type="button">Bearbeiten</button>
+          <button class="close-button" id="closeDetailBtn" type="button">×</button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div>
+          <div class="main-card-image" id="detailMainImage">CARD</div>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="image-action-row">
+            <button class="image-action-button" id="showFrontImageBtn" type="button">Vorderseite</button>
+            <button class="image-action-button" id="showBackImageBtn" type="button">Rückseite</button>
+            <button class="image-action-button" id="fullscreenImageBtn" type="button">Bild groß anzeigen</button>
+          </div>
+        </div>
+        <div>
+          <div class="info-grid" id="detailInfo"></div>
+          <div class="note-box" id="detailTagsBox" style="display:none;">
+            <div class="box-title">Tags</div>
+            <div class="tag-chip-list" id="detailTagsList"></div>
+          </div>
+
+          <div class="finance-summary-box" id="detailFinanceBox">
+            <div class="box-title">Wert / Trading</div>
+            <div class="finance-summary-grid" id="detailFinanceGrid"></div>
+          </div>
+
+          <div class="market-price-box" id="detailMarketPriceBox">
+            <div class="box-title">Cardmarket Preise</div>
+            <div class="box-text">Preise aus importierter Preisdatei, falls ein passender Treffer gefunden wurde.</div>
+            <div class="market-price-grid" id="detailMarketPriceGrid"></div>
+            <div class="market-price-actions" id="detailMarketPriceActions"></div>
+            <div class="market-inline-map" id="detailMarketProductIdMap">
+              <div class="field">
+                <label for="detailMarketProductIdInput">Cardmarket Produkt-ID nachtragen</label>
+                <input id="detailMarketProductIdInput" type="text" placeholder="z. B. 690369" />
+              </div>
+              <button class="market-action-button" id="saveDetailMarketProductIdBtn" type="button">ID speichern</button>
+            </div>
+            <div class="market-price-note" id="detailMarketPriceNote"></div>
+          </div>
+          <div class="verification-box">
+            <div class="box-title">✓ Karte in deiner Sammlung</div>
+            <div class="box-text" id="detailVerification"></div>
+          </div>
+
+          <div class="note-box" id="detailCompletionBox">
+            <div class="box-title">Dokumentations-Check</div>
+            <div class="box-text" id="detailCompletionScore"></div>
+            <div class="completion-list" id="detailCompletionList"></div>
+          </div>
+          <div class="note-box" id="detailNoteBox" style="display:none;">
+            <div class="box-title">Notizen / eigene Einschätzung</div>
+            <div class="box-text" id="detailNotes"></div>
+          </div>
+          <div class="damage-section">
+            <div class="damage-head">
+              <div>
+                <div class="box-title">Schadensgrafik</div>
+                <div class="hint">Klicke auf einen Schadenspunkt für die Zoomansicht.</div>
+              </div>
+              <div class="side-switch">
+                <button class="side-button active" id="damageFrontBtn" type="button">Vorderseite</button>
+                <button class="side-button" id="damageBackBtn" type="button">Rückseite</button>
+              </div>
+            </div>
+            <div class="damage-layout">
+              <div class="damage-card" id="damageCard">CARD</div>
+              <div>
+                <div class="damage-list" id="damageList"></div>
+                <div class="hint" id="damageEmpty">Keine Schäden auf dieser Seite eingetragen.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="zoom-backdrop" id="damageEditBackdrop">
+    <div class="damage-edit-modal">
+      <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;">
+        <div>
+          <div class="modal-kicker" id="damageEditKicker">Schaden bearbeiten</div>
+          <div class="zoom-title">Markierung</div>
+          <div class="hint" style="margin-top:8px;">Beschreibung, Kategorie und Schweregrad anpassen.</div>
+        </div>
+        <button class="close-button" id="closeDamageEditBtn" type="button">×</button>
+      </div>
+      <div class="damage-edit-grid">
+        <div class="field"><label for="damageEditLabel">Beschreibung</label><input id="damageEditLabel" type="text" /></div>
+        <div class="field"><label for="damageEditCategory">Kategorie</label><select id="damageEditCategory"><option>Whitening</option><option>Kratzer</option><option>Druckstelle</option><option>Ecke</option><option>Kante</option><option>Oberfläche</option><option>Sonstiges</option></select></div>
+        <div class="field"><label for="damageEditSeverity">Schweregrad</label><select id="damageEditSeverity"><option value="low">leicht</option><option value="medium">mittel</option><option value="high">stark</option></select></div>
+        <div class="field">
+          <label for="damageEditCloseupFile">Close-up Foto zum Schaden</label>
+          <input id="damageEditCloseupFile" type="file" accept="image/*" />
+          <div class="damage-closeup-preview" id="damageEditCloseupPreview">Kein Close-up hinterlegt</div>
+          <div class="hint">Optional: Nahaufnahme des markierten Schadens hochladen.</div>
+        </div>
+      </div>
+      <div class="damage-edit-actions">
+        <button class="danger-button" id="deleteDamageEditBtn" type="button">Markierung löschen</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;"><button class="secondary-button" id="cancelDamageEditBtn" type="button">Abbrechen</button><button class="primary-button" id="saveDamageEditBtn" type="button">Speichern</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="zoom-backdrop" id="zoomBackdrop">
+    <div class="zoom-modal">
+      <div class="zoom-header">
+        <div>
+          <div class="modal-kicker" id="zoomKicker">Schaden</div>
+          <div class="zoom-title" id="zoomTitle">Zoom</div>
+          <div class="hint" id="zoomDesc" style="margin-top:8px;">Vergrößerter Ausschnitt.</div>
+        </div>
+        <button class="close-button" id="closeZoomBtn" type="button">×</button>
+      </div>
+      <div class="zoom-body">
+        <div class="zoom-stage" id="zoomStage"></div>
+        <div class="hint" id="zoomCropInfo" style="margin-top:10px;">Der Ausschnitt wird aus dem Originalbild berechnet.</div>
+        <div class="hint" style="margin-top:12px;">Fester Ausschnitt-Zoom auf die markierte Stelle.</div>
+      </div>
+    </div>
+  </div>
+  <div class="quick-add-backdrop" id="quickAddBackdrop">
+    <div class="quick-add-modal">
+      <div style="display:flex; justify-content:space-between; gap:14px; align-items:flex-start;">
+        <div>
+          <div class="quick-add-title">Schnellerfassung</div>
+          <div class="quick-add-text">Für Karten, die du schnell vormerken willst. Bilder und genaue Bewertung kannst du später ergänzen.</div>
+        </div>
+        <button class="close-button" id="closeQuickAddBtn" type="button">×</button>
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label for="quickCatalogSearchInput">Cardmarket-Karte suchen</label>
+        <input id="quickCatalogSearchInput" type="text" placeholder="z. B. Monkey D Luffy OP01-003" />
+        <div class="quick-catalog-results" id="quickCatalogResults"></div>
+      </div>
+
+      <div class="quick-add-grid">
+        <div class="field">
+          <label for="quickName">Name</label>
+          <input id="quickName" type="text" placeholder="z. B. Monkey D. Luffy" />
+        </div>
+        <div class="field">
+          <label for="quickNumber">Kartennummer</label>
+          <input id="quickNumber" type="text" placeholder="z. B. OP05-060" />
+        </div>
+        <div class="field">
+          <label for="quickSet">Set</label>
+          <input id="quickSet" type="text" placeholder="z. B. OP05" />
+        </div>
+
+        <div class="field">
+          <label for="quickValue">Marktwert</label>
+          <input id="quickValue" type="text" placeholder="z. B. 120 €" />
+        </div>
+        <div class="field">
+          <label for="quickMarketProductId">Cardmarket Produkt-ID</label>
+          <input id="quickMarketProductId" type="text" placeholder="z. B. 690369" />
+        </div>
+        <div class="field">
+          <label for="quickStatus">Status</label>
+          <select id="quickStatus">
+            <option>Behalten</option>
+            <option>Verkaufen</option>
+            <option>Tauschen</option>
+            <option>Verkauft</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1 / -1;">
+          <label for="quickTags">Tags</label>
+          <input id="quickTags" type="text" placeholder="z. B. PSA-Kandidat, Alt Art" />
+        </div>
+      </div>
+
+      <div class="quick-add-actions">
+        <button class="secondary-button" id="quickAddFullBtn" type="button">In vollständigem Formular öffnen</button>
+        <button class="primary-button" id="quickAddSaveBtn" type="button">Schnell speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="trash-backdrop" id="trashBackdrop">
+    <div class="trash-modal">
+      <div class="trash-header">
+        <div>
+          <div class="trash-title">Papierkorb</div>
+          <div class="trash-text">Gelöschte Karten können wiederhergestellt oder endgültig entfernt werden.</div>
+        </div>
+        <button class="close-button" id="closeTrashBtn" type="button">×</button>
+      </div>
+      <div class="trash-list" id="trashList"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px; flex-wrap:wrap;">
+        <button class="secondary-button" id="restoreAllTrashBtn" type="button">Alle wiederherstellen</button>
+        <button class="danger-button" id="emptyTrashBtn" type="button">Papierkorb leeren</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="import-choice-backdrop" id="importChoiceBackdrop">
+    <div class="import-choice-modal">
+      <div class="import-choice-title">Import prüfen</div>
+      <div class="import-choice-text" id="importChoiceText">Wie sollen die importierten Karten übernommen werden?</div>
+      <div class="import-choice-stats">
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Import</div>
+          <div class="import-choice-value" id="importCountStat">0</div>
+        </div>
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Neue IDs</div>
+          <div class="import-choice-value" id="importNewStat">0</div>
+        </div>
+        <div class="import-choice-stat">
+          <div class="import-choice-label">Duplikate</div>
+          <div class="import-choice-value" id="importDuplicateStat">0</div>
+        </div>
+      </div>
+      <div class="import-choice-actions">
+        <button class="import-action-button primary-choice" id="importMergeBtn" type="button">
+          <strong>Zusammenführen</strong>
+          <span>Neue Karten hinzufügen, vorhandene IDs aktualisieren.</span>
+        </button>
+        <button class="import-action-button" id="importOnlyNewBtn" type="button">
+          <strong>Nur neue Karten hinzufügen</strong>
+          <span>Karten mit bereits vorhandener ID werden übersprungen.</span>
+        </button>
+        <button class="import-action-button danger" id="importReplaceBtn" type="button">
+          <strong>Sammlung ersetzen</strong>
+          <span>Aktuelle Sammlung vollständig durch Import ersetzen.</span>
+        </button>
+        <button class="import-action-button" id="importCancelBtn" type="button">
+          <strong>Abbrechen</strong>
+          <span>Import nicht durchführen.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-page-backdrop" id="cardReportBackdrop">
+    <div class="report-page" id="cardReportPage">
+      <div class="report-page-header">
+        <div>
+          <div class="report-page-title" id="cardReportTitle">Kartenreport</div>
+          <div class="report-page-sub" id="cardReportSub">Sammlungs- und Bewertungsreport</div>
+        </div>
+        <div class="report-page-actions">
+          <button class="secondary-button" id="printCardReportBtn" type="button">Drucken</button>
+          <button class="close-button" id="closeCardReportBtn" type="button">×</button>
+        </div>
+      </div>
+      <div class="report-page-body" id="cardReportBody"></div>
+    </div>
+  </div>
+
+  <div class="fullscreen-image-backdrop" id="fullscreenImageBackdrop">
+    <div class="fullscreen-image-box">
+      <button class="fullscreen-close" id="fullscreenCloseBtn" type="button">×</button>
+      <img id="fullscreenImage" src="" alt="Karte groß" />
+    </div>
+  </div>
+
+  <button class="scroll-top-button" id="scrollTopBtn" type="button" title="Nach oben">↑</button>
+
+  <div class="mobile-bottom-nav" id="mobileBottomNav">
+    <button class="mobile-nav-button" data-page="overviewPage" type="button">
+      <span>⌂</span><span>Start</span>
+    </button>
+    <button class="mobile-nav-button" data-page="collectionPage" type="button">
+      <span>▦</span><span>Sammlung</span>
+    </button>
+    <a class="mobile-nav-button" href="add.html" data-page="addPage"><span>＋</span><span>Neu</span></a>
+    <button class="mobile-nav-button" id="mobileBackupBtn" type="button">
+      <span>⇩</span><span>Backup</span>
+    </button>
+  </div>
+
+  <a class="floating-add" id="floatingAddBtn" href="add.html" title="Neue Karte eintragen"><span>＋</span><span>Neue Karte</span></a>
+<script src="assets/app.js?v=202"></script>
+</body>
+</html>
