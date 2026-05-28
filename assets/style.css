@@ -8796,3 +8796,9 @@ header .brand-icon {
   background: transparent !important;
   color: transparent !important;
 }
+
+
+/* v225: Mobile Prüfen-Tab ist Link zu check.html, kein Backup-Button */
+.mobile-bottom-nav a.mobile-nav-button {
+  text-decoration: none !important;
+}
