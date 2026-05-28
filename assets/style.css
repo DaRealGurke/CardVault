@@ -8670,14 +8670,129 @@ body.dark .public-collection-status {
   border-color: rgba(255,255,255,0.1);
   color: rgba(255,255,255,0.82);
 }
+
+
+/* v223: Mobile Header und Bottom Tab-Bar optimiert */
+@media (max-width: 720px) {
+  .app-header,
+  header,
+  .site-header {
+    overflow-x: hidden !important;
+  }
+
+  .top-bar,
+  .header-inner,
+  .nav-shell,
+  .brand-row {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .brand-home {
+    flex: 0 0 auto !important;
+  }
+
+  .brand-icon {
+    flex: 0 0 auto !important;
+  }
+
+  .main-nav,
+  .header-nav,
+  .top-nav,
+  nav[aria-label="Hauptnavigation"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+
+  .main-nav::-webkit-scrollbar,
+  .header-nav::-webkit-scrollbar,
+  .top-nav::-webkit-scrollbar,
+  nav[aria-label="Hauptnavigation"]::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .main-nav a,
+  .header-nav a,
+  .top-nav a,
+  nav[aria-label="Hauptnavigation"] a {
+    flex: 0 0 auto !important;
+    font-size: 12px !important;
+    padding: 7px 9px !important;
+    border-radius: 999px !important;
+  }
+
+  /* Falls die Header-Navigation als Pills/Buttons gebaut ist */
+  .nav-pill,
+  .nav-link,
+  .header-link {
+    flex: 0 0 auto !important;
+    font-size: 12px !important;
+    padding: 7px 9px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobile-bottom-nav,
+  .bottom-nav,
+  .mobile-tabbar {
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
+    padding-right: max(10px, env(safe-area-inset-right)) !important;
+  }
+
+  .mobile-bottom-nav a,
+  .bottom-nav a,
+  .mobile-tabbar a,
+  .mobile-nav-item {
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .main-nav a,
+  .header-nav a,
+  .top-nav a,
+  nav[aria-label="Hauptnavigation"] a,
+  .nav-pill,
+  .nav-link,
+  .header-link {
+    font-size: 11px !important;
+    padding: 6px 7px !important;
+  }
+
+  .brand-icon {
+    width: 34px !important;
+    height: 34px !important;
+  }
+}
+
+
+/* v224: CardVault Logo im Homebutton */
 .brand-icon {
   padding: 0 !important;
-  overflow: hidden;
+  overflow: hidden !important;
+  background: transparent !important;
+  color: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .brand-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+  border-radius: inherit !important;
+}
+
+header .brand-icon {
+  background: transparent !important;
+  color: transparent !important;
 }
