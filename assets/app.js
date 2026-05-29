@@ -97,12 +97,14 @@
       ];
     }
 
-    function loadCards() {
+function loadCards() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : demoCards();
-      } catch {
-        return demoCards();
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("Lokale Karten konnten nicht geladen werden.", error);
+        return [];
       }
     }
 
@@ -5891,8 +5893,10 @@ function setPublicCollectionStatus(message, state = "") {
     }
 
     async function loadPublicCollectionIfAvailable(options = {}) {
+      cv244SetPublicLoading(true);
       if (location.protocol === "file:") {
         setPublicCollectionStatus("Öffentliche Sammlung: lokal per Datei nicht ladbar.", "warning");
+        cv244SetPublicLoading(false);
         return false;
       }
 
@@ -5904,6 +5908,7 @@ function setPublicCollectionStatus(message, state = "") {
 
         if (!publicCards.length) {
           setPublicCollectionStatus("Öffentliche Sammlung gefunden, aber keine Karten enthalten.", "warning");
+          cv244SetPublicLoading(false);
           return false;
         }
 
@@ -5919,10 +5924,12 @@ function setPublicCollectionStatus(message, state = "") {
         else if (typeof refreshCardmarketPricesForCollection === "function") refreshCardmarketPricesForCollection({ silent: true });
 
         setPublicCollectionStatus("Öffentliche Sammlung geladen: " + publicCards.length + " Karte(n).", "success");
+        cv244SetPublicLoading(false);
         if (options.manual && typeof showImportToast === "function") showImportToast("Öffentliche Sammlung geladen", publicCards.length + " Karte(n) geladen.", "success");
         return true;
       } catch (error) {
         setPublicCollectionStatus("Öffentliche Sammlung nicht geladen: " + (error && error.message ? error.message : error), "error");
+        cv244SetPublicLoading(false);
         console.warn("Öffentliche Sammlung konnte nicht geladen werden.", error);
         return false;
       }
@@ -6337,6 +6344,14 @@ function forceMobileCollectionFiltersState() {
       }
     }
 
+
+
+    let cv244PublicCollectionLoading = false;
+
+    function cv244SetPublicLoading(isLoading) {
+      cv244PublicCollectionLoading = Boolean(isLoading);
+      document.body.classList.toggle("public-collection-loading", cv244PublicCollectionLoading);
+    }
 
 document.addEventListener("DOMContentLoaded", () => {
       if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));

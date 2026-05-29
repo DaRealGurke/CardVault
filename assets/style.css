@@ -9680,3 +9680,9 @@ body.dark .public-collection-menu-text {
 /* Kein aggressives mehrfaches Nachkorrigieren des aktiven Tabs. */
 
 /* v243: manifest.webmanifest in manifest.json umbenannt */
+
+
+/* v244: Keine Demo-/Beispielkarte mehr vor öffentlicher Sammlung */
+body.public-collection-loading #collectionPage .empty-state {
+  display: none !important;
+}
