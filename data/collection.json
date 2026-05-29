@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T19:05:26.861Z",
+  "updatedAt": "2026-05-29T12:56:26.667Z",
   "cards": [
     {
       "id": "213141",
@@ -35,7 +35,7 @@
       "updatedAt": "2026-05-28T19:05:24.318Z",
       "marketPrice": "27,99 €",
       "marketPriceRaw": 27.99,
-      "marketPriceUpdatedAt": "2026-05-28T19:05:24.910Z",
+      "marketPriceUpdatedAt": "2026-05-29T12:56:22.374Z",
       "marketPriceSource": "Cardmarket"
     },
     {
@@ -68,7 +68,7 @@
       "updatedAt": "2026-05-21T19:10:42.531Z",
       "marketPrice": "55,50 €",
       "marketPriceRaw": 55.5,
-      "marketPriceUpdatedAt": "2026-05-28T19:05:24.910Z",
+      "marketPriceUpdatedAt": "2026-05-29T12:56:22.374Z",
       "marketPriceSource": "Cardmarket",
       "apiCardId": "OP05-098",
       "apiImage": "https://optcgapi.com/media/static/Card_Images/OP05-098_p1.jpg",
