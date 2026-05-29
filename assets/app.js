@@ -73,36 +73,18 @@
 
     function $(id) { return document.getElementById(id); }
 
-    function demoCards() {
-      return [
-        {
-          id: "COL-2026-0001",
-          name: "Monkey D. Luffy",
-          number: "OP05-060",
-          set: "OP05 – Awakening of the New Era",
-          rarity: "SEC",
-          language: "Japanese",
-          status: "Behalten",
-          grade: "8.5",
-          condition: "Near Mint",
-          storage: "Binder 1 / Seite 4",
-          value: "320 €",
-          notes: "Demo-Karte. Lade eigene Bilder hoch, um die Schadensfunktion zu testen.",
-          images: [],
-          damageFront: [{ x: 14, y: 10, label: "Whitening oben links" }],
-          damageBack: [],
-          favorite: true,
-          createdAt: "2026-01-10T10:00:00.000Z"
-        }
-      ];
+function demoCards() {
+      return [];
     }
 
-    function loadCards() {
+function loadCards() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : demoCards();
-      } catch {
-        return demoCards();
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("Lokale Karten konnten nicht geladen werden.", error);
+        return [];
       }
     }
 
@@ -5889,10 +5871,7 @@ function setPublicCollectionStatus(message, state = "") {
     }
 
     async function loadPublicCollectionIfAvailable(options = {}) {
-      if (cv249IsLocalEditSession() && !options.manual) {
-        setPublicCollectionStatus("Lokale Bearbeitung aktiv – öffentliche Sammlung nicht automatisch überschrieben.", "warning");
-        return false;
-      }
+      // v250: öffentliche Sammlung darf laden, wird aber mit lokalen Karten zusammengeführt.
       if (location.protocol === "file:") {
         setPublicCollectionStatus("Öffentliche Sammlung: lokal per Datei nicht ladbar.", "warning");
         return false;
@@ -5909,18 +5888,13 @@ function setPublicCollectionStatus(message, state = "") {
           return false;
         }
 
-        cards = publicCards;
         publicCollectionLoaded = true;
         publicCollectionMode = true;
 
-        if (typeof enforceGalleryView === "function") enforceGalleryView();
-        if (typeof renderStats === "function") renderStats();
-        if (typeof renderCards === "function") renderCards();
-        if (typeof updateMobileNav === "function") updateMobileNav(currentPageIdFromFile());
+        cv250RenderMergedCollection(publicCards, "public-loader-merge");
+
         if (typeof cv220RefreshCardmarketPrices === "function") cv220RefreshCardmarketPrices({ silent: true });
         else if (typeof refreshCardmarketPricesForCollection === "function") refreshCardmarketPricesForCollection({ silent: true });
-
-        setPublicCollectionStatus("Öffentliche Sammlung geladen: " + publicCards.length + " Karte(n).", "success");
         if (options.manual && typeof showImportToast === "function") showImportToast("Öffentliche Sammlung geladen", publicCards.length + " Karte(n) geladen.", "success");
         return true;
       } catch (error) {
@@ -6359,6 +6333,7 @@ function forceMobileCollectionFiltersState() {
       try {
         cv249EnterLocalEditSession();
         saveCards();
+        cards = cv250MergePublicAndLocalCards(cards);
         if (typeof renderStats === "function") renderStats();
         if (typeof enforceGalleryView === "function") enforceGalleryView();
         if (typeof renderCards === "function") renderCards();
@@ -6375,6 +6350,60 @@ function forceMobileCollectionFiltersState() {
       } catch (error) {
         console.error("[CardVault] Lokales Speichern/Rendern fehlgeschlagen", error);
       }
+    }
+
+
+
+    /* v250: öffentliche Sammlung + lokal gespeicherte Karten zusammenführen */
+    function cv250LoadLocalCardsRaw() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn("[CardVault] Lokale Karten konnten nicht gelesen werden.", error);
+        return [];
+      }
+    }
+
+    function cv250MergePublicAndLocalCards(publicCards) {
+      const localCards = cv250LoadLocalCardsRaw();
+      const merged = [];
+      const seen = new Set();
+
+      function addCard(card, source) {
+        if (!card || typeof card !== "object") return;
+        const key = String(card.id || card.collectionId || card.cardId || card.name || Math.random()).trim();
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        merged.push({ ...card, _source: source });
+      }
+
+      // Lokal zuerst, damit frisch gespeicherte Karten sichtbar bleiben.
+      localCards.forEach(card => addCard(card, "local"));
+      (Array.isArray(publicCards) ? publicCards : []).forEach(card => addCard(card, "public"));
+
+      return merged;
+    }
+
+    function cv250RenderMergedCollection(publicCards, label = "merge") {
+      const mergedCards = cv250MergePublicAndLocalCards(publicCards);
+      cards = mergedCards;
+
+      if (typeof enforceGalleryView === "function") enforceGalleryView();
+      if (typeof renderStats === "function") renderStats();
+      if (typeof renderCards === "function") renderCards();
+      if (typeof updateMobileNav === "function") updateMobileNav(currentPageIdFromFile());
+
+      const localCount = cv250LoadLocalCardsRaw().length;
+      const publicCount = Array.isArray(publicCards) ? publicCards.length : 0;
+      setPublicCollectionStatus(
+        "Öffentliche Sammlung: " + publicCount + " Karte(n), lokal zusätzlich: " + Math.max(0, mergedCards.length - publicCount) + ".",
+        "success"
+      );
+
+      console.log("[CardVault]", label, { publicCount, localCount, mergedCount: mergedCards.length });
+      return mergedCards;
     }
 
 
