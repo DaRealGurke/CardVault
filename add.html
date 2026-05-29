@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Card Vault – Eintragen</title>
-  <link rel="stylesheet" href="assets/style.css?v=236" />
+  <link rel="stylesheet" href="assets/style.css?v=239" />
 
   <style id="critical-header-fix">
     body { padding-top: 82px !important; }
@@ -572,6 +572,16 @@
         Cardmarket Speicher leeren
         <span>Entfernt nur Preis- und Produktkatalogdaten, nicht deine Karten.</span>
       </button>
+      <div class="options-menu-divider public-collection-menu-divider"></div>
+      <div class="public-collection-menu-status" id="publicCollectionMenuStatus">
+        <div class="public-collection-menu-title">Öffentliche Sammlung</div>
+        <div class="public-collection-menu-text" id="publicCollectionMenuStatusText">Noch nicht geprüft.</div>
+        <button class="options-menu-button compact" id="reloadPublicCollectionMenuBtn" type="button">
+          Öffentliche Sammlung neu laden
+          <span>Lädt data/collection.json erneut.</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1173,6 +1183,6 @@
   </div>
 
   <a class="floating-add" id="floatingAddBtn" href="add.html" title="Neue Karte eintragen"><span>＋</span><span>Neue Karte</span></a>
-<script src="assets/app.js?v=236"></script>
+<script src="assets/app.js?v=239"></script>
 </body>
 </html>

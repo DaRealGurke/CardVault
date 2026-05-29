@@ -9588,3 +9588,87 @@ body.dark .mobile-filter-sheet {
     margin-top: 2px !important;
   }
 }
+
+
+/* v237: Öffentliche Sammlung Status im Optionen-Menü statt oben auf der Seite */
+.public-collection-status {
+  display: none !important;
+}
+
+.public-collection-menu-divider {
+  margin-top: 6px;
+}
+
+.public-collection-menu-status {
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(18,53,36,0.06);
+  border: 1px solid rgba(18,53,36,0.14);
+  margin: 8px 6px 4px;
+}
+
+.public-collection-menu-status.success {
+  background: rgba(18,53,36,0.08);
+  border-color: rgba(18,53,36,0.24);
+}
+
+.public-collection-menu-status.warning {
+  background: rgba(255,185,70,0.12);
+  border-color: rgba(180,118,0,0.25);
+}
+
+.public-collection-menu-status.error {
+  background: rgba(217,44,44,0.08);
+  border-color: rgba(217,44,44,0.25);
+}
+
+.public-collection-menu-title {
+  font-size: 12px;
+  font-weight: 850;
+  color: #123524;
+  margin-bottom: 4px;
+}
+
+.public-collection-menu-text {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #3f3f46;
+  margin-bottom: 8px;
+}
+
+.options-menu-button.compact {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+body.dark .public-collection-menu-status {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+}
+
+body.dark .public-collection-menu-title,
+body.dark .public-collection-menu-text {
+  color: rgba(255,255,255,0.86);
+}
+
+/* v238: Unnötigen Apple-inspiriert Text aus Übersicht entfernt */
+
+
+/* v239: Leere Sternchen/Pill aus Übersicht entfernt, Hero kompakter */
+#overviewPage .hero {
+  padding-top: 28px;
+}
+
+#overviewPage .hero .pill {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  #overviewPage .hero {
+    padding-top: 10px !important;
+  }
+
+  #overviewPage h1 {
+    margin-top: 0 !important;
+  }
+}
