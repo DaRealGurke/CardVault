@@ -5853,34 +5853,23 @@ function setValueIfExists(id, value) {
       };
     }
 
-    function ensurePublicCollectionStatusBox() {
-      let box = $("publicCollectionStatus");
-      if (box) return box;
-
-      box = document.createElement("div");
-      box.id = "publicCollectionStatus";
-      box.className = "public-collection-status";
-      box.innerHTML = '<span id="publicCollectionStatusText">Öffentliche Sammlung wird geprüft …</span><button id="reloadPublicCollectionBtn" type="button">Neu laden</button>';
-
-      const target = document.querySelector(".hero-card, .page-header, main, body");
-      if (target && target !== document.body) target.prepend(box);
-      else document.body.prepend(box);
-
-      const btn = $("reloadPublicCollectionBtn");
-      if (btn) btn.addEventListener("click", () => loadPublicCollectionIfAvailable({ manual: true }));
-
-      return box;
+function ensurePublicCollectionStatusBox() {
+      return $("publicCollectionMenuStatus") || null;
     }
 
-    function setPublicCollectionStatus(message, state = "") {
-      ensurePublicCollectionStatusBox();
-      const text = $("publicCollectionStatusText");
-      const box = $("publicCollectionStatus");
+function setPublicCollectionStatus(message, state = "") {
+      const box = $("publicCollectionMenuStatus");
+      const text = $("publicCollectionMenuStatusText");
+
       if (text) text.textContent = message;
       if (box) {
         box.classList.remove("success", "warning", "error");
         if (state) box.classList.add(state);
       }
+
+      // Die alte große Statusbox oben soll nicht mehr erscheinen.
+      const oldTopBox = $("publicCollectionStatus");
+      if (oldTopBox) oldTopBox.remove();
     }
 
     async function fetchPublicCollectionJson() {
@@ -6352,6 +6341,7 @@ function forceMobileCollectionFiltersState() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+      if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));
       cv236StartFilters();
       cvStartMobileFilterController();
       setTimeout(forceMobileCollectionFiltersState, 50);
@@ -6375,7 +6365,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(forceCorrectMobileTabFromUrl, 1000);
       setTimeout(updateMobileFilterFab, 1200);
       setTimeout(syncMobileFilterLayout, 1500);
-      ensurePublicCollectionStatusBox();
+      setPublicCollectionStatus("Öffentliche Sammlung wird geprüft …");
       setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 300);
       if ($("exportPublicCollectionBtn")) onIfExists("exportPublicCollectionBtn", "click", exportPublicCollectionJson);
       if ($("cardmarketDebugBtn")) onIfExists("cardmarketDebugBtn", "click", cv220ShowCardmarketDebug);
