@@ -97,14 +97,12 @@
       ];
     }
 
-function loadCards() {
+    function loadCards() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        console.warn("Lokale Karten konnten nicht geladen werden.", error);
-        return [];
+        return raw ? JSON.parse(raw) : demoCards();
+      } catch {
+        return demoCards();
       }
     }
 
@@ -1768,9 +1766,7 @@ const existingEditId = editingId || getQueryParam("edit") || localStorage.getIte
         next.updatedAt = new Date().toISOString();
         return next;
       });
-      saveCards();
-      renderStats();
-      renderCards();
+      cv249RenderSavedLocalCard();
     }
 
     function bulkDeleteSelected() {
@@ -5893,10 +5889,12 @@ function setPublicCollectionStatus(message, state = "") {
     }
 
     async function loadPublicCollectionIfAvailable(options = {}) {
-      cv244SetPublicLoading(true);
+      if (cv249IsLocalEditSession() && !options.manual) {
+        setPublicCollectionStatus("Lokale Bearbeitung aktiv – öffentliche Sammlung nicht automatisch überschrieben.", "warning");
+        return false;
+      }
       if (location.protocol === "file:") {
         setPublicCollectionStatus("Öffentliche Sammlung: lokal per Datei nicht ladbar.", "warning");
-        cv244SetPublicLoading(false);
         return false;
       }
 
@@ -5908,7 +5906,6 @@ function setPublicCollectionStatus(message, state = "") {
 
         if (!publicCards.length) {
           setPublicCollectionStatus("Öffentliche Sammlung gefunden, aber keine Karten enthalten.", "warning");
-          cv244SetPublicLoading(false);
           return false;
         }
 
@@ -5924,12 +5921,10 @@ function setPublicCollectionStatus(message, state = "") {
         else if (typeof refreshCardmarketPricesForCollection === "function") refreshCardmarketPricesForCollection({ silent: true });
 
         setPublicCollectionStatus("Öffentliche Sammlung geladen: " + publicCards.length + " Karte(n).", "success");
-        cv244SetPublicLoading(false);
         if (options.manual && typeof showImportToast === "function") showImportToast("Öffentliche Sammlung geladen", publicCards.length + " Karte(n) geladen.", "success");
         return true;
       } catch (error) {
         setPublicCollectionStatus("Öffentliche Sammlung nicht geladen: " + (error && error.message ? error.message : error), "error");
-        cv244SetPublicLoading(false);
         console.warn("Öffentliche Sammlung konnte nicht geladen werden.", error);
         return false;
       }
@@ -6346,14 +6341,46 @@ function forceMobileCollectionFiltersState() {
 
 
 
-    let cv244PublicCollectionLoading = false;
+    /* v249: Lokales Speichern trotz öffentlicher Sammlung sichtbar machen */
+    let cv249LocalEditSession = false;
 
-    function cv244SetPublicLoading(isLoading) {
-      cv244PublicCollectionLoading = Boolean(isLoading);
-      document.body.classList.toggle("public-collection-loading", cv244PublicCollectionLoading);
+    function cv249EnterLocalEditSession() {
+      cv249LocalEditSession = true;
+      publicCollectionMode = false;
+      publicCollectionLoaded = false;
+      sessionStorage.setItem("cardVaultLocalEditSession", "1");
     }
 
+    function cv249IsLocalEditSession() {
+      return cv249LocalEditSession || sessionStorage.getItem("cardVaultLocalEditSession") === "1";
+    }
+
+    function cv249RenderSavedLocalCard() {
+      try {
+        cv249EnterLocalEditSession();
+        saveCards();
+        if (typeof renderStats === "function") renderStats();
+        if (typeof enforceGalleryView === "function") enforceGalleryView();
+        if (typeof renderCards === "function") renderCards();
+        if (typeof updateMobileNav === "function") updateMobileNav("collectionPage");
+
+        setTimeout(() => {
+          if (typeof renderCards === "function") renderCards();
+          if (typeof renderStats === "function") renderStats();
+        }, 150);
+
+        setTimeout(() => {
+          if (typeof renderCards === "function") renderCards();
+        }, 600);
+      } catch (error) {
+        console.error("[CardVault] Lokales Speichern/Rendern fehlgeschlagen", error);
+      }
+    }
+
+
 document.addEventListener("DOMContentLoaded", () => {
+      /* cv249IsLocalEditSession startup */
+      if (cv249IsLocalEditSession()) setTimeout(cv249RenderSavedLocalCard, 250);
       if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));
       cv236StartFilters();
       cvStartMobileFilterController();
