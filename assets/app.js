@@ -576,7 +576,17 @@ function saveCards() {
       }
     }
 
-    function pageIdToHref(pageId) {
+    
+    function isStandaloneDisplayMode() {
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)
+        || window.navigator.standalone === true;
+    }
+
+    function isNarrowMobileNavigation() {
+      return (window.innerWidth || document.documentElement.clientWidth || 9999) <= 900;
+    }
+
+function pageIdToHref(pageId) {
       const map = {
         overviewPage: "index.html",
         collectionPage: "collection.html",
@@ -586,8 +596,22 @@ function saveCards() {
       return map[pageId] || "index.html";
     }
 
-    function goToPageFile(pageId) {
-      window.location.href = pageIdToHref(pageId);
+function goToPageFile(pageId) {
+      const href = pageIdToHref(pageId);
+      const currentFile = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+      const targetFile = href.toLowerCase();
+
+      if (currentFile === targetFile || (!currentFile && targetFile === "index.html")) {
+        updateMobileNav(pageId);
+        return;
+      }
+
+      // Auf iPhone/kleinen Screens weniger Safari-Historien-/Toolbar-Sprünge erzeugen.
+      if (isStandaloneDisplayMode() || isNarrowMobileNavigation()) {
+        window.location.replace(href);
+      } else {
+        window.location.href = href;
+      }
     }
 
     function showPage(pageId) {
@@ -6340,7 +6364,29 @@ function forceMobileCollectionFiltersState() {
     }
 
 
+
+    function bindMobileTabNavigation() {
+      document.querySelectorAll(".mobile-bottom-nav .mobile-nav-button[data-page]").forEach(button => {
+        if (button.dataset.cvMobileNavBound === "1") return;
+        button.dataset.cvMobileNavBound = "1";
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const pageId = button.dataset.page;
+          updateMobileNav(pageId);
+
+          if (document.getElementById(pageId)) {
+            showPage(pageId);
+          } else {
+            goToPageFile(pageId);
+          }
+        }, { passive: false });
+      });
+    }
+
 document.addEventListener("DOMContentLoaded", () => {
+      bindMobileTabNavigation();
       if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));
       cv236StartFilters();
       cvStartMobileFilterController();
