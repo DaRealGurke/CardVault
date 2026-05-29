@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Card Vault – ID prüfen</title>
-  <link rel="stylesheet" href="assets/style.css?v=225" />
+  <link rel="stylesheet" href="assets/style.css?v=236" />
 
   <style id="critical-header-fix">
     body { padding-top: 82px !important; }
@@ -36,6 +36,494 @@
     @media (max-width: 760px) {
       body { padding-top: 76px !important; }
       main { padding-top: 20px !important; }
+    }
+  </style>
+
+
+  <style id="mobile-header-tabbar-v228">
+    @media (max-width: 720px) {
+      html,
+      body {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+      }
+
+      body {
+        padding-top: 0 !important;
+        padding-bottom: 98px !important;
+      }
+
+      body > header,
+      header {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+      }
+
+      main {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+
+      .mobile-bottom-nav {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        left: 10px !important;
+        right: 10px !important;
+        bottom: max(10px, env(safe-area-inset-bottom)) !important;
+        width: auto !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        z-index: 10050 !important;
+        gap: 6px !important;
+      }
+
+      .mobile-nav-button {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        display: grid !important;
+        justify-items: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        text-decoration: none !important;
+      }
+
+      .mobile-nav-button span {
+        min-width: 0 !important;
+      }
+    }
+  </style>
+
+
+  <style id="mobile-filter-sheet-v230">
+    @media (max-width: 720px) {
+      /* Auf Mobilgeräten gibt es unten schon 'Neu', deshalb den extra Floating-Add ausblenden */
+      .floating-add,
+      #floatingAddBtn {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      /* Die Karten sollen direkt oben anfangen */
+      #collectionPage section {
+        padding-top: 0 !important;
+      }
+
+      #collectionPage .section-head {
+        padding-top: 8px !important;
+        margin-bottom: 6px !important;
+      }
+
+      #collectionPage .section-kicker,
+      #collectionPage .auto-market-box,
+      #collectionPage .toolbar-extra,
+      #collectionPage .collection-options-wrap,
+      #collectionPage .view-toggle {
+        display: none !important;
+      }
+
+      #collectionPage h2 {
+        font-size: 28px !important;
+        line-height: 1 !important;
+      }
+
+      /* WICHTIG: Filter oberhalb der Karten auf Handy vollständig ausblenden */
+      #collectionPage .quick-filter-bar,
+      #collectionPage #quickFilterBar,
+      #collectionPage .collection-controls {
+        display: none !important;
+        position: static !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* Nur wenn der Filter geöffnet ist: als Bottom-Sheet anzeigen */
+      body.mobile-filters-open #collectionPage .collection-controls {
+        display: grid !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        pointer-events: auto !important;
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+        z-index: 10080 !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        padding: 12px !important;
+        border-radius: 24px !important;
+        background: rgba(255,255,255,0.97) !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+        box-shadow: 0 22px 70px rgba(0,0,0,0.30) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+      }
+
+      body.mobile-filters-open #collectionPage .quick-filter-bar,
+      body.mobile-filters-open #collectionPage #quickFilterBar {
+        display: flex !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        pointer-events: auto !important;
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(350px + env(safe-area-inset-bottom)) !important;
+        z-index: 10081 !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        border-radius: 22px !important;
+        background: rgba(255,255,255,0.97) !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+        box-shadow: 0 18px 55px rgba(0,0,0,0.22) !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      body.mobile-filters-open #collectionPage .quick-filter-chip {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+      }
+
+      body.mobile-filters-open #collectionPage .control-panel {
+        display: block !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 11px !important;
+        border-radius: 18px !important;
+        box-shadow: none !important;
+      }
+
+      body.mobile-filters-open #collectionPage .control-panel input,
+      body.mobile-filters-open #collectionPage .control-panel select {
+        padding: 12px 13px !important;
+        border-radius: 14px !important;
+        font-size: 15px !important;
+      }
+
+      /* Filter-Button etwas höher über der Tab-Bar, ohne Überlappung */
+      .mobile-filter-fab {
+        right: 16px !important;
+        bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+        z-index: 10075 !important;
+      }
+
+      body.mobile-filters-open .mobile-filter-fab {
+        bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+      }
+
+      #collectionPage .cards {
+        margin-top: 4px !important;
+      }
+    }
+
+    body.dark.mobile-filters-open #collectionPage .collection-controls,
+    body.dark.mobile-filters-open #collectionPage .quick-filter-bar,
+    body.dark.mobile-filters-open #collectionPage #quickFilterBar {
+      background: rgba(28,28,30,0.97) !important;
+      border-color: rgba(255,255,255,0.14) !important;
+    }
+  </style>
+
+
+  <style id="mobile-collection-filters-v231">
+    @media (max-width: 720px) {
+      #collectionPage .quick-filter-bar,
+      #collectionPage #quickFilterBar,
+      #collectionPage .collection-controls,
+      #collectionPage .toolbar-extra,
+      #collectionPage .control-panel,
+      #collectionPage .sort-panel,
+      #collectionPage .sort-controls,
+      #collectionPage .filter-panel,
+      #collectionPage .view-toggle {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        pointer-events: none !important;
+      }
+
+      #collectionPage .section-head {
+        padding-top: 6px !important;
+        margin-bottom: 6px !important;
+      }
+
+      #collectionPage .section-kicker,
+      #collectionPage .auto-market-box,
+      #collectionPage .collection-options-wrap {
+        display: none !important;
+      }
+
+      #collectionPage h2 {
+        font-size: 27px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+      }
+
+      #collectionPage .collection-header-actions {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body.mobile-filters-open #collectionPage .collection-controls {
+        display: grid !important;
+        visibility: visible !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        pointer-events: auto !important;
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+        z-index: 10080 !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        padding: 12px !important;
+        border-radius: 24px !important;
+        background: rgba(255,255,255,0.98) !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+        box-shadow: 0 22px 70px rgba(0,0,0,0.30) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+      }
+
+      body.mobile-filters-open #collectionPage .collection-controls .control-panel {
+        display: block !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        pointer-events: auto !important;
+        margin: 0 !important;
+        padding: 11px !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+        border-radius: 18px !important;
+      }
+
+      body.mobile-filters-open #collectionPage .collection-controls .control-panel label,
+      body.mobile-filters-open #collectionPage .collection-controls .control-panel input,
+      body.mobile-filters-open #collectionPage .collection-controls .control-panel select {
+        display: block !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        pointer-events: auto !important;
+      }
+
+      body.mobile-filters-open #collectionPage .quick-filter-bar,
+      body.mobile-filters-open #collectionPage #quickFilterBar {
+        display: flex !important;
+        visibility: visible !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        pointer-events: auto !important;
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(350px + env(safe-area-inset-bottom)) !important;
+        z-index: 10081 !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        border-radius: 22px !important;
+        background: rgba(255,255,255,0.98) !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+        box-shadow: 0 18px 55px rgba(0,0,0,0.22) !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+      }
+
+      body.mobile-filters-open #collectionPage .quick-filter-chip {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+      }
+
+      #collectionPage .cards {
+        margin-top: 2px !important;
+      }
+    }
+
+    body.dark.mobile-filters-open #collectionPage .collection-controls,
+    body.dark.mobile-filters-open #collectionPage .quick-filter-bar,
+    body.dark.mobile-filters-open #collectionPage #quickFilterBar {
+      background: rgba(28,28,30,0.98) !important;
+      border-color: rgba(255,255,255,0.14) !important;
+    }
+  </style>
+
+
+  <style id="mobile-filter-v233-final">
+    @media (max-width: 900px), (hover: none) and (pointer: coarse) {
+      body.cv-mobile-layout #collectionPage > section > .collection-controls,
+      body.cv-mobile-layout #collectionPage > section > .quick-filter-bar,
+      body.cv-mobile-layout #collectionPage > section > #quickFilterBar,
+      body.cv-mobile-layout #collectionPage .cv-force-hide-mobile-filters {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      body.cv-mobile-layout .mobile-filter-sheet .collection-controls {
+        display: grid !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      body.cv-mobile-layout .mobile-filter-sheet .quick-filter-bar,
+      body.cv-mobile-layout .mobile-filter-sheet #quickFilterBar {
+        display: flex !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+  </style>
+
+
+  <style id="mobile-filter-v234-window-fix">
+    @media (max-width: 900px) {
+      body.cv-mobile-layout #collectionPage .collection-controls.cv-force-hide-mobile-filters,
+      body.cv-mobile-layout #collectionPage .quick-filter-bar.cv-force-hide-mobile-filters,
+      body.cv-mobile-layout #collectionPage #quickFilterBar.cv-force-hide-mobile-filters {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      body.cv-mobile-layout .mobile-filter-sheet .collection-controls {
+        display: grid !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
+      body.cv-mobile-layout .mobile-filter-sheet .quick-filter-bar,
+      body.cv-mobile-layout .mobile-filter-sheet #quickFilterBar {
+        display: flex !important;
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+    }
+  </style>
+
+
+  <style id="mobile-filter-v235-class-based-final">
+    @media (max-width: 900px) {
+      body.cv-mobile-filter-mode #collectionPage .mobile-filter-source {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      body.cv-mobile-filter-mode .mobile-filter-sheet .mobile-filter-source,
+      body.cv-mobile-filter-mode .mobile-filter-sheet .collection-controls,
+      body.cv-mobile-filter-mode .mobile-filter-sheet .quick-filter-bar,
+      body.cv-mobile-filter-mode .mobile-filter-sheet #quickFilterBar {
+        visibility: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      body.cv-mobile-filter-mode .mobile-filter-sheet .collection-controls {
+        display: grid !important;
+      }
+      body.cv-mobile-filter-mode .mobile-filter-sheet .quick-filter-bar,
+      body.cv-mobile-filter-mode .mobile-filter-sheet #quickFilterBar {
+        display: flex !important;
+      }
+    }
+  </style>
+
+
+  <style id="mobile-filter-v236-direct-final">
+    @media (max-width: 900px) {
+      body.cv236-mobile-filter-mode #collectionPage #quickFilterBar:not(.cv236-in-sheet),
+      body.cv236-mobile-filter-mode #collectionPage #mobileFilterControlsSource:not(.cv236-in-sheet),
+      body.cv236-mobile-filter-mode #collectionPage #mobileFilterToolbarSource:not(.cv236-in-sheet) {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      body.cv236-mobile-filter-mode .mobile-filter-sheet #quickFilterBar {
+        display: flex !important;
+        visibility: visible !important;
+        height: auto !important;
+        opacity: 1 !important;
+      }
+      body.cv236-mobile-filter-mode .mobile-filter-sheet #mobileFilterControlsSource {
+        display: grid !important;
+        visibility: visible !important;
+        height: auto !important;
+        opacity: 1 !important;
+      }
     }
   </style>
 
@@ -422,7 +910,20 @@
 
   <button class="scroll-top-button" id="scrollTopBtn" type="button" title="Nach oben">↑</button>
 
-  <div class="mobile-bottom-nav" id="mobileBottomNav">
+  
+  <button class="mobile-filter-fab" id="mobileFilterFab" type="button" aria-expanded="false">
+    <span>☰</span><span>Filter</span>
+  </button>
+  
+  <div class="mobile-filter-sheet" id="mobileFilterSheet" aria-hidden="true">
+    <div class="mobile-filter-sheet-head">
+      <strong>Filter & Suche</strong>
+      <button id="mobileFilterCloseBtn" type="button" aria-label="Filter schließen">×</button>
+    </div>
+    <div class="mobile-filter-sheet-body" id="mobileFilterSheetBody"></div>
+  </div>
+
+<div class="mobile-bottom-nav" id="mobileBottomNav">
     <button class="mobile-nav-button" data-page="overviewPage" type="button">
       <span>⌂</span><span>Start</span>
     </button>
@@ -439,6 +940,6 @@
 
   
 
-  <script src="assets/app.js?v=225"></script>
+  <script src="assets/app.js?v=236"></script>
 </body>
 </html>

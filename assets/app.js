@@ -526,8 +526,9 @@ function saveCards() {
     }
 
     function updateMobileNav(pageId) {
+      const current = pageId || currentPageIdFromFile();
       document.querySelectorAll(".mobile-nav-button[data-page]").forEach(button => {
-        button.classList.toggle("active", button.dataset.page === pageId);
+        button.classList.toggle("active", button.dataset.page === current);
       });
     }
 
@@ -541,6 +542,7 @@ function saveCards() {
 
     function currentPageIdFromFile() {
       const file = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+      if (!file || file === "/" || file === "index.html") return "overviewPage";
       if (file.includes("collection")) return "collectionPage";
       if (file.includes("add")) return "addPage";
       if (file.includes("check")) return "checkPage";
@@ -549,7 +551,9 @@ function saveCards() {
 
     function markCurrentNav() {
       const current = currentPageIdFromFile();
-      document.querySelectorAll(".nav-link").forEach(link => link.classList.toggle("active", link.dataset.page === current));
+      document.querySelectorAll(".nav-link").forEach(link => {
+        link.classList.toggle("active", link.dataset.page === current);
+      });
       updateMobileNav(current);
     }
 
@@ -597,6 +601,9 @@ function saveCards() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       if (pageId === "collectionPage") renderCards();
       if (pageId === "overviewPage") renderStats();
+      if (pageId !== "collectionPage") document.body.classList.remove("mobile-filters-open");
+      updateMobileFilterFab();
+      forceMobileCollectionFiltersState();
     }
 
     function escapeHtml(value) {
@@ -5918,7 +5925,7 @@ function setValueIfExists(id, value) {
         if (typeof enforceGalleryView === "function") enforceGalleryView();
         if (typeof renderStats === "function") renderStats();
         if (typeof renderCards === "function") renderCards();
-        if (typeof updateMobileNav === "function") updateMobileNav("collectionPage");
+        if (typeof updateMobileNav === "function") updateMobileNav(currentPageIdFromFile());
         if (typeof cv220RefreshCardmarketPrices === "function") cv220RefreshCardmarketPrices({ silent: true });
         else if (typeof refreshCardmarketPricesForCollection === "function") refreshCardmarketPricesForCollection({ silent: true });
 
@@ -5947,7 +5954,427 @@ function setValueIfExists(id, value) {
     }
 
 
+
+    function forceCorrectMobileTabFromUrl() {
+      updateMobileNav(currentPageIdFromFile());
+    }
+
+
+    function isCollectionPageActiveForMobileFilters() {
+      return currentPageIdFromFile && currentPageIdFromFile() === "collectionPage";
+    }
+
+function updateMobileFilterFab() {
+      const btn = $("mobileFilterFab");
+      if (!btn) return;
+
+      const visible = isCollectionContextForMobileFilters() && isMobileLayout();
+      btn.classList.toggle("visible", visible);
+
+      const open = document.body.classList.contains("mobile-filters-open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.innerHTML = open ? "<span>×</span><span>Schließen</span>" : "<span>☰</span><span>Filter</span>";
+
+      if (!visible) document.body.classList.remove("mobile-filters-open");
+    }
+
+    function toggleMobileFilters(force) {
+      syncMobileFilterLayout();
+      const shouldOpen = typeof force === "boolean" ? force : !document.body.classList.contains("mobile-filters-open");
+      document.body.classList.toggle("mobile-filters-open", shouldOpen);
+      const sheet = $("mobileFilterSheet");
+      if (sheet) sheet.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+      updateMobileFilterFab();
+    }
+
+
+    function closeMobileFiltersAfterQuickFilter() {
+      if (window.matchMedia && window.matchMedia("(max-width: 720px)").matches) {
+        document.body.classList.remove("mobile-filters-open");
+        if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+      }
+    }
+
+
+    /* v232: Mobile Filter werden physisch in Bottom-Sheet verschoben */
+    let mobileFilterOriginalParent = null;
+    let mobileFilterOriginalNext = null;
+    let mobileQuickFilterOriginalParent = null;
+    let mobileQuickFilterOriginalNext = null;
+    let mobileFiltersMoved = false;
+
+function isMobileLayout() {
+      return (window.innerWidth || document.documentElement.clientWidth || 9999) <= 900;
+    }
+
+function moveCollectionFiltersToMobileSheet() {
+      const controls = document.querySelector("#collectionPage .collection-controls");
+      const quick = document.querySelector("#collectionPage #quickFilterBar, #collectionPage .quick-filter-bar");
+      const sheetBody = $("mobileFilterSheetBody");
+
+      if (!controls || !sheetBody || mobileFiltersMoved || !isMobileLayout()) return;
+
+      mobileFilterOriginalParent = controls.parentNode;
+      mobileFilterOriginalNext = controls.nextSibling;
+      mobileQuickFilterOriginalParent = quick ? quick.parentNode : null;
+      mobileQuickFilterOriginalNext = quick ? quick.nextSibling : null;
+
+      if (quick) sheetBody.appendChild(quick);
+      sheetBody.appendChild(controls);
+
+      controls.classList.remove("cv-force-hide-mobile-filters");
+      if (quick) quick.classList.remove("cv-force-hide-mobile-filters");
+
+      mobileFiltersMoved = true;
+    }
+
+    function restoreCollectionFiltersFromMobileSheet() {
+      const controls = document.querySelector("#mobileFilterSheetBody .collection-controls");
+      const quick = document.querySelector("#mobileFilterSheetBody #quickFilterBar, #mobileFilterSheetBody .quick-filter-bar");
+
+      if (!mobileFiltersMoved) return;
+
+      if (quick && mobileQuickFilterOriginalParent) {
+        mobileQuickFilterOriginalParent.insertBefore(quick, mobileQuickFilterOriginalNext);
+      }
+
+      if (controls && mobileFilterOriginalParent) {
+        mobileFilterOriginalParent.insertBefore(controls, mobileFilterOriginalNext);
+      }
+
+      mobileFiltersMoved = false;
+    }
+
+    function syncMobileFilterLayout() {
+      if (currentPageIdFromFile && currentPageIdFromFile() !== "collectionPage") {
+        document.body.classList.remove("mobile-filters-open");
+        restoreCollectionFiltersFromMobileSheet();
+        if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+        return;
+      }
+
+      if (isMobileLayout()) {
+        moveCollectionFiltersToMobileSheet();
+      } else {
+        document.body.classList.remove("mobile-filters-open");
+        restoreCollectionFiltersFromMobileSheet();
+      }
+
+      if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+    }
+
+    function closeMobileFilterSheet() {
+      document.body.classList.remove("mobile-filters-open");
+      const sheet = $("mobileFilterSheet");
+      if (sheet) sheet.setAttribute("aria-hidden", "true");
+      if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+    }
+
+
+
+    
+    function isCollectionContextForMobileFilters() {
+      const collectionPage = document.getElementById("collectionPage");
+      if (!collectionPage) return false;
+
+      const fileBased = typeof currentPageIdFromFile === "function" && currentPageIdFromFile() === "collectionPage";
+      const activeBased = collectionPage.classList.contains("active");
+      const visibleBased = !!(collectionPage.offsetWidth || collectionPage.offsetHeight || collectionPage.getClientRects().length);
+
+      return fileBased || activeBased || visibleBased;
+    }
+
+function forceMobileCollectionFiltersState() {
+      const mobile = isMobileLayout();
+      document.body.classList.toggle("cv-mobile-layout", mobile);
+
+      const isCollection = isCollectionContextForMobileFilters();
+      if (!isCollection) {
+        document.body.classList.remove("mobile-filters-open");
+        if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+        return;
+      }
+
+      if (mobile) {
+        moveCollectionFiltersToMobileSheet();
+
+        document.querySelectorAll("#collectionPage .collection-controls, #collectionPage #quickFilterBar, #collectionPage .quick-filter-bar").forEach(element => {
+          element.classList.add("cv-force-hide-mobile-filters");
+        });
+      } else {
+        document.body.classList.remove("mobile-filters-open");
+        restoreCollectionFiltersFromMobileSheet();
+        document.querySelectorAll(".cv-force-hide-mobile-filters").forEach(element => element.classList.remove("cv-force-hide-mobile-filters"));
+      }
+
+      if (typeof updateMobileFilterFab === "function") updateMobileFilterFab();
+    }
+
+    function startMobileCollectionFilterWatch() {
+      forceMobileCollectionFiltersState();
+      setTimeout(forceMobileCollectionFiltersState, 200);
+      setTimeout(forceMobileCollectionFiltersState, 700);
+      setTimeout(forceMobileCollectionFiltersState, 1500);
+      setTimeout(forceMobileCollectionFiltersState, 3000);
+
+      if (!window.__cvMobileFilterWatchStarted) {
+        window.__cvMobileFilterWatchStarted = true;
+        setInterval(forceMobileCollectionFiltersState, 2000);
+      }
+    }
+
+
+    /* v235: Class-based mobile filter movement - no selector guessing */
+    const CV_MOBILE_FILTER_BREAKPOINT = 900;
+    let cvMobileFilterMoved = false;
+    let cvMobileFilterPositions = [];
+
+    function cvIsNarrowLayout() {
+      return (window.innerWidth || document.documentElement.clientWidth || 9999) <= CV_MOBILE_FILTER_BREAKPOINT;
+    }
+
+    function cvIsCollectionDocument() {
+      return Boolean(document.getElementById("collectionPage"));
+    }
+
+    function cvMobileFilterSources() {
+      return Array.from(document.querySelectorAll("#collectionPage .mobile-filter-source"));
+    }
+
+    function cvMoveFiltersIntoSheet() {
+      const sheetBody = document.getElementById("mobileFilterSheetBody");
+      const sources = cvMobileFilterSources();
+      if (!sheetBody || !sources.length || cvMobileFilterMoved) return;
+
+      cvMobileFilterPositions = sources.map(node => ({
+        node,
+        parent: node.parentNode,
+        next: node.nextSibling
+      }));
+
+      sources.forEach(node => {
+        node.classList.remove("cv-mobile-hidden-source");
+        sheetBody.appendChild(node);
+      });
+
+      cvMobileFilterMoved = true;
+    }
+
+    function cvRestoreFiltersFromSheet() {
+      if (!cvMobileFilterMoved) return;
+
+      cvMobileFilterPositions.forEach(item => {
+        if (item.parent && item.node) item.parent.insertBefore(item.node, item.next);
+      });
+
+      cvMobileFilterPositions = [];
+      cvMobileFilterMoved = false;
+    }
+
+    function cvSyncMobileFilters() {
+      if (!cvIsCollectionDocument()) {
+        document.body.classList.remove("mobile-filters-open", "cv-mobile-filter-mode");
+        return;
+      }
+
+      const narrow = cvIsNarrowLayout();
+      document.body.classList.toggle("cv-mobile-filter-mode", narrow);
+
+      if (narrow) {
+        cvMoveFiltersIntoSheet();
+      } else {
+        document.body.classList.remove("mobile-filters-open");
+        cvRestoreFiltersFromSheet();
+      }
+
+      cvUpdateMobileFilterButton();
+    }
+
+    function cvUpdateMobileFilterButton() {
+      const btn = document.getElementById("mobileFilterFab");
+      if (!btn) return;
+      const visible = cvIsCollectionDocument() && cvIsNarrowLayout();
+      btn.classList.toggle("visible", visible);
+
+      const open = document.body.classList.contains("mobile-filters-open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.innerHTML = open ? "<span>×</span><span>Schließen</span>" : "<span>☰</span><span>Filter</span>";
+    }
+
+    function cvToggleMobileFilterSheet(force) {
+      cvSyncMobileFilters();
+      const open = typeof force === "boolean" ? force : !document.body.classList.contains("mobile-filters-open");
+      document.body.classList.toggle("mobile-filters-open", open);
+      const sheet = document.getElementById("mobileFilterSheet");
+      if (sheet) sheet.setAttribute("aria-hidden", open ? "false" : "true");
+      cvUpdateMobileFilterButton();
+    }
+
+    function cvStartMobileFilterController() {
+      cvSyncMobileFilters();
+
+      const btn = document.getElementById("mobileFilterFab");
+      if (btn && !btn.dataset.cvFilterBound) {
+        btn.dataset.cvFilterBound = "1";
+        btn.addEventListener("click", () => cvToggleMobileFilterSheet());
+      }
+
+      const close = document.getElementById("mobileFilterCloseBtn");
+      if (close && !close.dataset.cvFilterBound) {
+        close.dataset.cvFilterBound = "1";
+        close.addEventListener("click", () => cvToggleMobileFilterSheet(false));
+      }
+
+      window.addEventListener("resize", cvSyncMobileFilters);
+      window.addEventListener("orientationchange", cvSyncMobileFilters);
+
+      // After public collection render / existing app render, enforce again.
+      [50, 200, 600, 1200, 2500, 5000].forEach(ms => setTimeout(cvSyncMobileFilters, ms));
+      if (!window.__cv235MobileFilterInterval) {
+        window.__cv235MobileFilterInterval = setInterval(cvSyncMobileFilters, 1500);
+      }
+    }
+
+
+
+    /* v236: Direct ID based mobile filter movement */
+    let cv236FilterMoved = false;
+    let cv236Positions = [];
+
+    function cv236IsNarrow() {
+      return (window.innerWidth || document.documentElement.clientWidth || 9999) <= 900;
+    }
+
+    function cv236IsCollection() {
+      return !!document.getElementById("collectionPage");
+    }
+
+    function cv236Sources() {
+      return [
+        document.getElementById("quickFilterBar"),
+        document.getElementById("mobileFilterControlsSource"),
+        document.getElementById("mobileFilterToolbarSource")
+      ].filter(Boolean);
+    }
+
+    function cv236MoveFilters() {
+      const sheetBody = document.getElementById("mobileFilterSheetBody");
+      const sources = cv236Sources();
+      if (!sheetBody || !sources.length || cv236FilterMoved) return;
+
+      cv236Positions = sources.map(node => ({
+        node,
+        parent: node.parentNode,
+        next: node.nextSibling
+      }));
+
+      sources.forEach(node => {
+        node.classList.add("cv236-in-sheet");
+        sheetBody.appendChild(node);
+      });
+
+      cv236FilterMoved = true;
+    }
+
+    function cv236RestoreFilters() {
+      if (!cv236FilterMoved) return;
+
+      cv236Positions.forEach(item => {
+        if (item.parent && item.node) {
+          item.node.classList.remove("cv236-in-sheet");
+          item.parent.insertBefore(item.node, item.next);
+        }
+      });
+
+      cv236Positions = [];
+      cv236FilterMoved = false;
+    }
+
+    function cv236SyncFilters() {
+      const active = cv236IsCollection() && cv236IsNarrow();
+      document.body.classList.toggle("cv236-mobile-filter-mode", active);
+
+      if (active) {
+        cv236MoveFilters();
+      } else {
+        document.body.classList.remove("mobile-filters-open");
+        cv236RestoreFilters();
+      }
+
+      cv236UpdateButton();
+    }
+
+    function cv236UpdateButton() {
+      const btn = document.getElementById("mobileFilterFab");
+      if (!btn) return;
+
+      const visible = cv236IsCollection() && cv236IsNarrow();
+      btn.classList.toggle("visible", visible);
+
+      const open = document.body.classList.contains("mobile-filters-open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.innerHTML = open ? "<span>×</span><span>Schließen</span>" : "<span>☰</span><span>Filter</span>";
+    }
+
+    function cv236ToggleFilters(force) {
+      cv236SyncFilters();
+      const open = typeof force === "boolean" ? force : !document.body.classList.contains("mobile-filters-open");
+      document.body.classList.toggle("mobile-filters-open", open);
+      const sheet = document.getElementById("mobileFilterSheet");
+      if (sheet) sheet.setAttribute("aria-hidden", open ? "false" : "true");
+      cv236UpdateButton();
+    }
+
+    function cv236StartFilters() {
+      cv236SyncFilters();
+
+      const btn = document.getElementById("mobileFilterFab");
+      if (btn && !btn.dataset.cv236Bound) {
+        btn.dataset.cv236Bound = "1";
+        btn.addEventListener("click", () => cv236ToggleFilters());
+      }
+
+      const close = document.getElementById("mobileFilterCloseBtn");
+      if (close && !close.dataset.cv236Bound) {
+        close.dataset.cv236Bound = "1";
+        close.addEventListener("click", () => cv236ToggleFilters(false));
+      }
+
+      window.addEventListener("resize", cv236SyncFilters);
+      window.addEventListener("orientationchange", cv236SyncFilters);
+
+      [0, 50, 150, 300, 700, 1200, 2500, 5000].forEach(ms => setTimeout(cv236SyncFilters, ms));
+
+      if (!window.__cv236FilterInterval) {
+        window.__cv236FilterInterval = setInterval(cv236SyncFilters, 1000);
+      }
+    }
+
+
 document.addEventListener("DOMContentLoaded", () => {
+      cv236StartFilters();
+      cvStartMobileFilterController();
+      setTimeout(forceMobileCollectionFiltersState, 50);
+      setTimeout(forceMobileCollectionFiltersState, 300);
+      setTimeout(forceMobileCollectionFiltersState, 1000);
+      setTimeout(forceMobileCollectionFiltersState, 5000);
+      startMobileCollectionFilterWatch();
+      syncMobileFilterLayout();
+      window.addEventListener("resize", syncMobileFilterLayout);
+      window.addEventListener("resize", forceMobileCollectionFiltersState);
+      window.addEventListener("orientationchange", forceMobileCollectionFiltersState);
+      onIfExists("mobileFilterCloseBtn", "click", closeMobileFilterSheet);
+      document.querySelectorAll(".mobile-bottom-nav .mobile-nav-button").forEach(btn => btn.addEventListener("click", closeMobileFilterSheet));
+
+      document.querySelectorAll(".quick-filter-chip").forEach(btn => btn.addEventListener("click", () => setTimeout(closeMobileFiltersAfterQuickFilter, 120)));
+      onIfExists("mobileFilterFab", "click", () => toggleMobileFilters());
+      setTimeout(updateMobileFilterFab, 100);
+      setTimeout(updateMobileFilterFab, 800);
+      setTimeout(forceCorrectMobileTabFromUrl, 50);
+      setTimeout(forceCorrectMobileTabFromUrl, 500);
+      setTimeout(forceCorrectMobileTabFromUrl, 1000);
+      setTimeout(updateMobileFilterFab, 1200);
+      setTimeout(syncMobileFilterLayout, 1500);
       ensurePublicCollectionStatusBox();
       setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 300);
       if ($("exportPublicCollectionBtn")) onIfExists("exportPublicCollectionBtn", "click", exportPublicCollectionJson);
