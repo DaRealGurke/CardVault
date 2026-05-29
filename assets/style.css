@@ -9676,8 +9676,5 @@ body.dark .public-collection-menu-text {
 /* v240: Apple Touch Icon / PWA Manifest hinzugefügt */
 
 
-/* v241: Mobile Tab-Bar als JS-Navigation statt normale Links */
-.mobile-bottom-nav button.mobile-nav-button {
-  appearance: none;
-  -webkit-appearance: none;
-}
+/* v242: iOS Tab-Bar Verhalten beruhigt */
+/* Kein aggressives mehrfaches Nachkorrigieren des aktiven Tabs. */

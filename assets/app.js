@@ -525,7 +525,7 @@ function saveCards() {
       applyTheme(saved);
     }
 
-    function updateMobileNav(pageId) {
+function updateMobileNav(pageId) {
       const current = pageId || currentPageIdFromFile();
       document.querySelectorAll(".mobile-nav-button[data-page]").forEach(button => {
         button.classList.toggle("active", button.dataset.page === current);
@@ -540,7 +540,7 @@ function saveCards() {
 
 
 
-    function currentPageIdFromFile() {
+function currentPageIdFromFile() {
       const file = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
       if (!file || file === "/" || file === "index.html") return "overviewPage";
       if (file.includes("collection")) return "collectionPage";
@@ -549,7 +549,7 @@ function saveCards() {
       return "overviewPage";
     }
 
-    function markCurrentNav() {
+function markCurrentNav() {
       const current = currentPageIdFromFile();
       document.querySelectorAll(".nav-link").forEach(link => {
         link.classList.toggle("active", link.dataset.page === current);
@@ -576,17 +576,7 @@ function saveCards() {
       }
     }
 
-    
-    function isStandaloneDisplayMode() {
-      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)
-        || window.navigator.standalone === true;
-    }
-
-    function isNarrowMobileNavigation() {
-      return (window.innerWidth || document.documentElement.clientWidth || 9999) <= 900;
-    }
-
-function pageIdToHref(pageId) {
+    function pageIdToHref(pageId) {
       const map = {
         overviewPage: "index.html",
         collectionPage: "collection.html",
@@ -597,21 +587,7 @@ function pageIdToHref(pageId) {
     }
 
 function goToPageFile(pageId) {
-      const href = pageIdToHref(pageId);
-      const currentFile = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
-      const targetFile = href.toLowerCase();
-
-      if (currentFile === targetFile || (!currentFile && targetFile === "index.html")) {
-        updateMobileNav(pageId);
-        return;
-      }
-
-      // Auf iPhone/kleinen Screens weniger Safari-Historien-/Toolbar-Sprünge erzeugen.
-      if (isStandaloneDisplayMode() || isNarrowMobileNavigation()) {
-        window.location.replace(href);
-      } else {
-        window.location.href = href;
-      }
+      window.location.href = pageIdToHref(pageId);
     }
 
     function showPage(pageId) {
@@ -5968,9 +5944,7 @@ function setPublicCollectionStatus(message, state = "") {
 
 
 
-    function forceCorrectMobileTabFromUrl() {
-      updateMobileNav(currentPageIdFromFile());
-    }
+
 
 
     function isCollectionPageActiveForMobileFilters() {
@@ -6364,29 +6338,7 @@ function forceMobileCollectionFiltersState() {
     }
 
 
-
-    function bindMobileTabNavigation() {
-      document.querySelectorAll(".mobile-bottom-nav .mobile-nav-button[data-page]").forEach(button => {
-        if (button.dataset.cvMobileNavBound === "1") return;
-        button.dataset.cvMobileNavBound = "1";
-        button.addEventListener("click", event => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          const pageId = button.dataset.page;
-          updateMobileNav(pageId);
-
-          if (document.getElementById(pageId)) {
-            showPage(pageId);
-          } else {
-            goToPageFile(pageId);
-          }
-        }, { passive: false });
-      });
-    }
-
 document.addEventListener("DOMContentLoaded", () => {
-      bindMobileTabNavigation();
       if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));
       cv236StartFilters();
       cvStartMobileFilterController();
@@ -6406,9 +6358,9 @@ document.addEventListener("DOMContentLoaded", () => {
       onIfExists("mobileFilterFab", "click", () => toggleMobileFilters());
       setTimeout(updateMobileFilterFab, 100);
       setTimeout(updateMobileFilterFab, 800);
-      setTimeout(forceCorrectMobileTabFromUrl, 50);
-      setTimeout(forceCorrectMobileTabFromUrl, 500);
-      setTimeout(forceCorrectMobileTabFromUrl, 1000);
+      
+      
+      
       setTimeout(updateMobileFilterFab, 1200);
       setTimeout(syncMobileFilterLayout, 1500);
       setPublicCollectionStatus("Öffentliche Sammlung wird geprüft …");
