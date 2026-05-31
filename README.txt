@@ -1,14 +1,11 @@
-Card Vault modular v258
+Card Vault modular v259
 
 Fix:
-- Basis: v255.
-- Bearbeiten wurde minimal repariert.
-- Die originale Formular-Befüllung aus editCard bleibt erhalten.
-- Beim Bearbeiten wird die Karte jetzt auch in der lokalen/zusammengeführten Sammlung gefunden.
-- Beim Speichern wird anhand der Bearbeitungs-ID die vorhandene Karte aktualisiert.
-- Zusätzlich wird die bearbeitete Karte lokal gespeichert, damit sie nach Reload/Export erhalten bleibt.
-- CSS/JS mit ?v=258 cache-gebustet.
+- Bearbeiten übernimmt Kartendaten jetzt robuster.
+- Beim Klick auf Bearbeiten wird die komplette Karte kurz in sessionStorage/localStorage zwischengespeichert.
+- Auf add.html?edit=... wird das Formular aus dieser zwischengespeicherten Karte befüllt, auch wenn die öffentliche collection.json noch nicht geladen ist.
+- Dadurch sollten vorhandene Kartendaten beim Bearbeiten wieder übernommen werden.
+- Beim Speichern wird der Zwischenspeicher wieder gelöscht.
+- Basis: v258.
+- CSS/JS mit ?v=259 cache-gebustet.
 - JavaScript-Syntax geprüft.
-
-Hinweis:
-Wenn alte Duplikate bereits entstanden sind, müssen diese einmalig gelöscht werden.

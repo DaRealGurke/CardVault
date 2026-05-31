@@ -1366,6 +1366,7 @@ const existingEditId = cv258CurrentEditId();
       cv258SaveToLocal(card);
       saveCards();
       cv258ClearEditId();
+      cv259ClearPendingEditCard();
 
       renderStats();
       renderCards();
@@ -1381,13 +1382,14 @@ const existingEditId = cv258CurrentEditId();
 
     
     function editCard(id, stayOnPage = false) {
-      const card = cv258FindCard(id);
+      const card = cv258FindCard(id) || cv259LoadPendingEditCard(id);
       if (!card) {
         showImportToast("Karte nicht gefunden", "Die Karte konnte nicht zum Bearbeiten geladen werden.", "error");
         return;
       }
 
       cv258SetEditId(card.id);
+      cv259StorePendingEditCard(card);
 
       if (!isAddPageActiveFile() && !stayOnPage) {
         cv258SetEditId(card.id);
@@ -5658,9 +5660,10 @@ function setValueIfExists(id, value) {
       const editId = getQueryParam("edit") || localStorage.getItem("cardVaultPendingEditId") || localStorage.getItem("cardVaultEditingSourceId") || localStorage.getItem("cardVaultEditingId");
       if (!editId) return;
 
-      const card = cv258FindCard(editId);
+      const card = cv258FindCard(editId) || cv259LoadPendingEditCard(editId);
       if (card) {
         cv258SetEditId(card.id);
+        cv259StorePendingEditCard(card);
         editCard(card.id, true);
       }
     }
@@ -6618,6 +6621,41 @@ function forceMobileCollectionFiltersState() {
       else localCards.unshift(card);
       safeLocalSet(STORAGE_KEY, JSON.stringify(localCards));
       safeLocalSet("cardVaultLastChange", new Date().toISOString());
+    }
+
+
+    /* v259: Bearbeiten lädt Kartendaten direkt aus zwischengespeicherter Karte */
+    function cv259StorePendingEditCard(card) {
+      try {
+        if (!card || typeof card !== "object") return;
+        sessionStorage.setItem("cardVaultPendingEditCard", JSON.stringify(card));
+        localStorage.setItem("cardVaultPendingEditCard", JSON.stringify(card));
+      } catch (error) {
+        console.warn("[CardVault] Bearbeitungskarte konnte nicht zwischengespeichert werden.", error);
+      }
+    }
+
+    function cv259LoadPendingEditCard(id) {
+      const expectedId = String(id || "").trim();
+      const sources = [
+        sessionStorage.getItem("cardVaultPendingEditCard"),
+        localStorage.getItem("cardVaultPendingEditCard")
+      ].filter(Boolean);
+
+      for (const raw of sources) {
+        try {
+          const card = JSON.parse(raw);
+          if (!card || typeof card !== "object") continue;
+          if (!expectedId || String(card.id) === expectedId) return card;
+        } catch {}
+      }
+
+      return null;
+    }
+
+    function cv259ClearPendingEditCard() {
+      sessionStorage.removeItem("cardVaultPendingEditCard");
+      localStorage.removeItem("cardVaultPendingEditCard");
     }
 
 document.addEventListener("DOMContentLoaded", () => {
