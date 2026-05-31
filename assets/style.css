@@ -9785,3 +9785,12 @@ body.dark .public-collection-menu-text {
 /* v259: Bearbeiten lädt zwischengespeicherte Kartendaten */
 
 /* v260: Bilder beim Bearbeiten/Speichern zuverlässig übernehmen */
+
+
+/* v261: Detailansicht nutzt eigene hochgeladene Bilder zuerst */
+#detailMainImage img,
+#thumbs img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}

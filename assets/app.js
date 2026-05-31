@@ -2577,11 +2577,19 @@ function setValueIfExists(id, value) {
       updateBulkToolbar();
       applyViewPreferences();
     }
-
     function cardImages(card) {
-      const apiImage = String((card && card.apiImage) || "").trim();
-      const images = Array.isArray(card && card.images) ? card.images.filter(Boolean) : [];
-      return images.filter(src => String(src || "").trim() !== apiImage);
+      if (!card) return [];
+
+      const ownImages = Array.isArray(card.images)
+        ? card.images.filter(Boolean)
+        : [];
+
+      const api = card.apiImage || card.image || card.imageUrl || "";
+
+      // Detailansicht soll eigene hochgeladene Bilder zuerst zeigen.
+      // API-Bild nur als Fallback verwenden, wenn keine eigenen Bilder vorhanden sind.
+      if (ownImages.length) return ownImages;
+      return api ? [api] : [];
     }
 
     function reportImageHtml(src, label) {
@@ -2729,6 +2737,7 @@ function setValueIfExists(id, value) {
       const card = cards.find(c => c.id === id);
       if (!card) return;
       currentDetailCard = card;
+      cv261DetailOwnImageDebug(card);
       currentDamageSide = "front";
       if ($("detailEditBtn")) $("detailEditBtn").dataset.cardEdit = card.id;
 
@@ -6689,6 +6698,16 @@ function forceMobileCollectionFiltersState() {
       backImage = backImage || imgs[1] || "";
       extraImages = Array.isArray(extraImages) && extraImages.length ? extraImages : imgs.slice(2);
       if (typeof refreshPreviews === "function") refreshPreviews();
+    }
+
+
+    function cv261DetailOwnImageDebug(card) {
+      if (!card) return;
+      console.log("[CardVault] Detailbilder", {
+        name: card.name,
+        ownImages: Array.isArray(card.images) ? card.images.length : 0,
+        apiImage: Boolean(card.apiImage)
+      });
     }
 
 document.addEventListener("DOMContentLoaded", () => {
