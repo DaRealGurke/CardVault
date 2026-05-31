@@ -1348,8 +1348,6 @@ const existingEditId = cv258CurrentEditId();
       card.cardmarketProductId = cv220NormalizeId(card.cardmarketProductId || card.marketProductId || "");
       card.marketProductId = cv220NormalizeId(card.marketProductId || card.cardmarketProductId || "");
 
-      Object.assign(card, await cv264StoreCardImagesAndReturnRefs(card));
-
 
       const existingIndex = cards.findIndex(item =>
         (existingEditId && String(item.id) === String(existingEditId)) ||
@@ -1365,8 +1363,7 @@ const existingEditId = cv258CurrentEditId();
         showImportToast("Karte gespeichert", card.name, "success");
       }
 
-      cv258SaveToLocal(card);
-      saveCards();
+      await cv265SaveLocalCard(card);
       cv258ClearEditId();
       cv259ClearPendingEditCard();
 
@@ -2584,7 +2581,7 @@ function setValueIfExists(id, value) {
       const images = Array.isArray(card.images)
         ? card.images.filter(Boolean).map(src => String(src || "").trim()).filter(Boolean)
         : [];
-      return images.filter(src => src.startsWith("data:image/") || cv264IsImageRef(src));
+      return images.filter(src => src.startsWith("data:image/") || cv265IsRef(src));
     }
 
     function reportImageHtml(src, label) {
@@ -2732,7 +2729,7 @@ function setValueIfExists(id, value) {
       const card = cards.find(c => c.id === id);
       if (!card) return;
       currentDetailCard = card;
-      cv264DetailDebug(card);
+      cv265DetailDebug(card);
       cv263DetailOwnOnlyDebug(card);
       cv261DetailOwnImageDebug(card);
       currentDamageSide = "front";
@@ -2777,7 +2774,7 @@ function setValueIfExists(id, value) {
       document.body.style.overflow = "hidden";
     }
     async function setDetailMainImage(card, index) {
-      const images = await cv264ResolveCardImages(card);
+      const images = await cv265ResolveImages(card);
       const main = $("detailMainImage");
       if (!main) return;
 
@@ -2799,7 +2796,7 @@ function setValueIfExists(id, value) {
     }
     async function openFullscreenImage() {
       if (!currentDetailCard) return;
-      const images = await cv264ResolveCardImages(currentDetailCard);
+      const images = await cv265ResolveImages(currentDetailCard);
       const src = images[currentDetailImageIndex || 0];
       if (!src) return;
       setImagePreview($("zoomImage"), src, currentDetailCard.name || "Karte");
@@ -2811,7 +2808,7 @@ function setValueIfExists(id, value) {
       $("fullscreenImage").src = "";
     }
     async function renderDetailImages(card) {
-      const images = await cv264ResolveCardImages(card);
+      const images = await cv265ResolveImages(card);
       const thumbs = $("thumbs");
       if (!thumbs) return;
       thumbs.innerHTML = "";
@@ -5991,7 +5988,7 @@ function setPublicCollectionStatus(message, state = "") {
       const expandedCards = [];
       for (const card of (cards || [])) {
         const copy = JSON.parse(JSON.stringify(card));
-        const resolved = await cv264ResolveCardImages(copy);
+        const resolved = await cv265ResolveImages(copy);
         if (resolved.length) copy.images = resolved;
         expandedCards.push(copy);
       }
@@ -6759,121 +6756,139 @@ function forceMobileCollectionFiltersState() {
     }
 
 
-    /* v264: Eigene Bilder in IndexedDB speichern und in Detailansicht laden */
-    const CV264_IMAGE_DB_NAME = "CardVaultImages";
-    const CV264_IMAGE_DB_VERSION = 1;
-    const CV264_IMAGE_STORE = "images";
-    const CV264_IMAGE_REF_PREFIX = "cv-img:";
+    /* v265: Eigene Bilder direkt anzeigen, lokal platzsparend sichern */
+    const CV265_IMAGE_DB_NAME = "CardVaultImages";
+    const CV265_IMAGE_DB_VERSION = 1;
+    const CV265_IMAGE_STORE = "images";
+    const CV265_REF_PREFIX = "cv-img:";
 
-    function cv264OpenImageDb() {
+    function cv265IsRef(src) {
+      return typeof src === "string" && src.startsWith(CV265_REF_PREFIX);
+    }
+
+    function cv265RefKey(ref) {
+      return String(ref || "").replace(CV265_REF_PREFIX, "");
+    }
+
+    function cv265MakeRef(cardId, index) {
+      return CV265_REF_PREFIX + String(cardId || "").trim() + ":" + String(index || 0);
+    }
+
+    function cv265OpenDb() {
       return new Promise((resolve, reject) => {
         if (!("indexedDB" in window)) {
-          reject(new Error("IndexedDB wird von diesem Browser nicht unterstützt."));
+          reject(new Error("IndexedDB nicht verfügbar"));
           return;
         }
-        const request = indexedDB.open(CV264_IMAGE_DB_NAME, CV264_IMAGE_DB_VERSION);
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if (!db.objectStoreNames.contains(CV264_IMAGE_STORE)) db.createObjectStore(CV264_IMAGE_STORE);
+        const req = indexedDB.open(CV265_IMAGE_DB_NAME, CV265_IMAGE_DB_VERSION);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(CV265_IMAGE_STORE)) db.createObjectStore(CV265_IMAGE_STORE);
         };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error("IndexedDB konnte nicht geöffnet werden."));
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error || new Error("IndexedDB Fehler"));
       });
     }
 
-    async function cv264PutImageData(key, dataUrl) {
-      if (!key || !dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) return false;
-      const db = await cv264OpenImageDb();
+    async function cv265Put(key, value) {
+      if (!key || !value || !String(value).startsWith("data:image/")) return false;
+      const db = await cv265OpenDb();
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(CV264_IMAGE_STORE, "readwrite");
-        tx.objectStore(CV264_IMAGE_STORE).put(dataUrl, key);
+        const tx = db.transaction(CV265_IMAGE_STORE, "readwrite");
+        tx.objectStore(CV265_IMAGE_STORE).put(value, key);
         tx.oncomplete = () => { db.close(); resolve(true); };
-        tx.onerror = () => { db.close(); reject(tx.error || new Error("Bild konnte nicht gespeichert werden.")); };
+        tx.onerror = () => { db.close(); reject(tx.error || new Error("Bildspeicherung fehlgeschlagen")); };
       });
     }
 
-    async function cv264GetImageData(key) {
+    async function cv265Get(key) {
       if (!key) return "";
-      const db = await cv264OpenImageDb();
+      const db = await cv265OpenDb();
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(CV264_IMAGE_STORE, "readonly");
-        const request = tx.objectStore(CV264_IMAGE_STORE).get(key);
-        request.onsuccess = () => { db.close(); resolve(request.result || ""); };
-        request.onerror = () => { db.close(); reject(request.error || new Error("Bild konnte nicht geladen werden.")); };
+        const tx = db.transaction(CV265_IMAGE_STORE, "readonly");
+        const req = tx.objectStore(CV265_IMAGE_STORE).get(key);
+        req.onsuccess = () => { db.close(); resolve(req.result || ""); };
+        req.onerror = () => { db.close(); reject(req.error || new Error("Bildladen fehlgeschlagen")); };
       });
     }
 
-    function cv264ImageKey(cardId, index) {
-      return String(cardId || "").trim() + ":" + String(index || 0);
+    async function cv265ResolveImages(card) {
+      if (!card || !Array.isArray(card.images)) return [];
+      const resolved = [];
+
+      for (const src of card.images) {
+        if (!src) continue;
+        const value = String(src || "").trim();
+
+        if (value.startsWith("data:image/")) {
+          resolved.push(value);
+        } else if (cv265IsRef(value)) {
+          try {
+            const data = await cv265Get(cv265RefKey(value));
+            if (data) resolved.push(data);
+          } catch (error) {
+            console.warn("[CardVault] Eigenes Bild konnte nicht aus IndexedDB geladen werden.", error);
+          }
+        }
+      }
+
+      return resolved;
     }
 
-    function cv264ImageRef(cardId, index) {
-      return CV264_IMAGE_REF_PREFIX + cv264ImageKey(cardId, index);
-    }
-
-    function cv264IsImageRef(value) {
-      return typeof value === "string" && value.startsWith(CV264_IMAGE_REF_PREFIX);
-    }
-
-    function cv264KeyFromRef(ref) {
-      return String(ref || "").replace(CV264_IMAGE_REF_PREFIX, "");
-    }
-
-    async function cv264StoreCardImagesAndReturnRefs(card) {
-      if (!card || !Array.isArray(card.images)) return card;
-      const next = { ...card };
+    async function cv265CreateLocalRefCard(card) {
+      const copy = JSON.parse(JSON.stringify(card || {}));
+      const images = Array.isArray(copy.images) ? copy.images : [];
       const refs = [];
 
-      for (let i = 0; i < card.images.length; i += 1) {
-        const src = card.images[i];
+      for (let i = 0; i < images.length; i += 1) {
+        const src = images[i];
         if (!src) continue;
 
-        if (cv264IsImageRef(src)) {
+        if (cv265IsRef(src)) {
           refs.push(src);
-        } else if (typeof src === "string" && src.startsWith("data:image/")) {
-          const ref = cv264ImageRef(card.id, i);
+          continue;
+        }
+
+        if (String(src).startsWith("data:image/")) {
+          const ref = cv265MakeRef(copy.id, i);
           try {
-            await cv264PutImageData(cv264KeyFromRef(ref), src);
+            await cv265Put(cv265RefKey(ref), src);
             refs.push(ref);
           } catch (error) {
-            console.warn("[CardVault] Bild konnte nicht in IndexedDB gespeichert werden.", error);
+            console.warn("[CardVault] Bild konnte nicht in IndexedDB gesichert werden; bleibt direkt in localStorage.", error);
             refs.push(src);
           }
         }
       }
 
-      next.images = refs;
-      return next;
+      copy.images = refs;
+      return copy;
     }
 
-    async function cv264ResolveCardImages(card) {
-      if (!card || !Array.isArray(card.images)) return [];
-      const result = [];
+    async function cv265SaveLocalCard(card) {
+      const localCard = await cv265CreateLocalRefCard(card);
+      const localCards = cv258LocalCardsRaw();
+      const editId = cv258CurrentEditId ? cv258CurrentEditId() : "";
 
-      for (const src of card.images) {
-        if (!src) continue;
+      const index = localCards.findIndex(existing =>
+        (editId && String(existing.id) === String(editId)) ||
+        String(existing.id) === String(localCard.id) ||
+        (typeof cv258SameCard === "function" && cv258SameCard(existing, localCard))
+      );
 
-        if (typeof src === "string" && src.startsWith("data:image/")) {
-          result.push(src);
-        } else if (cv264IsImageRef(src)) {
-          try {
-            const data = await cv264GetImageData(cv264KeyFromRef(src));
-            if (data) result.push(data);
-          } catch (error) {
-            console.warn("[CardVault] IndexedDB-Bild konnte nicht geladen werden.", error);
-          }
-        }
-      }
+      if (index >= 0) localCards[index] = localCard;
+      else localCards.unshift(localCard);
 
-      return result;
+      safeLocalSet(STORAGE_KEY, JSON.stringify(localCards));
+      safeLocalSet("cardVaultLastChange", new Date().toISOString());
     }
 
 
-    function cv264DetailDebug(card) {
+    function cv265DetailDebug(card) {
       console.log("[CardVault] Detailbild-Status", {
         name: card && card.name,
         imagesField: card && Array.isArray(card.images) ? card.images.length : 0,
-        ownRefsOrData: cardImages(card).length,
+        usableOwnImagesOrRefs: cardImages(card).length,
         apiImageIgnoredInDetail: Boolean(card && card.apiImage)
       });
     }

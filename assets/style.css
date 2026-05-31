@@ -9803,5 +9803,5 @@ body.dark .public-collection-menu-text {
   min-height: 220px;
 }
 
-/* v264: Detailbilder aus IndexedDB/eigenen Uploads */
+/* v265: Detailbilder aus eigenen Uploads/IndexedDB, keine API-Bilder */
 #detailMainImage{min-height:240px;}
