@@ -1,15 +1,10 @@
-Card Vault modular v254
+Card Vault modular v255
 
-Fix:
-- Öffentliche data/collection.json ist jetzt immer die Basis.
-- Lokale Karten werden nur als Zusatz ergänzt, nicht als Ersatz für die öffentliche Sammlung.
-- Status im Optionen-Menü zeigt öffentliche Karten, lokale Zusatzkarten und Gesamtzahl.
-- Neuer Optionen-Button: „Lokale Karten auf diesem Gerät löschen“.
-  Das löscht nur den Browser-Speicher, nicht deine GitHub-collection.json.
-- data/collection.json ist weiterhin nicht in der ZIP enthalten.
-- Basis: v253.
-- CSS/JS mit ?v=254 cache-gebustet.
+Änderung:
+- Basis: v254.
+- Auf kleinen Bildschirmen wurde der dünne Strich/Rest vom ausgeblendeten Header entfernt.
+- Übersicht und Sammlung bekommen oben wieder etwas Abstand, damit die Überschriften nicht so stark am oberen Rand kleben.
+- Header bleibt mobil ausgeblendet.
+- Mobile Tab-Bar, Filter und öffentliche/lokale Collection-Logik aus v254 bleiben erhalten.
+- CSS/JS mit ?v=255 cache-gebustet.
 - JavaScript-Syntax geprüft.
-
-Wenn weiterhin nur Shanks angezeigt wird:
-Optionen -> Lokale Karten auf diesem Gerät löschen -> Öffentliche Sammlung neu laden.

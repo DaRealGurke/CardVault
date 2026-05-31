@@ -9694,3 +9694,88 @@ body.dark .public-collection-menu-text {
 /* v253: data/collection.json aus ZIP entfernt, öffentliche Sammlung wird beim Start nachgeladen */
 
 /* v254: Öffentliche Collection ist Basis, lokale Karten nur Zusatz */
+
+
+/* v255: Mobile Layout oben angenehmer, dünnen Header-Strich entfernen */
+@media (max-width: 900px) {
+  html,
+  body {
+    background-clip: border-box !important;
+  }
+
+  /* Der ausgeblendete Header darf keinen Schatten/Rand/Strich mehr hinterlassen */
+  body > header,
+  header,
+  .app-header,
+  .site-header,
+  .header-shell,
+  .top-bar,
+  .topbar {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body::before,
+  body::after,
+  main::before,
+  .page::before {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Übersicht und Sammlung nicht direkt an den oberen Rand kleben lassen */
+  #overviewPage,
+  #collectionPage {
+    padding-top: 14px !important;
+  }
+
+  #overviewPage .hero {
+    padding-top: 18px !important;
+  }
+
+  #overviewPage h1 {
+    margin-top: 0 !important;
+  }
+
+  #collectionPage section {
+    padding-top: 10px !important;
+  }
+
+  #collectionPage .section-head {
+    padding-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #collectionPage h2 {
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #overviewPage,
+  #collectionPage {
+    padding-top: 18px !important;
+  }
+
+  #overviewPage .hero {
+    padding-top: 20px !important;
+  }
+
+  #collectionPage section {
+    padding-top: 14px !important;
+  }
+}
