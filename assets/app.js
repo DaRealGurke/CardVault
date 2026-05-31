@@ -6416,6 +6416,8 @@ function forceMobileCollectionFiltersState() {
 
         setTimeout(() => {
           if (typeof renderCards === "function") renderCards();
+          sessionStorage.removeItem("cardVaultLocalEditSession");
+          cv249LocalEditSession = false;
         }, 600);
       } catch (error) {
         console.error("[CardVault] Lokales Speichern/Rendern fehlgeschlagen", error);
@@ -6477,7 +6479,22 @@ function forceMobileCollectionFiltersState() {
     }
 
 
+
+    /* v253: Öffentliche Sammlung zuverlässig nachladen */
+    function cv253ForcePublicCollectionStartup() {
+      if (location.protocol === "file:") return;
+
+      setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 150);
+      setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 900);
+      setTimeout(() => {
+        if (Array.isArray(cards)) {
+          console.log("[CardVault] v253 cards after public startup", cards.length, cards.map(card => card && card.name));
+        }
+      }, 1400);
+    }
+
 document.addEventListener("DOMContentLoaded", () => {
+      cv253ForcePublicCollectionStartup();
       /* cv249IsLocalEditSession startup */
       if (cv249IsLocalEditSession()) setTimeout(cv249RenderSavedLocalCard, 250);
       if ($("reloadPublicCollectionMenuBtn")) onIfExists("reloadPublicCollectionMenuBtn", "click", () => loadPublicCollectionIfAvailable({ manual: true }));

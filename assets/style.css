@@ -9690,3 +9690,5 @@ body.dark .public-collection-menu-text {
 /* v251: Hochauflösende eigene Kartenbilder */
 
 /* v252: Papierkorb speicherschonend bei hochauflösenden Bildern */
+
+/* v253: data/collection.json aus ZIP entfernt, öffentliche Sammlung wird beim Start nachgeladen */

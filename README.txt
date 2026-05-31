@@ -1,14 +1,14 @@
-Card Vault modular v252
+Card Vault modular v253
 
 Fix:
-- Löschen großer Karten mit hochauflösenden Bildern repariert.
-- Ursache war sehr wahrscheinlich das localStorage-Speicherlimit beim Speichern in den Papierkorb.
-- Papierkorb speichert bei großen Karten keine vollständigen Bilddaten mehr.
-- Falls der Papierkorb wegen Speicherlimit trotzdem nicht gespeichert werden kann, wird die Karte trotzdem gelöscht und eine Warnung angezeigt.
-- Basis: v251.
-- CSS/JS mit ?v=252 cache-gebustet.
+- data/collection.json wurde aus der ZIP entfernt, damit deine echte GitHub-Collection nicht überschrieben wird.
+- Öffentliche Sammlung wird beim Start zuverlässig nachgeladen.
+- Öffentliche Karten werden weiterhin mit lokal gespeicherten Karten zusammengeführt.
+- Lokale Bearbeitungssitzung wird nach dem Speichern wieder zurückgesetzt.
+- Basis: v252.
+- CSS/JS mit ?v=253 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
-Hinweis:
-- Durch hochauflösende Bilder kann localStorage schnell voll werden.
-- Gelöschte Karten mit entfernten Bilddaten können aus dem Papierkorb nicht mehr mit Bildern wiederhergestellt werden.
+Wichtig:
+Beim Hochladen auf GitHub die vorhandene echte Datei CardVault/data/collection.json behalten.
+Diese ZIP enthält bewusst keine data/collection.json.
