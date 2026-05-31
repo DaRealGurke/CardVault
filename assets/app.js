@@ -1291,7 +1291,7 @@ refreshPreviews();
       if (cancel) cancel.style.display = isEditing ? "inline-flex" : "none";
     }
 
-    function saveCard() {
+    async function saveCard() {
       
       if (!validateGradeField("cardGrade")) return;
       if (!validateCollectionIdField("cardId")) return;
@@ -1347,6 +1347,8 @@ const existingEditId = cv258CurrentEditId();
 
       card.cardmarketProductId = cv220NormalizeId(card.cardmarketProductId || card.marketProductId || "");
       card.marketProductId = cv220NormalizeId(card.marketProductId || card.cardmarketProductId || "");
+
+      Object.assign(card, await cv264StoreCardImagesAndReturnRefs(card));
 
 
       const existingIndex = cards.findIndex(item =>
@@ -2579,14 +2581,10 @@ function setValueIfExists(id, value) {
     }
     function cardImages(card) {
       if (!card) return [];
-
       const images = Array.isArray(card.images)
         ? card.images.filter(Boolean).map(src => String(src || "").trim()).filter(Boolean)
         : [];
-
-      // Detailansicht/Kartenreport: NIEMALS API-Bilder.
-      // Nur eigene hochgeladene, gespeicherte Bilder anzeigen.
-      return images.filter(src => src.startsWith("data:image/"));
+      return images.filter(src => src.startsWith("data:image/") || cv264IsImageRef(src));
     }
 
     function reportImageHtml(src, label) {
@@ -2734,6 +2732,7 @@ function setValueIfExists(id, value) {
       const card = cards.find(c => c.id === id);
       if (!card) return;
       currentDetailCard = card;
+      cv264DetailDebug(card);
       cv263DetailOwnOnlyDebug(card);
       cv261DetailOwnImageDebug(card);
       currentDamageSide = "front";
@@ -2777,10 +2776,10 @@ function setValueIfExists(id, value) {
       $("detailBackdrop").style.display = "flex";
       document.body.style.overflow = "hidden";
     }
-
-    function setDetailMainImage(card, index) {
-      const images = cardImages(card);
+    async function setDetailMainImage(card, index) {
+      const images = await cv264ResolveCardImages(card);
       const main = $("detailMainImage");
+      if (!main) return;
 
       if (!images.length) {
         currentDetailImageIndex = 0;
@@ -2798,33 +2797,32 @@ function setValueIfExists(id, value) {
       if ($("showFrontImageBtn")) $("showFrontImageBtn").classList.toggle("active", currentDetailImageIndex === 0);
       if ($("showBackImageBtn")) $("showBackImageBtn").classList.toggle("active", currentDetailImageIndex === 1);
     }
-
-    function openFullscreenImage() {
+    async function openFullscreenImage() {
       if (!currentDetailCard) return;
-      const images = cardImages(currentDetailCard);
-      const src = images[currentDetailImageIndex];
+      const images = await cv264ResolveCardImages(currentDetailCard);
+      const src = images[currentDetailImageIndex || 0];
       if (!src) return;
-
-      $("fullscreenImage").src = src;
-      $("fullscreenImageBackdrop").classList.add("active");
+      setImagePreview($("zoomImage"), src, currentDetailCard.name || "Karte");
+      $("zoomBackdrop").style.display = "flex";
     }
 
     function closeFullscreenImage() {
       $("fullscreenImageBackdrop").classList.remove("active");
       $("fullscreenImage").src = "";
     }
-
-    function renderDetailImages(card) {
-      const images = cardImages(card);
+    async function renderDetailImages(card) {
+      const images = await cv264ResolveCardImages(card);
       const thumbs = $("thumbs");
+      if (!thumbs) return;
       thumbs.innerHTML = "";
 
       if (!images.length) {
-        setDetailMainImage(card, 0);
+        await setDetailMainImage(card, 0);
+        if ($("showBackImageBtn")) $("showBackImageBtn").disabled = true;
         return;
       }
 
-      setDetailMainImage(card, 0);
+      await setDetailMainImage(card, 0);
 
       images.forEach((img, index) => {
         const wrap = document.createElement("div");
@@ -2833,7 +2831,7 @@ function setValueIfExists(id, value) {
         const btn = document.createElement("button");
         btn.className = "thumb" + (index === 0 ? " active" : "");
         btn.type = "button";
-        btn.innerHTML = `<img src="${img}" alt="Bild ${index + 1}">`;
+        btn.innerHTML = `<img src="${img}" alt="Eigenes Bild ${index + 1}">`;
         btn.onclick = () => setDetailMainImage(card, index);
 
         const label = document.createElement("div");
@@ -2845,20 +2843,14 @@ function setValueIfExists(id, value) {
         thumbs.appendChild(wrap);
       });
 
-      if ($("showFrontImageBtn")) {
-        $("showFrontImageBtn").onclick = () => setDetailMainImage(card, 0);
-      }
+      if ($("showFrontImageBtn")) $("showFrontImageBtn").onclick = () => setDetailMainImage(card, 0);
 
       if ($("showBackImageBtn")) {
-        $("showBackImageBtn").onclick = () => {
-          if (images[1]) setDetailMainImage(card, 1);
-        };
+        $("showBackImageBtn").onclick = () => { if (images[1]) setDetailMainImage(card, 1); };
         $("showBackImageBtn").disabled = !images[1];
       }
 
-      if ($("fullscreenImageBtn")) {
-        $("fullscreenImageBtn").onclick = openFullscreenImage;
-      }
+      if ($("fullscreenImageBtn")) $("fullscreenImageBtn").onclick = openFullscreenImage;
     }
 
     function renderDamageMap() {
@@ -5995,9 +5987,16 @@ function setPublicCollectionStatus(message, state = "") {
         return false;
       }
     }
+    async function exportPublicCollectionJson() {
+      const expandedCards = [];
+      for (const card of (cards || [])) {
+        const copy = JSON.parse(JSON.stringify(card));
+        const resolved = await cv264ResolveCardImages(copy);
+        if (resolved.length) copy.images = resolved;
+        expandedCards.push(copy);
+      }
 
-    function exportPublicCollectionJson() {
-      const payload = { updatedAt: new Date().toISOString(), cards: cards || [] };
+      const payload = { updatedAt: new Date().toISOString(), cards: expandedCards };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -6756,6 +6755,126 @@ function forceMobileCollectionFiltersState() {
         savedImages: Array.isArray(card.images) ? card.images.length : 0,
         ownDataImages: cardImages(card).length,
         apiImageIgnored: Boolean(card.apiImage)
+      });
+    }
+
+
+    /* v264: Eigene Bilder in IndexedDB speichern und in Detailansicht laden */
+    const CV264_IMAGE_DB_NAME = "CardVaultImages";
+    const CV264_IMAGE_DB_VERSION = 1;
+    const CV264_IMAGE_STORE = "images";
+    const CV264_IMAGE_REF_PREFIX = "cv-img:";
+
+    function cv264OpenImageDb() {
+      return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+          reject(new Error("IndexedDB wird von diesem Browser nicht unterstützt."));
+          return;
+        }
+        const request = indexedDB.open(CV264_IMAGE_DB_NAME, CV264_IMAGE_DB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(CV264_IMAGE_STORE)) db.createObjectStore(CV264_IMAGE_STORE);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("IndexedDB konnte nicht geöffnet werden."));
+      });
+    }
+
+    async function cv264PutImageData(key, dataUrl) {
+      if (!key || !dataUrl || typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) return false;
+      const db = await cv264OpenImageDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(CV264_IMAGE_STORE, "readwrite");
+        tx.objectStore(CV264_IMAGE_STORE).put(dataUrl, key);
+        tx.oncomplete = () => { db.close(); resolve(true); };
+        tx.onerror = () => { db.close(); reject(tx.error || new Error("Bild konnte nicht gespeichert werden.")); };
+      });
+    }
+
+    async function cv264GetImageData(key) {
+      if (!key) return "";
+      const db = await cv264OpenImageDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(CV264_IMAGE_STORE, "readonly");
+        const request = tx.objectStore(CV264_IMAGE_STORE).get(key);
+        request.onsuccess = () => { db.close(); resolve(request.result || ""); };
+        request.onerror = () => { db.close(); reject(request.error || new Error("Bild konnte nicht geladen werden.")); };
+      });
+    }
+
+    function cv264ImageKey(cardId, index) {
+      return String(cardId || "").trim() + ":" + String(index || 0);
+    }
+
+    function cv264ImageRef(cardId, index) {
+      return CV264_IMAGE_REF_PREFIX + cv264ImageKey(cardId, index);
+    }
+
+    function cv264IsImageRef(value) {
+      return typeof value === "string" && value.startsWith(CV264_IMAGE_REF_PREFIX);
+    }
+
+    function cv264KeyFromRef(ref) {
+      return String(ref || "").replace(CV264_IMAGE_REF_PREFIX, "");
+    }
+
+    async function cv264StoreCardImagesAndReturnRefs(card) {
+      if (!card || !Array.isArray(card.images)) return card;
+      const next = { ...card };
+      const refs = [];
+
+      for (let i = 0; i < card.images.length; i += 1) {
+        const src = card.images[i];
+        if (!src) continue;
+
+        if (cv264IsImageRef(src)) {
+          refs.push(src);
+        } else if (typeof src === "string" && src.startsWith("data:image/")) {
+          const ref = cv264ImageRef(card.id, i);
+          try {
+            await cv264PutImageData(cv264KeyFromRef(ref), src);
+            refs.push(ref);
+          } catch (error) {
+            console.warn("[CardVault] Bild konnte nicht in IndexedDB gespeichert werden.", error);
+            refs.push(src);
+          }
+        }
+      }
+
+      next.images = refs;
+      return next;
+    }
+
+    async function cv264ResolveCardImages(card) {
+      if (!card || !Array.isArray(card.images)) return [];
+      const result = [];
+
+      for (const src of card.images) {
+        if (!src) continue;
+
+        if (typeof src === "string" && src.startsWith("data:image/")) {
+          result.push(src);
+        } else if (cv264IsImageRef(src)) {
+          try {
+            const data = await cv264GetImageData(cv264KeyFromRef(src));
+            if (data) result.push(data);
+          } catch (error) {
+            console.warn("[CardVault] IndexedDB-Bild konnte nicht geladen werden.", error);
+          }
+        }
+      }
+
+      return result;
+    }
+
+
+    function cv264DetailDebug(card) {
+      console.log("[CardVault] Detailbild-Status", {
+        name: card && card.name,
+        imagesField: card && Array.isArray(card.images) ? card.images.length : 0,
+        ownRefsOrData: cardImages(card).length,
+        apiImageIgnoredInDetail: Boolean(card && card.apiImage)
       });
     }
 

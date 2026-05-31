@@ -1,14 +1,15 @@
-Card Vault modular v263
+Card Vault modular v264
 
 Fix:
-- Detailansicht zeigt niemals API-Bilder.
-- Kartenreport nutzt ebenfalls keine API-Bilder mehr.
-- cardImages(card) gibt nur noch eigene hochgeladene Bilder zurück, die als data:image/... in card.images gespeichert sind.
-- API-Bilder bleiben für Galerie/Übersicht möglich, aber nicht für Detailansicht.
-- Wenn keine eigenen Bilder vorhanden sind, steht in der Detailansicht „Kein eigenes Bild hinterlegt“.
-- Basis: v262.
-- CSS/JS mit ?v=263 cache-gebustet.
+- Eigene hochgeladene Bilder werden beim Speichern zusätzlich in IndexedDB gespeichert.
+- In card.images stehen danach platzsparende cv-img:-Referenzen.
+- Detailansicht lädt die Bilder aus IndexedDB und zeigt weiterhin niemals API-Bilder.
+- API-Bilder bleiben nur für Galerie/Übersicht möglich.
+- Export der collection.json löst cv-img:-Referenzen wieder zu data:image/... auf, damit die Bilder nach GitHub-Upload auf anderen Geräten sichtbar sind.
+- Basis: v263.
+- CSS/JS mit ?v=264 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
 Wichtig:
-Wenn eine Karte keine eigenen Bilder in card.images enthält, muss sie einmal mit Vorder-/Rückseite neu gespeichert werden.
+- Bereits vorher gespeicherte Karten ohne Bilder müssen einmal neu mit Bildern gespeichert werden.
+- Nach dem Speichern Export verwenden, damit die Bilder in collection.json landen.
