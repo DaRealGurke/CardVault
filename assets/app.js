@@ -1337,7 +1337,7 @@ const existingEditId = cv258CurrentEditId();
         notes: valueOf("cardNotes").trim(),
         tags: Array.isArray(formTags) ? formTags.slice() : [],
         timeline: Array.isArray(formTimeline) ? JSON.parse(JSON.stringify(formTimeline)) : [],
-        images: [frontImage, backImage].concat(extraImages || []).filter(Boolean),
+        images: cv260CurrentFormImages(oldCard),
         damageFront: JSON.parse(JSON.stringify(markersFront || [])),
         damageBack: JSON.parse(JSON.stringify(markersBack || [])),
         favorite: oldCard ? Boolean(oldCard.favorite) : false,
@@ -1438,6 +1438,7 @@ const existingEditId = cv258CurrentEditId();
       extraImages = (card.images || []).slice(2);
       markersFront = JSON.parse(JSON.stringify(card.damageFront || []));
       markersBack = JSON.parse(JSON.stringify(card.damageBack || []));
+      cv260EnsureFormImagesFromCard(card);
 
       if (typeof renderFormTags === "function") renderFormTags();
       if (typeof renderFormTimeline === "function") renderFormTimeline();
@@ -6656,6 +6657,38 @@ function forceMobileCollectionFiltersState() {
     function cv259ClearPendingEditCard() {
       sessionStorage.removeItem("cardVaultPendingEditCard");
       localStorage.removeItem("cardVaultPendingEditCard");
+    }
+
+
+    /* v260: Bilder beim Speichern zuverlässig übernehmen */
+    function cv260CurrentFormImages(oldCard) {
+      const result = [];
+      const oldImages = oldCard && Array.isArray(oldCard.images) ? oldCard.images : [];
+
+      const front = frontImage || oldImages[0] || "";
+      const back = backImage || oldImages[1] || "";
+
+      if (front) result.push(front);
+      if (back) result.push(back);
+
+      const extras = Array.isArray(extraImages) ? extraImages.filter(Boolean) : [];
+      extras.forEach(image => {
+        if (image && !result.includes(image)) result.push(image);
+      });
+
+      // Falls aus irgendeinem Grund keine Formularbilder gesetzt sind, alte Bilder nicht verlieren.
+      if (!result.length && oldImages.length) return oldImages.filter(Boolean);
+
+      return result;
+    }
+
+    function cv260EnsureFormImagesFromCard(card) {
+      if (!card || typeof card !== "object") return;
+      const imgs = Array.isArray(card.images) ? card.images : [];
+      frontImage = frontImage || imgs[0] || "";
+      backImage = backImage || imgs[1] || "";
+      extraImages = Array.isArray(extraImages) && extraImages.length ? extraImages : imgs.slice(2);
+      if (typeof refreshPreviews === "function") refreshPreviews();
     }
 
 document.addEventListener("DOMContentLoaded", () => {
