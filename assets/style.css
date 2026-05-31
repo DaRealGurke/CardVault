@@ -9780,6 +9780,4 @@ body.dark .public-collection-menu-text {
   }
 }
 
-/* v256: Bearbeiten öffentlicher/lokaler Karten repariert */
-
-/* v257: Bearbeiten überschreibt bestehende Karte statt Duplikat */
+/* v258: Bearbeiten minimal repariert, Formular-Befüllung original belassen */
