@@ -1,0 +1,27 @@
+Damit die Website auf allen Geräten funktioniert
+
+1. Website immer über GitHub Pages öffnen:
+   https://DEINNAME.github.io/DEINREPO/
+
+2. Nicht über die normale GitHub-Dateiansicht öffnen:
+   https://github.com/DEINNAME/DEINREPO/blob/main/index.html
+
+3. Diese Dateien müssen im gleichen Ordner wie index.html liegen:
+   - price_guide_18.json
+   - products_singles_18.json
+   - assets/
+
+4. iPhone/Safari:
+   - Die Cardmarket-Dateien können sehr groß sein.
+   - Wenn Safari sie nicht dauerhaft speichern kann, nutzt die App sie trotzdem temporär im Arbeitsspeicher.
+   - Beim nächsten Öffnen werden sie erneut geladen.
+
+5. Wenn Cardmarket rot angezeigt wird:
+   - Dateinamen prüfen
+   - Groß-/Kleinschreibung prüfen
+   - GitHub Pages ein paar Minuten aktualisieren lassen
+   - Seite neu laden
+
+6. Für zuverlässige Nutzung:
+   - Repository öffentlich oder GitHub Pages korrekt aktiviert
+   - index.html im Hauptverzeichnis oder richtigem Pages-Ordner
