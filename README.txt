@@ -1,14 +1,15 @@
-Card Vault modular v253
+Card Vault modular v254
 
 Fix:
-- data/collection.json wurde aus der ZIP entfernt, damit deine echte GitHub-Collection nicht überschrieben wird.
-- Öffentliche Sammlung wird beim Start zuverlässig nachgeladen.
-- Öffentliche Karten werden weiterhin mit lokal gespeicherten Karten zusammengeführt.
-- Lokale Bearbeitungssitzung wird nach dem Speichern wieder zurückgesetzt.
-- Basis: v252.
-- CSS/JS mit ?v=253 cache-gebustet.
+- Öffentliche data/collection.json ist jetzt immer die Basis.
+- Lokale Karten werden nur als Zusatz ergänzt, nicht als Ersatz für die öffentliche Sammlung.
+- Status im Optionen-Menü zeigt öffentliche Karten, lokale Zusatzkarten und Gesamtzahl.
+- Neuer Optionen-Button: „Lokale Karten auf diesem Gerät löschen“.
+  Das löscht nur den Browser-Speicher, nicht deine GitHub-collection.json.
+- data/collection.json ist weiterhin nicht in der ZIP enthalten.
+- Basis: v253.
+- CSS/JS mit ?v=254 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
-Wichtig:
-Beim Hochladen auf GitHub die vorhandene echte Datei CardVault/data/collection.json behalten.
-Diese ZIP enthält bewusst keine data/collection.json.
+Wenn weiterhin nur Shanks angezeigt wird:
+Optionen -> Lokale Karten auf diesem Gerät löschen -> Öffentliche Sammlung neu laden.

@@ -9692,3 +9692,5 @@ body.dark .public-collection-menu-text {
 /* v252: Papierkorb speicherschonend bei hochauflösenden Bildern */
 
 /* v253: data/collection.json aus ZIP entfernt, öffentliche Sammlung wird beim Start nachgeladen */
+
+/* v254: Öffentliche Collection ist Basis, lokale Karten nur Zusatz */

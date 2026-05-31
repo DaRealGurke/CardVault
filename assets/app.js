@@ -5939,11 +5939,9 @@ function setPublicCollectionStatus(message, state = "") {
       }
       throw new Error(lastError || "collection.json konnte nicht geladen werden");
     }
-
     async function loadPublicCollectionIfAvailable(options = {}) {
-      // v250: öffentliche Sammlung darf laden, wird aber mit lokalen Karten zusammengeführt.
       if (location.protocol === "file:") {
-        setPublicCollectionStatus("Öffentliche Sammlung: lokal per Datei nicht ladbar.", "warning");
+        setPublicCollectionStatus("Öffentliche Sammlung: lokal per Datei nicht ladbar. Bitte über GitHub Pages oder lokalen Server testen.", "warning");
         return false;
       }
 
@@ -5951,25 +5949,35 @@ function setPublicCollectionStatus(message, state = "") {
 
       try {
         const result = await fetchPublicCollectionJson();
-        const publicCards = normalizePublicCollectionPayload(result.payload).map(normalizePublicCard).filter(card => card && card.name);
+        const publicCards = normalizePublicCollectionPayload(result.payload)
+          .map(normalizePublicCard)
+          .filter(card => card && card.name);
 
         if (!publicCards.length) {
           setPublicCollectionStatus("Öffentliche Sammlung gefunden, aber keine Karten enthalten.", "warning");
+          console.warn("[CardVault] collection.json ohne verwertbare Karten", result);
           return false;
         }
 
         publicCollectionLoaded = true;
         publicCollectionMode = true;
 
-        cv250RenderMergedCollection(publicCards, "public-loader-merge");
+        cv250RenderMergedCollection(publicCards, "public-loader-v254");
 
         if (typeof cv220RefreshCardmarketPrices === "function") cv220RefreshCardmarketPrices({ silent: true });
         else if (typeof refreshCardmarketPricesForCollection === "function") refreshCardmarketPricesForCollection({ silent: true });
-        if (options.manual && typeof showImportToast === "function") showImportToast("Öffentliche Sammlung geladen", publicCards.length + " Karte(n) geladen.", "success");
+
+        setTimeout(() => cv250RenderMergedCollection(publicCards, "public-loader-v254-delayed-300"), 300);
+        setTimeout(() => cv250RenderMergedCollection(publicCards, "public-loader-v254-delayed-1200"), 1200);
+
+        if (options.manual && typeof showImportToast === "function") {
+          showImportToast("Öffentliche Sammlung geladen", publicCards.length + " öffentliche Karte(n) geladen.", "success");
+        }
+
         return true;
       } catch (error) {
         setPublicCollectionStatus("Öffentliche Sammlung nicht geladen: " + (error && error.message ? error.message : error), "error");
-        console.warn("Öffentliche Sammlung konnte nicht geladen werden.", error);
+        console.warn("[CardVault] Öffentliche Sammlung konnte nicht geladen werden.", error);
         return false;
       }
     }
@@ -6437,28 +6445,51 @@ function forceMobileCollectionFiltersState() {
         return [];
       }
     }
-
     function cv250MergePublicAndLocalCards(publicCards) {
       const localCards = cv250LoadLocalCardsRaw();
       const merged = [];
       const seen = new Set();
 
-      function addCard(card, source) {
-        if (!card || typeof card !== "object") return;
-        const key = String(card.id || card.collectionId || card.cardId || card.name || Math.random()).trim();
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-        merged.push({ ...card, _source: source });
+      function keysFor(card) {
+        if (!card || typeof card !== "object") return [];
+        const keys = [];
+        if (card.id) keys.push("id:" + String(card.id).trim());
+        if (card.apiCardId) keys.push("api:" + String(card.apiCardId).trim());
+        if (card.cardmarketProductId) keys.push("cm:" + String(card.cardmarketProductId).trim());
+        if (card.marketProductId) keys.push("cm:" + String(card.marketProductId).trim());
+        const nameNumber = (String(card.name || "").trim().toLowerCase() + "|" + String(card.number || "").trim().toLowerCase()).trim();
+        if (nameNumber !== "|") keys.push("nn:" + nameNumber);
+        return keys;
       }
 
-      // Lokal zuerst, damit frisch gespeicherte Karten sichtbar bleiben.
-      localCards.forEach(card => addCard(card, "local"));
-      (Array.isArray(publicCards) ? publicCards : []).forEach(card => addCard(card, "public"));
+      function alreadySeen(card) {
+        return keysFor(card).some(key => seen.has(key));
+      }
+
+      function remember(card) {
+        keysFor(card).forEach(key => seen.add(key));
+      }
+
+      // Öffentliche Sammlung ist die Basis.
+      (Array.isArray(publicCards) ? publicCards : []).forEach(card => {
+        if (!alreadySeen(card)) {
+          remember(card);
+          merged.push({ ...card, _source: "public" });
+        }
+      });
+
+      // Lokale Karten nur als Zusatz ergänzen.
+      localCards.forEach(card => {
+        if (!alreadySeen(card)) {
+          remember(card);
+          merged.unshift({ ...card, _source: "local" });
+        }
+      });
 
       return merged;
     }
-
     function cv250RenderMergedCollection(publicCards, label = "merge") {
+      const localCards = cv250LoadLocalCardsRaw();
       const mergedCards = cv250MergePublicAndLocalCards(publicCards);
       cards = mergedCards;
 
@@ -6467,14 +6498,22 @@ function forceMobileCollectionFiltersState() {
       if (typeof renderCards === "function") renderCards();
       if (typeof updateMobileNav === "function") updateMobileNav(currentPageIdFromFile());
 
-      const localCount = cv250LoadLocalCardsRaw().length;
       const publicCount = Array.isArray(publicCards) ? publicCards.length : 0;
+      const localExtraCount = Math.max(0, mergedCards.length - publicCount);
+
       setPublicCollectionStatus(
-        "Öffentliche Sammlung: " + publicCount + " Karte(n), lokal zusätzlich: " + Math.max(0, mergedCards.length - publicCount) + ".",
+        "Öffentliche Sammlung geladen: " + publicCount + " Karte(n). Lokale Zusatzkarten: " + localExtraCount + ". Gesamt: " + mergedCards.length + ".",
         "success"
       );
 
-      console.log("[CardVault]", label, { publicCount, localCount, mergedCount: mergedCards.length });
+      console.log("[CardVault]", label, {
+        publicCount,
+        localCount: localCards.length,
+        localExtraCount,
+        mergedCount: mergedCards.length,
+        names: mergedCards.map(card => card && card.name)
+      });
+
       return mergedCards;
     }
 
@@ -6483,17 +6522,25 @@ function forceMobileCollectionFiltersState() {
     /* v253: Öffentliche Sammlung zuverlässig nachladen */
     function cv253ForcePublicCollectionStartup() {
       if (location.protocol === "file:") return;
-
-      setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 150);
+      setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 100);
       setTimeout(() => loadPublicCollectionIfAvailable({ manual: false }), 900);
-      setTimeout(() => {
-        if (Array.isArray(cards)) {
-          console.log("[CardVault] v253 cards after public startup", cards.length, cards.map(card => card && card.name));
-        }
-      }, 1400);
+    }
+
+    function cv254ClearLocalCardsOnly() {
+      if (!confirm("Nur lokal gespeicherte Karten auf diesem Gerät löschen? Deine GitHub-collection.json bleibt unverändert.")) return;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem("cardVaultLocalEditSession");
+        cards = [];
+        loadPublicCollectionIfAvailable({ manual: true });
+        showImportToast("Lokale Karten gelöscht", "Öffentliche Sammlung wird neu geladen.", "success");
+      } catch (error) {
+        showImportToast("Fehler", "Lokale Karten konnten nicht gelöscht werden.", "error");
+      }
     }
 
 document.addEventListener("DOMContentLoaded", () => {
+      onIfExists("clearLocalCardsOnlyBtn", "click", cv254ClearLocalCardsOnly);
       cv253ForcePublicCollectionStartup();
       /* cv249IsLocalEditSession startup */
       if (cv249IsLocalEditSession()) setTimeout(cv249RenderSavedLocalCard, 250);
