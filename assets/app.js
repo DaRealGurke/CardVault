@@ -102,8 +102,59 @@ function loadCards() {
       }
     }
 
-    function saveTrash() {
-      localStorage.setItem("cardVaultTrash", JSON.stringify(trashCards));
+    
+    /* v252: Papierkorb speichert bei großen Bildern speicherschonend */
+    function cv252IsQuotaError(error) {
+      return error && (
+        error.name === "QuotaExceededError" ||
+        error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+        error.code === 22 ||
+        error.code === 1014 ||
+        String(error.message || "").toLowerCase().includes("quota")
+      );
+    }
+
+    function cv252StripLargeImageData(card) {
+      const copy = JSON.parse(JSON.stringify(card || {}));
+      copy.images = [];
+      copy._trashImagesRemoved = true;
+      copy._trashNote = "Bilddaten wurden beim Löschen nicht im Papierkorb gespeichert, um das Browser-Speicherlimit nicht zu überschreiten.";
+      return copy;
+    }
+
+    function cv252TrashPayloadFits(items) {
+      try {
+        const payload = JSON.stringify(items || []);
+        return payload.length < 3500000;
+      } catch {
+        return false;
+      }
+    }
+
+function saveTrash() {
+      try {
+        safeLocalSet("cardVaultTrash", JSON.stringify(trashCards));
+      } catch (error) {
+        console.warn("[CardVault] Papierkorb konnte nicht vollständig gespeichert werden.", error);
+
+        if (cv252IsQuotaError(error)) {
+          try {
+            trashCards = trashCards.map(cv252StripLargeImageData);
+            safeLocalSet("cardVaultTrash", JSON.stringify(trashCards));
+            showImportToast("Papierkorb gespeichert", "Bilddaten wurden aus dem Papierkorb entfernt, damit das Speicherlimit nicht überschritten wird.", "warning");
+          } catch (secondError) {
+            console.warn("[CardVault] Papierkorb auch ohne Bilder zu groß. Papierkorb wird geleert.", secondError);
+            trashCards = [];
+            try {
+              localStorage.removeItem("cardVaultTrash");
+            } catch {}
+            showImportToast("Karte gelöscht", "Papierkorb konnte wegen Browser-Speicherlimit nicht gespeichert werden.", "warning");
+          }
+        } else {
+          showImportToast("Papierkorb-Fehler", "Die Karte wurde gelöscht, aber der Papierkorb konnte nicht gespeichert werden.", "warning");
+        }
+      }
+
       updateTrashButton();
     }
 
@@ -113,10 +164,18 @@ function loadCards() {
       btn.textContent = trashCards.length ? "Papierkorb (" + trashCards.length + ")" : "Papierkorb";
     }
 
-    function moveCardToTrash(card, reason = "gelöscht") {
-      const deleted = JSON.parse(JSON.stringify(card));
+function moveCardToTrash(card, reason = "gelöscht") {
+      let deleted = JSON.parse(JSON.stringify(card));
       deleted.deletedAt = new Date().toISOString();
       deleted.deleteReason = reason;
+
+      const testTrash = [deleted].concat(trashCards || []);
+      if (!cv252TrashPayloadFits(testTrash)) {
+        deleted = cv252StripLargeImageData(deleted);
+        deleted.deletedAt = new Date().toISOString();
+        deleted.deleteReason = reason;
+      }
+
       trashCards.unshift(deleted);
       saveTrash();
     }
@@ -2092,7 +2151,12 @@ function setValueIfExists(id, value) {
       const card = cards.find(item => item.id === id);
       if (!card) return;
       if (!confirm("Karte in den Papierkorb verschieben?")) return;
-      if (typeof moveCardToTrash === "function") moveCardToTrash(card);
+      if (typeof moveCardToTrash === "function") try {
+        moveCardToTrash(card);
+      } catch (error) {
+        console.warn("[CardVault] Papierkorb konnte nicht genutzt werden, Karte wird trotzdem gelöscht.", error);
+        showImportToast("Karte gelöscht", "Papierkorb konnte wegen Speicherlimit nicht genutzt werden.", "warning");
+      }
       cards = cards.filter(item => item.id !== id);
       saveCards();
       renderStats();
