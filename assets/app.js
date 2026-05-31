@@ -1349,23 +1349,25 @@ const existingEditId = editingId || getQueryParam("edit") || localStorage.getIte
       card.marketProductId = cv220NormalizeId(card.marketProductId || card.cardmarketProductId || "");
 
 
-      const existingIndex = cards.findIndex(item => String(item.id) === String(id));
+      const existedBefore = cards.some(item => cv256SameCard(item, card) || String(item.id) === String(id));
 
-      if (existingIndex >= 0) {
-        cards[existingIndex] = card;
+      cv256UpsertCurrentCard(card);
+      cv256SaveCardToLocal(card);
+      cv249EnterLocalEditSession();
+
+      if (existedBefore) {
         showImportToast("Karte aktualisiert", card.name, "success");
       } else {
-        cards.unshift(card);
         showImportToast("Karte gespeichert", card.name, "success");
       }
 
-      saveCards();
+      if (typeof enforceGalleryView === "function") enforceGalleryView();
+      if (typeof renderStats === "function") renderStats();
+      if (typeof renderCards === "function") renderCards();
+
       editingId = "";
       localStorage.removeItem("cardVaultEditingId");
       localStorage.removeItem("cardVaultPendingEditId");
-
-      renderStats();
-      renderCards();
 
       resetForm();
 
@@ -1375,73 +1377,22 @@ const existingEditId = editingId || getQueryParam("edit") || localStorage.getIte
         showPage("collectionPage");
       }
     }
-
-    
     function editCard(id, stayOnPage = false) {
-      const card = cards.find(item => String(item.id) === String(id));
+      const card = cv256FindCardForEdit(id);
       if (!card) {
         showImportToast("Karte nicht gefunden", "Die Karte konnte nicht zum Bearbeiten geladen werden.", "error");
         return;
       }
 
+      cv257SetEditingSourceId(card.id);
+
       if (!isAddPageActiveFile() && !stayOnPage) {
-        localStorage.setItem("cardVaultPendingEditId", card.id);
         window.location.href = "add.html?edit=" + encodeURIComponent(card.id);
         return;
       }
-
-      editingId = card.id;
-      localStorage.setItem("cardVaultEditingId", card.id);
-
-      textIfExists("formHeadline", "Karte bearbeiten");
-      textIfExists("saveCardBtn", "Änderungen speichern");
-      syncFloatingSaveBar();
-      if ($("cancelEditBtn")) $("cancelEditBtn").style.display = "inline-flex";
-
-      setValueIfExists("cardId", card.id || "");
-      setValueIfExists("cardName", card.name || "");
-      setValueIfExists("cardNumber", card.number || "");
-      setValueIfExists("cardmarketProductId", card.marketProductId || card.idProduct || "");
-      setValueIfExists("cardSet", card.set || "");
-      setValueIfExists("cardRarity", card.rarity || "");
-      setValueIfExists("cardLanguage", card.language || "");
-      setValueIfExists("cardStatus", card.status || "Behalten");
-      setValueIfExists("cardGrade", card.grade || "");
-      ensureConditionOption(card.condition || "");
-      setValueIfExists("cardCondition", card.condition || "");
-      setValueIfExists("cardStorage", card.storage || "");
-      setValueIfExists("cardValue", card.value || "");
-      setValueIfExists("purchasePrice", card.purchasePrice || "");
-      setValueIfExists("purchaseDate", card.purchaseDate || "");
-      setValueIfExists("salePrice", card.salePrice || "");
-      setValueIfExists("saleDate", card.saleDate || "");
-      setValueIfExists("platform", card.platform || "");
-      setValueIfExists("buyer", card.buyer || "");
-      setValueIfExists("cardNotes", card.notes || "");
-
-      selectedCatalogProduct = null;
-      if (card.marketProductId && Array.isArray(cardmarketProducts)) {
-        selectedCatalogProduct = cardmarketProducts.find(product => String(product.idProduct) === String(card.marketProductId)) || null;
-      }
-      if (typeof renderInlineCatalogSelection === "function") renderInlineCatalogSelection(selectedCatalogProduct);
-
-      formTags = Array.isArray(card.tags) ? card.tags.slice() : [];
-      formTimeline = Array.isArray(card.timeline) ? JSON.parse(JSON.stringify(card.timeline)) : [];
-      frontImage = (card.images || [])[0] || "";
-      backImage = (card.images || [])[1] || "";
-      extraImages = (card.images || []).slice(2);
-      markersFront = JSON.parse(JSON.stringify(card.damageFront || []));
-      markersBack = JSON.parse(JSON.stringify(card.damageBack || []));
-
-      if (typeof renderFormTags === "function") renderFormTags();
-      if (typeof renderFormTimeline === "function") renderFormTimeline();
-      if (typeof refreshPreviews === "function") refreshPreviews();
-      if (typeof renderMarkerEditor === "function") renderMarkerEditor();
-      if (typeof updateProfitPreview === "function") updateProfitPreview();
-      if (typeof updateProfileGradePreview === "function") updateProfileGradePreview();
-
+      loadCardIntoForm(card);
+      showPage("addPage");
       window.scrollTo({ top: 0, behavior: "smooth" });
-      showImportToast("Bearbeitungsmodus", "Karte wurde zum Bearbeiten geladen.", "success");
     }
 
     
@@ -5648,18 +5599,15 @@ function setValueIfExists(id, value) {
       };
       reader.readAsText(file);
     }
-
     function initializePendingEdit() {
-      if (!isAddPageActiveFile()) return;
+      const pendingId = getQueryParam("edit") || localStorage.getItem("cardVaultPendingEditId") || localStorage.getItem("cardVaultEditingSourceId") || localStorage.getItem("cardVaultEditingId");
+      if (!pendingId) return;
 
-      const editId = getQueryParam("edit") || localStorage.getItem("cardVaultPendingEditId");
-      if (!editId) return;
+      const card = cv256FindCardForEdit(pendingId);
+      if (!card) return;
 
-      localStorage.removeItem("cardVaultPendingEditId");
-      const card = cards.find(item => item.id === editId);
-      if (card) {
-        editCard(editId, true);
-      }
+      cv257SetEditingSourceId(card.id);
+      editCard(card.id, true);
     }
 
     
@@ -6537,6 +6485,93 @@ function forceMobileCollectionFiltersState() {
       } catch (error) {
         showImportToast("Fehler", "Lokale Karten konnten nicht gelöscht werden.", "error");
       }
+    }
+
+
+    /* v256: Bearbeiten mit öffentlicher + lokaler Sammlung repariert */
+    function cv256CardKeys(card) {
+      if (!card || typeof card !== "object") return [];
+      const keys = [];
+      if (card.id) keys.push("id:" + String(card.id).trim());
+      if (card.apiCardId) keys.push("api:" + String(card.apiCardId).trim());
+      if (card.cardmarketProductId) keys.push("cm:" + String(card.cardmarketProductId).trim());
+      if (card.marketProductId) keys.push("cm:" + String(card.marketProductId).trim());
+      const nameNumber = (String(card.name || "").trim().toLowerCase() + "|" + String(card.number || "").trim().toLowerCase()).trim();
+      if (nameNumber !== "|") keys.push("nn:" + nameNumber);
+      return keys;
+    }
+
+    function cv256SameCard(a, b) {
+      const aKeys = new Set(cv256CardKeys(a));
+      return cv256CardKeys(b).some(key => aKeys.has(key));
+    }
+
+    function cv256FindCardForEdit(id) {
+      const searchId = String(id || "").trim();
+      if (!searchId) return null;
+      return (cards || []).find(card => String(card.id) === searchId)
+        || cv250LoadLocalCardsRaw().find(card => String(card.id) === searchId)
+        || null;
+    }
+    function cv256SaveCardToLocal(card) {
+      if (!card || typeof card !== "object") return;
+      const sourceId = cv257CurrentEditingSourceId();
+      const localCards = cv250LoadLocalCardsRaw();
+      const index = localCards.findIndex(existing =>
+        (sourceId && String(existing.id) === String(sourceId)) ||
+        cv256SameCard(existing, card) ||
+        String(existing.id) === String(card.id)
+      );
+
+      if (index >= 0) localCards[index] = card;
+      else localCards.unshift(card);
+
+      safeLocalSet(STORAGE_KEY, JSON.stringify(localCards));
+      safeLocalSet("cardVaultLastChange", new Date().toISOString());
+    }
+    function cv256UpsertCurrentCard(card) {
+      const sourceId = cv257CurrentEditingSourceId();
+      const index = cards.findIndex(existing =>
+        (sourceId && String(existing.id) === String(sourceId)) ||
+        cv256SameCard(existing, card) ||
+        String(existing.id) === String(card.id)
+      );
+
+      if (index >= 0) cards[index] = card;
+      else cards.unshift(card);
+    }
+
+
+    /* v257: Bearbeiten überschreibt bestehende Karte statt Duplikat */
+    function cv257SetEditingSourceId(id) {
+      const clean = String(id || "").trim();
+      if (!clean) return;
+      editingId = clean;
+      localStorage.setItem("cardVaultEditingId", clean);
+      localStorage.setItem("cardVaultEditingSourceId", clean);
+      localStorage.setItem("cardVaultPendingEditId", clean);
+    }
+
+    function cv257CurrentEditingSourceId() {
+      return String(
+        editingId ||
+        getQueryParam("edit") ||
+        localStorage.getItem("cardVaultEditingSourceId") ||
+        localStorage.getItem("cardVaultEditingId") ||
+        localStorage.getItem("cardVaultPendingEditId") ||
+        ""
+      ).trim();
+    }
+
+    function cv257ClearEditingSourceId() {
+      editingId = "";
+      localStorage.removeItem("cardVaultEditingId");
+      localStorage.removeItem("cardVaultEditingSourceId");
+      localStorage.removeItem("cardVaultPendingEditId");
+    }
+
+    function cv257IsEditingExistingCard() {
+      return !!cv257CurrentEditingSourceId();
     }
 
 document.addEventListener("DOMContentLoaded", () => {

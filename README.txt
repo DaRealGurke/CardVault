@@ -1,10 +1,14 @@
-Card Vault modular v255
+Card Vault modular v257
 
-Änderung:
-- Basis: v254.
-- Auf kleinen Bildschirmen wurde der dünne Strich/Rest vom ausgeblendeten Header entfernt.
-- Übersicht und Sammlung bekommen oben wieder etwas Abstand, damit die Überschriften nicht so stark am oberen Rand kleben.
-- Header bleibt mobil ausgeblendet.
-- Mobile Tab-Bar, Filter und öffentliche/lokale Collection-Logik aus v254 bleiben erhalten.
-- CSS/JS mit ?v=255 cache-gebustet.
+Fix:
+- Bearbeiten erstellt nicht mehr versehentlich eine neue Karte.
+- Beim Klick auf Bearbeiten wird eine feste Bearbeitungs-ID gespeichert.
+- Beim Speichern wird anhand dieser Bearbeitungs-ID die bestehende Karte überschrieben.
+- Lokaler Speicher wird ebenfalls gezielt per Bearbeitungs-ID aktualisiert.
+- Nach dem Speichern werden die Bearbeitungsmarker wieder entfernt.
+- Basis: v256.
+- CSS/JS mit ?v=257 cache-gebustet.
 - JavaScript-Syntax geprüft.
+
+Hinweis:
+Wenn in früheren Versionen bereits Duplikate entstanden sind, müssen diese einmalig manuell gelöscht werden.

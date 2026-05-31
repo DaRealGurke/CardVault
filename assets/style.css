@@ -9779,3 +9779,7 @@ body.dark .public-collection-menu-text {
     padding-top: 14px !important;
   }
 }
+
+/* v256: Bearbeiten öffentlicher/lokaler Karten repariert */
+
+/* v257: Bearbeiten überschreibt bestehende Karte statt Duplikat */
