@@ -1,13 +1,18 @@
-Card Vault modular v250
+Card Vault modular v251
 
-Fix:
-- Öffentliche Sammlung aus data/collection.json wird nicht mehr hart über lokale Karten gelegt.
-- Öffentliche Karten und lokal gespeicherte Karten werden zusammengeführt.
-- Lokale Karten werden zuerst angezeigt, damit frisch gespeicherte Karten sichtbar bleiben.
-- Demo-/Ruffy-Fallback bleibt entfernt.
-- Basis: v249.
-- CSS/JS mit ?v=250 cache-gebustet.
+Änderung:
+- Basis: v250.
+- Hochgeladene eigene Kartenbilder werden jetzt deutlich größer gespeichert:
+  CARD_IMAGE_TARGET_WIDTH = 2400
+  CARD_IMAGE_TARGET_HEIGHT = 3354
+  CARD_IMAGE_JPEG_QUALITY = 0.95
+- Vorher waren es nur 630 x 880 px mit JPEG 0.9.
+- Dadurch bleiben feine Details bei Scans/Fotos besser sichtbar.
+- Galerie nutzt weiterhin die bestehende Darstellung/API-Bilder; eigene Bilder sind vor allem für Detailansicht/Prüfung gedacht.
+- CSS/JS mit ?v=251 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
 Hinweis:
-Neue Karten sind lokal sichtbar. Damit andere Geräte sie sehen, collection.json exportieren und bei GitHub unter data/collection.json hochladen.
+- Bereits gespeicherte Bilder werden dadurch nicht automatisch besser.
+- Für höhere Qualität müssen die Kartenbilder nach dieser Version neu hochgeladen/neu gespeichert werden.
+- Die exportierte collection.json wird dadurch deutlich größer.

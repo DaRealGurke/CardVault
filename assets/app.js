@@ -71,7 +71,13 @@
     let damageEditCloseupData = "";
     let draggingMarker = null;
 
-    function $(id) { return document.getElementById(id); }
+    
+    /* v251: Hochauflösende Kartenscans für Detailprüfung */
+    const CARD_IMAGE_TARGET_WIDTH = 2400;
+    const CARD_IMAGE_TARGET_HEIGHT = 3354;
+    const CARD_IMAGE_JPEG_QUALITY = 0.95;
+
+function $(id) { return document.getElementById(id); }
 
 function demoCards() {
       return [];
@@ -654,8 +660,8 @@ function goToPageFile(pageId) {
             // Alle Bilder werden auf exakt dasselbe Kartenformat gebracht.
             // Dadurch sind Markierung, Detailansicht und Zoom immer deckungsgleich.
             const canvas = document.createElement("canvas");
-            canvas.width = 630;
-            canvas.height = 880;
+            canvas.width = CARD_IMAGE_TARGET_WIDTH;
+            canvas.height = CARD_IMAGE_TARGET_HEIGHT;
 
             const ctx = canvas.getContext("2d");
             ctx.fillStyle = "#ffffff";
@@ -671,7 +677,7 @@ function goToPageFile(pageId) {
             ctx.imageSmoothingQuality = "high";
             ctx.drawImage(img, dx, dy, drawW, drawH);
 
-            resolve(canvas.toDataURL("image/jpeg", 0.9));
+            resolve(canvas.toDataURL("image/jpeg", CARD_IMAGE_JPEG_QUALITY));
           };
 
           img.onerror = () => resolve(original);
@@ -694,8 +700,8 @@ function goToPageFile(pageId) {
 
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          canvas.width = 630;
-          canvas.height = 880;
+          canvas.width = CARD_IMAGE_TARGET_WIDTH;
+          canvas.height = CARD_IMAGE_TARGET_HEIGHT;
           const ctx = canvas.getContext("2d");
 
           ctx.fillStyle = "#ffffff";
@@ -712,7 +718,7 @@ function goToPageFile(pageId) {
           ctx.drawImage(img, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
           ctx.restore();
 
-          resolve(canvas.toDataURL("image/jpeg", 0.9));
+          resolve(canvas.toDataURL("image/jpeg", CARD_IMAGE_JPEG_QUALITY));
         };
 
         img.onerror = () => reject(new Error("Bild konnte nicht gedreht werden."));
@@ -989,8 +995,8 @@ function goToPageFile(pageId) {
       stage.innerHTML = "";
 
       const canvas = document.createElement("canvas");
-      canvas.width = 630;
-      canvas.height = 880;
+      canvas.width = CARD_IMAGE_TARGET_WIDTH;
+      canvas.height = CARD_IMAGE_TARGET_HEIGHT;
       stage.appendChild(canvas);
 
       const ctx = canvas.getContext("2d");
@@ -2884,8 +2890,8 @@ function setValueIfExists(id, value) {
       stage.innerHTML = "";
 
       const canvas = document.createElement("canvas");
-      canvas.width = 630;
-      canvas.height = 880;
+      canvas.width = CARD_IMAGE_TARGET_WIDTH;
+      canvas.height = CARD_IMAGE_TARGET_HEIGHT;
       stage.appendChild(canvas);
 
       const ctx = canvas.getContext("2d");
