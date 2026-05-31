@@ -1,14 +1,15 @@
-Card Vault modular v261
+Card Vault modular v262
 
 Fix:
-- Detailansicht nutzt jetzt zentrale Funktion cardImages(card).
-- cardImages(card) gibt eigene hochgeladene Bilder aus card.images zuerst zurück.
-- API-Bild wird nur noch als Fallback verwendet, wenn keine eigenen Bilder vorhanden sind.
-- Dadurch sollten in der Detailansicht Vorderseite/Rückseite aus deinen hochgeladenen Bildern erscheinen.
-- Basis: v260.
-- CSS/JS mit ?v=261 cache-gebustet.
+- Lokale Änderungen/Bilder überschreiben jetzt die öffentliche Version derselben Karte.
+- Vorher konnte die öffentliche Karte aus data/collection.json die lokale Version mit hochgeladenen Bildern verdrängen.
+- Detailansicht nutzt weiterhin eigene Bilder aus card.images zuerst.
+- API-Bild wird nur als Fallback genutzt, wenn keine eigenen Bilder vorhanden sind.
+- Status im Optionen-Menü zeigt jetzt lokale Änderungen und lokale Zusatzkarten getrennt.
+- Basis: v261.
+- CSS/JS mit ?v=262 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
-Hinweis:
-Wenn eine Karte gar keine eigenen Bilder in card.images enthält, können sie auch nicht angezeigt werden.
-Dann bitte die Bilder einmal neu hochladen und die Karte speichern.
+Wichtig:
+Wenn eine Karte lokal hochgeladene Bilder hat, sollte sie nach dem Laden als lokale Änderung über der öffentlichen Version liegen.
+Danach collection.json exportieren und bei GitHub hochladen, damit die Bilder auf allen Geräten erscheinen.

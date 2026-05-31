@@ -2586,8 +2586,7 @@ function setValueIfExists(id, value) {
 
       const api = card.apiImage || card.image || card.imageUrl || "";
 
-      // Detailansicht soll eigene hochgeladene Bilder zuerst zeigen.
-      // API-Bild nur als Fallback verwenden, wenn keine eigenen Bilder vorhanden sind.
+      // Detailansicht: eigene hochgeladene Bilder haben immer Vorrang.
       if (ownImages.length) return ownImages;
       return api ? [api] : [];
     }
@@ -6464,7 +6463,7 @@ function forceMobileCollectionFiltersState() {
     function cv250MergePublicAndLocalCards(publicCards) {
       const localCards = cv250LoadLocalCardsRaw();
       const merged = [];
-      const seen = new Set();
+      const indexByKey = new Map();
 
       function keysFor(card) {
         if (!card || typeof card !== "object") return [];
@@ -6478,27 +6477,59 @@ function forceMobileCollectionFiltersState() {
         return keys;
       }
 
-      function alreadySeen(card) {
-        return keysFor(card).some(key => seen.has(key));
+      function findExistingIndex(card) {
+        for (const key of keysFor(card)) {
+          if (indexByKey.has(key)) return indexByKey.get(key);
+        }
+        return -1;
       }
 
-      function remember(card) {
-        keysFor(card).forEach(key => seen.add(key));
+      function remember(card, index) {
+        keysFor(card).forEach(key => indexByKey.set(key, index));
+      }
+
+      function preferUsefulImages(localImages, publicImages) {
+        const local = Array.isArray(localImages) ? localImages.filter(Boolean) : [];
+        const pub = Array.isArray(publicImages) ? publicImages.filter(Boolean) : [];
+        return local.length ? local : pub;
       }
 
       // Öffentliche Sammlung ist die Basis.
-      (Array.isArray(publicCards) ? publicCards : []).forEach(card => {
-        if (!alreadySeen(card)) {
-          remember(card);
-          merged.push({ ...card, _source: "public" });
-        }
+      (Array.isArray(publicCards) ? publicCards : []).forEach(publicCard => {
+        if (!publicCard || typeof publicCard !== "object") return;
+        const item = { ...publicCard, _source: "public" };
+        const index = merged.length;
+        merged.push(item);
+        remember(item, index);
       });
 
-      // Lokale Karten nur als Zusatz ergänzen.
-      localCards.forEach(card => {
-        if (!alreadySeen(card)) {
-          remember(card);
-          merged.unshift({ ...card, _source: "local" });
+      // Lokale Version derselben Karte überschreibt/ergänzt die öffentliche Version.
+      localCards.forEach(localCard => {
+        if (!localCard || typeof localCard !== "object") return;
+
+        const existingIndex = findExistingIndex(localCard);
+        if (existingIndex >= 0) {
+          const publicCard = merged[existingIndex] || {};
+          const mergedCard = {
+            ...publicCard,
+            ...localCard,
+            images: preferUsefulImages(localCard.images, publicCard.images),
+            damageFront: Array.isArray(localCard.damageFront) ? localCard.damageFront : (publicCard.damageFront || []),
+            damageBack: Array.isArray(localCard.damageBack) ? localCard.damageBack : (publicCard.damageBack || []),
+            tags: Array.isArray(localCard.tags) ? localCard.tags : (publicCard.tags || []),
+            timeline: Array.isArray(localCard.timeline) ? localCard.timeline : (publicCard.timeline || []),
+            _source: "local-override"
+          };
+
+          merged[existingIndex] = mergedCard;
+          remember(mergedCard, existingIndex);
+        } else {
+          const item = { ...localCard, _source: "local" };
+          merged.unshift(item);
+
+          // Indizes nach unshift aktualisieren.
+          indexByKey.clear();
+          merged.forEach((card, index) => remember(card, index));
         }
       });
 
@@ -6515,19 +6546,27 @@ function forceMobileCollectionFiltersState() {
       if (typeof updateMobileNav === "function") updateMobileNav(currentPageIdFromFile());
 
       const publicCount = Array.isArray(publicCards) ? publicCards.length : 0;
-      const localExtraCount = Math.max(0, mergedCards.length - publicCount);
+      const localTotal = localCards.length;
+      const localExtraCount = mergedCards.filter(card => card && card._source === "local").length;
+      const localOverrideCount = mergedCards.filter(card => card && card._source === "local-override").length;
 
       setPublicCollectionStatus(
-        "Öffentliche Sammlung geladen: " + publicCount + " Karte(n). Lokale Zusatzkarten: " + localExtraCount + ". Gesamt: " + mergedCards.length + ".",
+        "Öffentliche Sammlung geladen: " + publicCount + " Karte(n). Lokale Änderungen: " + localOverrideCount + ". Lokale Zusatzkarten: " + localExtraCount + ". Gesamt: " + mergedCards.length + ".",
         "success"
       );
 
       console.log("[CardVault]", label, {
         publicCount,
-        localCount: localCards.length,
+        localTotal,
+        localOverrideCount,
         localExtraCount,
         mergedCount: mergedCards.length,
-        names: mergedCards.map(card => card && card.name)
+        names: mergedCards.map(card => ({
+          name: card && card.name,
+          source: card && card._source,
+          images: Array.isArray(card && card.images) ? card.images.length : 0,
+          apiImage: Boolean(card && card.apiImage)
+        }))
       });
 
       return mergedCards;
