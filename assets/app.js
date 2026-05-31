@@ -2580,19 +2580,17 @@ function setValueIfExists(id, value) {
     function cardImages(card) {
       if (!card) return [];
 
-      const ownImages = Array.isArray(card.images)
-        ? card.images.filter(Boolean)
+      const images = Array.isArray(card.images)
+        ? card.images.filter(Boolean).map(src => String(src || "").trim()).filter(Boolean)
         : [];
 
-      const api = card.apiImage || card.image || card.imageUrl || "";
-
-      // Detailansicht: eigene hochgeladene Bilder haben immer Vorrang.
-      if (ownImages.length) return ownImages;
-      return api ? [api] : [];
+      // Detailansicht/Kartenreport: NIEMALS API-Bilder.
+      // Nur eigene hochgeladene, gespeicherte Bilder anzeigen.
+      return images.filter(src => src.startsWith("data:image/"));
     }
 
     function reportImageHtml(src, label) {
-      return `<div><div class="report-image">${src ? `<img src="${src}" alt="${escapeHtml(label)}">` : "Kein Bild"}</div><div class="thumb-label">${escapeHtml(label)}</div></div>`;
+      return `<div><div class="report-image">${src ? `<img src="${src}" alt="${escapeHtml(label)}">` : "Kein eigenes Bild"}</div><div class="thumb-label">${escapeHtml(label)}</div></div>`;
     }
 
     function reportKv(label, value) {
@@ -2736,6 +2734,7 @@ function setValueIfExists(id, value) {
       const card = cards.find(c => c.id === id);
       if (!card) return;
       currentDetailCard = card;
+      cv263DetailOwnOnlyDebug(card);
       cv261DetailOwnImageDebug(card);
       currentDamageSide = "front";
       if ($("detailEditBtn")) $("detailEditBtn").dataset.cardEdit = card.id;
@@ -2785,7 +2784,7 @@ function setValueIfExists(id, value) {
 
       if (!images.length) {
         currentDetailImageIndex = 0;
-        main.textContent = "CARD";
+        main.textContent = "Kein eigenes Bild hinterlegt";
         return;
       }
 
@@ -6746,6 +6745,17 @@ function forceMobileCollectionFiltersState() {
         name: card.name,
         ownImages: Array.isArray(card.images) ? card.images.length : 0,
         apiImage: Boolean(card.apiImage)
+      });
+    }
+
+
+    function cv263DetailOwnOnlyDebug(card) {
+      if (!card) return;
+      console.log("[CardVault] Detailansicht eigene Bilder only", {
+        name: card.name,
+        savedImages: Array.isArray(card.images) ? card.images.length : 0,
+        ownDataImages: cardImages(card).length,
+        apiImageIgnored: Boolean(card.apiImage)
       });
     }
 

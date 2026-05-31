@@ -1,15 +1,14 @@
-Card Vault modular v262
+Card Vault modular v263
 
 Fix:
-- Lokale Änderungen/Bilder überschreiben jetzt die öffentliche Version derselben Karte.
-- Vorher konnte die öffentliche Karte aus data/collection.json die lokale Version mit hochgeladenen Bildern verdrängen.
-- Detailansicht nutzt weiterhin eigene Bilder aus card.images zuerst.
-- API-Bild wird nur als Fallback genutzt, wenn keine eigenen Bilder vorhanden sind.
-- Status im Optionen-Menü zeigt jetzt lokale Änderungen und lokale Zusatzkarten getrennt.
-- Basis: v261.
-- CSS/JS mit ?v=262 cache-gebustet.
+- Detailansicht zeigt niemals API-Bilder.
+- Kartenreport nutzt ebenfalls keine API-Bilder mehr.
+- cardImages(card) gibt nur noch eigene hochgeladene Bilder zurück, die als data:image/... in card.images gespeichert sind.
+- API-Bilder bleiben für Galerie/Übersicht möglich, aber nicht für Detailansicht.
+- Wenn keine eigenen Bilder vorhanden sind, steht in der Detailansicht „Kein eigenes Bild hinterlegt“.
+- Basis: v262.
+- CSS/JS mit ?v=263 cache-gebustet.
 - JavaScript-Syntax geprüft.
 
 Wichtig:
-Wenn eine Karte lokal hochgeladene Bilder hat, sollte sie nach dem Laden als lokale Änderung über der öffentlichen Version liegen.
-Danach collection.json exportieren und bei GitHub hochladen, damit die Bilder auf allen Geräten erscheinen.
+Wenn eine Karte keine eigenen Bilder in card.images enthält, muss sie einmal mit Vorder-/Rückseite neu gespeichert werden.

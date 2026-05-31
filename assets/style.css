@@ -9796,3 +9796,9 @@ body.dark .public-collection-menu-text {
 }
 
 /* v262: Lokale Bilder/Bearbeitungen überschreiben öffentliche Kartenversion */
+
+
+/* v263: Detailansicht zeigt niemals API-Bilder */
+#detailMainImage {
+  min-height: 220px;
+}
